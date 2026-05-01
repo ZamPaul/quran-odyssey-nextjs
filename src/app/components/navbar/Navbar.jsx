@@ -1,14 +1,28 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const NAV_LINKS = [
-  { label: "Home", href: "/", active: true },
-  { label: "Courses", href: "#" },
+  { label: "Home", href: "/" },
+  { label: "Courses", href: "/courses" },
   { label: "Teachers", href: "#" },
-  { label: "About", href: "#" },
+  { label: "About", href: "/about" },
   { label: "Pricing", href: "#" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export default function Navbar() {
+  const pathname = usePathname();
+  const activeHref =
+    pathname === "/about"
+      ? "/about"
+      : pathname === "/courses"
+        ? "/courses"
+        : pathname === "/contact"
+          ? "/contact"
+          : "/";
+
   return (
     <nav
       id="navbar"
@@ -58,7 +72,7 @@ export default function Navbar() {
                 className={[
                   "rounded-[6px] px-[14px] py-[6px] text-[14px] font-[500] text-content-muted transition-all",
                   "hover:bg-surface-light hover:text-content-primary",
-                  link.active ? "text-content-primary font-[600]" : "",
+                  link.href === activeHref ? "text-content-primary font-[600]" : "",
                 ].join(" ")}
               >
                 {link.label}

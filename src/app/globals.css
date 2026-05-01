@@ -173,6 +173,41 @@ body {
   animation: floatB 5s ease-in-out infinite 0.5s;
 }
 
+/* Courses page chip styles (DOM-toggled) */
+.filter-chip,
+.level-chip {
+  border: 2px solid var(--border-light);
+  background: white;
+  color: var(--text-muted);
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 150ms ease;
+}
+
+.filter-chip:hover,
+.level-chip:hover {
+  border-color: color-mix(in srgb, var(--brand-cyan) 60%, var(--border-light));
+  color: var(--brand-cyan-dark);
+  background: var(--bg-cyan-tint);
+}
+
+.filter-chip.active,
+.level-chip.selected {
+  background: var(--brand-navy);
+  border-color: var(--brand-navy);
+  color: white;
+}
+
+.faq-item.open .faq-a {
+  display: block;
+}
+
+.faq-item.open .faq-icon {
+  transform: rotate(45deg);
+}
+
 .fc-dot {
   width: 8px;
   height: 8px;
