@@ -10,6 +10,7 @@ import TeachersPreviewSection from "./teachers-preview/TeachersPreviewSection";
 import TestimonialsSection from "./testimonials/TestimonialsSection";
 import CtaSection from "../shared/CtaSection";
 import Footer from "../shared/Footer";
+import FeaturesSection from "./features-section/FeaturesSection";
 
 export default function HomePage() {
   return (
@@ -19,6 +20,7 @@ export default function HomePage() {
       <HeroSection />
       <TrustBar />
       <CoursesSection />
+      <FeaturesSection />
       <HowItWorksSection />
       <CartoonLecturesSection />
       <NumbersSection />
