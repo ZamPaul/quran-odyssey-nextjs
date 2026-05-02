@@ -14,7 +14,7 @@ import FeaturesSection from "./features-section/FeaturesSection";
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col justify-center">
       <ScrollProgressBar />
       <PageClientEffects />
       <HeroSection />

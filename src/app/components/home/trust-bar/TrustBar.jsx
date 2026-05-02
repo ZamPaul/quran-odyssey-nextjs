@@ -1,9 +1,9 @@
 const ITEMS = [
-  { num: "4.97", label: "Avg. teacher rating" },
-  { num: "2,000+", label: "Students enrolled" },
-  { num: "40+", label: "Qualified teachers" },
-  { num: "18+", label: "Countries served" },
-  { num: "97%", label: "Parent satisfaction" },
+  { target: 4.97, decimals: 2, suffix: "", label: "Avg. teacher rating" },
+  { target: 2000, suffix: "+", label: "Students enrolled" },
+  { target: 40, suffix: "+", label: "Qualified teachers" },
+  { target: 18, suffix: "+", label: "Countries served" },
+  { target: 97, suffix: "%", label: "Parent satisfaction" },
 ];
 
 export default function TrustBar() {
@@ -16,8 +16,17 @@ export default function TrustBar() {
             className="flex items-center gap-12 md:gap-12"
           >
             <div className="text-center">
-              <div className="text-[20px] font-[plus-eb] tracking-[-0.03em] text-content-primary">
-                {item.num}
+              <div
+                className="trust-bar-stat inline-flex items-baseline justify-center gap-0 text-[20px] font-[plus-eb] tracking-[-0.03em] text-content-primary"
+                data-target={item.target}
+                data-decimals={item.decimals}
+              >
+                <span className="counter tabular-nums">
+                  {item.decimals
+                    ? item.target.toFixed(item.decimals)
+                    : item.target.toLocaleString()}
+                </span>
+                {item.suffix ? <span>{item.suffix}</span> : null}
               </div>
               <div className="text-[12px] font-[plus-r] text-content-muted">
                 {item.label}

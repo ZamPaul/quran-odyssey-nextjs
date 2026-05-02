@@ -3,6 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useLayoutEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
@@ -13,8 +16,13 @@ const NAV_LINKS = [
   { label: "Contact", href: "/contact" },
 ];
 
+/** Matches `#navbar.scrolled` in globals.css (shadow) plus glass bar treatment */
+const NAV_SCROLL_CLASSES = ["scrolled", "backdrop-blur-xl", "bg-white/75"];
+
 export default function Navbar() {
   const pathname = usePathname();
+  const navRef = useRef(null);
+
   const activeHref =
     pathname === "/about"
       ? "/about"
@@ -24,14 +32,59 @@ export default function Navbar() {
           ? "/contact"
           : "/";
 
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useLayoutEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const nav = navRef.current;
+    if (!nav) return;
+
+    const ctx = gsap.context(() => {
+      const applyForScrollY = (y) => {
+        const scrolled = y > 1;
+        NAV_SCROLL_CLASSES.forEach((cls) =>
+          nav.classList.toggle(cls, scrolled),
+        );
+      };
+
+      ScrollTrigger.create({
+        trigger: "main",
+        start: "top top",
+        end: "bottom bottom",
+        // animation: anim,
+        scrub: 2,
+        // markers: true,
+        onUpdate: (self) => applyForScrollY(self.scroll()),
+      });
+
+      applyForScrollY(window.scrollY || document.documentElement.scrollTop);
+      ScrollTrigger.refresh();
+    }, nav);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
     <nav
+      ref={navRef}
       id="navbar"
-      className="fixed inset-x-0 top-0 z-[100] h-[68px] border-b border-line-lightbackdrop-blur-xl transition-shadow"
+      className="fixed inset-x-0 top-0 z-[100] h-[68px] border-b-[0.1px] border-neutral-300 transition-[box-shadow,backdrop-filter,background-color] duration-200"
     >
       <div className="mx-auto flex h-full w-full max-w-[1240px] items-center justify-between px-6 md:px-[60px]">
-        <Link href="/" className="logo flex items-center gap-[10px] no-underline">
-          <Image src={`${"/logo2.png"}`} width={100} height={100} alt="logo" className="" />
+        <Link
+          href="/"
+          className="logo flex items-center gap-[10px] no-underline"
+        >
+          <Image
+            src={`${"/logo2.png"}`}
+            width={100}
+            height={100}
+            alt="logo"
+            className=""
+          />
         </Link>
 
         <ul className="hidden list-none items-center gap-1 md:flex">
@@ -42,7 +95,9 @@ export default function Navbar() {
                 className={[
                   "rounded-[6px] px-[14px] py-[6px] text-[14px] font-[500] text-content-muted transition-all",
                   "hover:bg-surface-light hover:text-content-primary",
-                  link.href === activeHref ? "text-content-primary font-[600]" : "",
+                  link.href === activeHref
+                    ? "text-content-primary font-[600]"
+                    : "",
                 ].join(" ")}
               >
                 {link.label}

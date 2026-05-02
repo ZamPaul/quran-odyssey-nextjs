@@ -2,7 +2,8 @@
 
 import { useEffect } from "react";
 
-function animateCounter(counterEl, target, durationMs = 1600) {
+function animateCounter(counterEl, target, durationMs = 1600, options = {}) {
+  const decimals = options.decimals ?? 0;
   let startTs = null;
 
   const step = (ts) => {
@@ -11,13 +12,20 @@ function animateCounter(counterEl, target, durationMs = 1600) {
     const progress = Math.min((ts - startTs) / durationMs, 1);
     const eased = 1 - Math.pow(1 - progress, 3);
 
-    const value = Math.floor(eased * target);
-    counterEl.textContent = value.toLocaleString();
+    if (decimals > 0) {
+      const raw = eased * target;
+      const value = progress >= 1 ? target : Number(raw.toFixed(decimals));
+      counterEl.textContent = value.toFixed(decimals);
+    } else {
+      const value = Math.floor(eased * target);
+      counterEl.textContent = value.toLocaleString();
+    }
 
     if (progress < 1) {
       requestAnimationFrame(step);
     } else {
-      counterEl.textContent = target.toLocaleString();
+      counterEl.textContent =
+        decimals > 0 ? target.toFixed(decimals) : target.toLocaleString();
     }
   };
 
@@ -68,15 +76,25 @@ export default function PageClientEffects() {
 
           statItem.classList.add("counted");
           const counter = statItem.querySelector(".counter");
-          const target = Number.parseInt(statItem.dataset.target || "0", 10);
-          if (counter && target) animateCounter(counter, target);
+          const decimalsParsed = Number.parseInt(
+            statItem.dataset.decimals || "0",
+            10
+          );
+          const decimals = Number.isNaN(decimalsParsed) ? 0 : decimalsParsed;
+          const target =
+            decimals > 0
+              ? Number.parseFloat(statItem.dataset.target || "0")
+              : Number.parseInt(statItem.dataset.target || "0", 10);
+          if (counter && target && !Number.isNaN(target)) {
+            animateCounter(counter, target, 1600, { decimals });
+          }
         });
       },
       { threshold: 0.3 }
     );
 
     document
-      .querySelectorAll(".stat-item[data-target]")
+      .querySelectorAll(".stat-item[data-target], .trust-bar-stat[data-target]")
       .forEach((el) => statObserver.observe(el));
 
     const preventDefaultLinks = (e) => e.preventDefault();
