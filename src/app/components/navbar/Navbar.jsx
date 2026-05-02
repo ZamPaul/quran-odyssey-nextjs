@@ -26,7 +26,7 @@ export default function Navbar() {
   return (
     <nav
       id="navbar"
-      className="fixed inset-x-0 top-0 z-[100] h-[68px] border-b border-line-light bg-white/95 backdrop-blur-xl transition-shadow"
+      className="fixed inset-x-0 top-0 z-[100] h-[68px] border-b border-line-lightbackdrop-blur-xl transition-shadow"
     >
       <div className="mx-auto flex h-full w-full max-w-[1240px] items-center justify-between px-6 md:px-[60px]">
         <Link href="/" className="logo flex items-center gap-[10px] no-underline">

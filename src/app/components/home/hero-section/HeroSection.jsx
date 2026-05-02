@@ -1,4 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
+import HeroCountriesMap from "./HeroCountriesMap";
 
 const DASH_STATS = [
   { num: "24", label: "Classes" },
@@ -8,13 +10,23 @@ const DASH_STATS = [
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-screen overflow-hidden bg-surface-white pt-[68px]">
+    <section className="relative min-h-screen overflow-x-hidden bg-surface-white pt-[68px]">
       {/* <div className="hero-grid-bg absolute inset-0 pointer-events-none" /> */}
       {/* <div className="hero-glow hero-glow-a absolute right-0 top-0 pointer-events-none" /> */}
       {/* <div className="hero-glow hero-glow-b absolute bottom-0 left-[200px] pointer-events-none" /> */}
+      {/* <div className="w-"> */}
+        <Image
+          src={`/Frame.png`}
+          className="absolute top-0 left-0 w-full h-full object-cover"
+          width={1000}
+          height={1000}
+          alt="zmdjic"
+        />
+      {/* </div> */}
 
       <div className="relative w-full flex items-center justify-center py-[10vh]">
-        <div className="w-[85%] flex flex-col items-start">
+        <div className="w-[85%] grid items-center gap-10 md:grid-cols-2">
+          <div className="flex flex-col items-start">
           <div className="hero-badge inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--brand-cyan)_25%,transparent)] bg-surface-cyan-tint px-[14px] py-[5px] text-[12px] font-[600] tracking-[0.02em] text-brand-cyan-dark">
             <span className="hero-badge-dot h-[7px] w-[7px] rounded-full bg-brand-cyan" />
             Live classes · UK · USA · Canada
@@ -23,15 +35,14 @@ export default function HeroSection() {
           <h1 className="mt-7 text-[44px] font-[plus-eb] leading-[1.06] tracking-[-0.03em] text-content-primary md:text-[52px]">
             Your child deserves
             <br />
-            more than{" "}
-            <span className="text-brand-cyan">inconsistent</span>
+            more than <span className="text-brand-cyan">inconsistent</span>
             <br />
             <span className="text-brand-cyan">tutors.</span>
           </h1>
 
           <p className="mt-4 max-w-[460px] text-[16px] font-[400] leading-[1.75] text-content-muted">
-            Quran Odyssey connects families with verified Quran teachers for live
-            online classes — structured, consistent, and built around your
+            Quran Odyssey connects families with verified Quran teachers for
+            live online classes — structured, consistent, and built around your
             child&apos;s pace.
           </p>
 
@@ -102,6 +113,13 @@ export default function HeroSection() {
                 2,000+ families
               </span>{" "}
               across 18+ countries trust Quran Odyssey
+            </div>
+          </div>
+          </div>
+
+          <div className="relative left-[-3vw] md:justify-self-end">
+            <div className="reveal-right">
+              <HeroCountriesMap />
             </div>
           </div>
         </div>
@@ -204,8 +222,14 @@ export default function HeroSection() {
 function ProgressRow({ label, pct, variant }) {
   const fillStyle =
     variant === "amber"
-      ? { background: "linear-gradient(90deg, var(--brand-amber), var(--brand-amber-dark))" }
-      : { background: "linear-gradient(90deg, var(--brand-cyan), color-mix(in_srgb,var(--brand-cyan)_70%,white))" };
+      ? {
+          background:
+            "linear-gradient(90deg, var(--brand-amber), var(--brand-amber-dark))",
+        }
+      : {
+          background:
+            "linear-gradient(90deg, var(--brand-cyan), color-mix(in_srgb,var(--brand-cyan)_70%,white))",
+        };
 
   return (
     <div className="mb-[10px]">
@@ -218,7 +242,10 @@ function ProgressRow({ label, pct, variant }) {
         </span>
       </div>
       <div className="h-[6px] overflow-hidden rounded bg-surface-light">
-        <div className="h-full rounded" style={{ width: `${pct}%`, ...fillStyle }} />
+        <div
+          className="h-full rounded"
+          style={{ width: `${pct}%`, ...fillStyle }}
+        />
       </div>
     </div>
   );

@@ -22,7 +22,7 @@ export default function HomePage() {
       <HowItWorksSection />
       <CartoonLecturesSection />
       <NumbersSection />
-      <TeachersPreviewSection />
+      {/* <TeachersPreviewSection /> */}
       <TestimonialsSection />
       <CtaSection />
       <Footer />
