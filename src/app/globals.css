@@ -639,5 +639,8 @@ body {
   .text-secondary-styling{
     @apply text-text-secondary font-[plus-r] text-[16px] leading-[1.75em];
   }
+  .apply-cyan-chip{
+    @apply border-[color-mix(in_srgb,var(--brand-cyan)_25%,transparent)] bg-[color-mix(in_srgb,var(--brand-cyan)_12%,transparent)] text-brand-cyan-dark;
+  }
   /* .text-secondary-sytu */
 }

@@ -1,6 +1,6 @@
 import React from "react";
 
-const CourseCard = ({c}) => {
+const CourseCard = ({ c }) => {
   return (
     <div
       key={c.num}
@@ -25,8 +25,8 @@ const CourseCard = ({c}) => {
       <p className="mt-2 text-[14px] leading-[1.75] text-content-muted">
         {c.text}
       </p>
-      <div className="mt-5 inline-flex rounded-full border border-line-light bg-surface-light px-4 py-2 text-[12px] font-[600] text-content-muted">
-        {c.tag}
+      <div className="mt-5 apply-cyan-chip inline-flex rounded-full px-4 py-2 text-[13px] font-[plus-b]">
+        <h2>{c.tag}</h2>
       </div>
     </div>
   );
