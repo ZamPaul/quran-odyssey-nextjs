@@ -1067,10 +1067,48 @@ const illustrationVariants = {
   },
 };
 
+function ChevronIcon({ direction }) {
+  const isLeft = direction === "left";
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 16 16"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d={isLeft ? "M10 12L6 8l4-4" : "M6 4l4 4-4 4"}
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 // ─── Main Component ────────────────────────────────────────────────────────────
 export default function FeaturesSection() {
   const [activeId, setActiveId] = useState(FEATURES[0].id);
-  const feature = FEATURES.find((f) => f.id === activeId);
+  const foundIndex = FEATURES.findIndex((f) => f.id === activeId);
+  const activeIndex = foundIndex === -1 ? 0 : foundIndex;
+  const feature = FEATURES[activeIndex];
+  const canGoPrev = activeIndex > 0;
+  const canGoNext = activeIndex < FEATURES.length - 1;
+
+  function goPrev() {
+    if (!canGoPrev) return;
+    setActiveId(FEATURES[activeIndex - 1].id);
+  }
+
+  function goNext() {
+    if (!canGoNext) return;
+    setActiveId(FEATURES[activeIndex + 1].id);
+  }
+
+  const carouselArrowClass =
+    "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/60 bg-white/95 text-content-primary shadow-[0_4px_24px_rgba(0,0,0,0.30)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-navy focus-visible:ring-offset-2 enabled:cursor-pointer enabled:hover:bg-white enabled:hover:shadow-[0_10px_28px_rgba(0,0,0,0.12)] disabled:cursor-not-allowed disabled:opacity-35";
 
   return (
     <section className="bg-white px-6 py-[100px] md:px-[60px]">
@@ -1101,19 +1139,61 @@ export default function FeaturesSection() {
               type="button"
               onClick={() => setActiveId(f.id)}
               className={[
-                "inline-flex cursor-pointer items-center gap-2 rounded-full border px-4 py-[8px] text-[13px] font-[700] transition-all duration-200",
+                "inline-flex cursor-pointer items-center gap-2 rounded-full border px-4 py-[8px] text-[14px] font-[plus-b] transition-all duration-200",
                 activeId === f.id
                   ? "border-brand-navy bg-brand-navy text-white shadow-[0_4px_14px_rgba(13,40,64,0.25)]"
                   : "border-line-light bg-white text-content-muted hover:border-line-default hover:text-content-primary",
               ].join(" ")}
             >
-              <span className="text-[14px]">{f.icon}</span>
+              {/* <span className="text-[14px]">{f.icon}</span> */}
               {f.label}
             </button>
           ))}
         </div>
 
-        {/* ── Feature Card ───────────────────────────────────────────────── */}
+        {/* ── Feature Card + carousel arrows ─────────────────────────────── */}
+        <div className="relative">
+          {/* Mobile — controls above card */}
+          <div className="mb-4 flex items-center justify-center gap-3 md:hidden">
+            <button
+              type="button"
+              aria-label="Previous feature"
+              disabled={!canGoPrev}
+              onClick={goPrev}
+              className={carouselArrowClass}
+            >
+              <ChevronIcon direction="left" />
+            </button>
+            <button
+              type="button"
+              aria-label="Next feature"
+              disabled={!canGoNext}
+              onClick={goNext}
+              className={carouselArrowClass}
+            >
+              <ChevronIcon direction="right" />
+            </button>
+          </div>
+
+          <button
+            type="button"
+            aria-label="Previous feature"
+            disabled={!canGoPrev}
+            onClick={goPrev}
+            className={`${carouselArrowClass} absolute top-1/2 left-3 z-10 hidden -translate-x-full -translate-y-1/2 md:flex`}
+          >
+            <ChevronIcon direction="left" />
+          </button>
+          <button
+            type="button"
+            aria-label="Next feature"
+            disabled={!canGoNext}
+            onClick={goNext}
+            className={`${carouselArrowClass} absolute top-1/2 right-3 z-10 hidden translate-x-full -translate-y-1/2 md:flex`}
+          >
+            <ChevronIcon direction="right" />
+          </button>
+
         <AnimatePresence mode="wait">
           <motion.div
             key={activeId}
@@ -1204,7 +1284,7 @@ export default function FeaturesSection() {
               >
                 {/* Illustration */}
                 <div className="relative flex items-center justify-center">
-                  {ILLUSTRATIONS[activeId]}
+                  {ILLUSTRATIONS[feature.id]}
 
                   {/* Floating badge 1 — top right of illustration */}
                   <motion.div
@@ -1232,6 +1312,7 @@ export default function FeaturesSection() {
             </div>
           </motion.div>
         </AnimatePresence>
+        </div>
       </div>
     </section>
   );

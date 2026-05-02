@@ -49,47 +49,51 @@ export default function HeroSection() {
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link
               href="#"
-              className="btn-primary inline-flex items-center gap-2 rounded-[var(--radius)] border-2 border-brand-amber bg-brand-amber px-7 py-[13px] text-[14px] font-[700] tracking-[-0.01em] text-brand-navy transition-all hover:-translate-y-[2px] hover:border-brand-amber-dark hover:bg-brand-amber-dark"
+              className="hero-cta-primary btn-primary inline-flex items-center gap-2 rounded-[var(--radius)] border-2 border-brand-amber bg-brand-amber px-7 py-[13px] text-[14px] font-[700] tracking-[-0.01em] text-brand-navy"
             >
               Book a Free Trial
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M3 8h10M9 4l4 4-4 4"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <span className="hero-cta-arrow inline-flex">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M3 8h10M9 4l4 4-4 4"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
             </Link>
 
             <Link
               href="#"
-              className="inline-flex items-center gap-2 rounded-[var(--radius)] border-2 border-line-default bg-transparent px-7 py-[13px] text-[14px] font-[600] tracking-[-0.01em] text-content-primary transition-all hover:-translate-y-[1px] hover:bg-surface-light hover:border-content-primary"
+              className="hero-cta-secondary inline-flex items-center gap-2 rounded-[var(--radius)] border-2 border-line-default bg-transparent px-7 py-[13px] text-[14px] font-[600] tracking-[-0.01em] text-content-primary"
             >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                aria-hidden="true"
-              >
-                <circle
-                  cx="8"
-                  cy="8"
-                  r="7"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                />
-                <polygon points="6,5 12,8 6,11" fill="currentColor" />
-              </svg>
-              See how it works
+              <span className="hero-cta-play inline-flex">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <circle
+                    cx="8"
+                    cy="8"
+                    r="7"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  />
+                  <polygon points="6,5 12,8 6,11" fill="currentColor" />
+                </svg>
+              </span>
+              <span className="hero-cta-label">See how it works</span>
             </Link>
           </div>
 
