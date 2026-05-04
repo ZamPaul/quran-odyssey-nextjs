@@ -46,7 +46,7 @@ export default function CoursesHeroSection() {
               Course Catalog
             </span>
           </div>
-          <h1 className="mt-5 text-[44px] font-[800] leading-[1.06] tracking-[-0.03em] text-content-primary md:text-[52px]">
+          <h1 className="mt-5 text-[44px] font-[plus-eb] leading-[1.06] tracking-[-0.03em] text-content-primary md:text-[52px]">
             A curriculum built for
             <br />
             <span className="text-brand-cyan">real, lasting</span>

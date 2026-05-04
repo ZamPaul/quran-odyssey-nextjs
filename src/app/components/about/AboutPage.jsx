@@ -21,7 +21,7 @@ export default function AboutPage() {
       <StorySection />
       <PhilosophySection />
       <AboutNumbersSection />
-      <AboutTeachersSection />
+      {/* <AboutTeachersSection /> */}
       <CtaSection />
       <Footer />
     </div>

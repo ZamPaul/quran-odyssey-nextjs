@@ -30,14 +30,12 @@ export default function AboutHeroSection() {
             </span>
           </div>
 
-          <h1 className="mt-6 text-[44px] font-[800] leading-[1.06] tracking-[-0.03em] text-content-primary md:text-[52px]">
-            Most children in the West
-            <br />
-            grow up <span className="text-brand-cyan">disconnected</span>
+          <h1 className="mt-6 text-[44px] font-[plus-eb] leading-[1.06] tracking-[-0.03em] text-content-primary md:text-[52px]">
+            Most children in the West grow up
             <br />
             from the Quran.
             <br />
-            <span className="text-brand-amber-dark">
+            <span className="text-brand-cyan">
               We&apos;re fixing that.
             </span>
           </h1>

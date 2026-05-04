@@ -34,7 +34,7 @@ export default function CoursesFaqSection() {
             <div className="section-chip inline-flex items-center rounded-full border border-[color-mix(in_srgb,var(--brand-cyan)_25%,transparent)] bg-[color-mix(in_srgb,var(--brand-cyan)_12%,transparent)] px-4 py-[6px] text-[11px] font-[700] tracking-[0.06em] text-brand-cyan-dark">
               Common questions
             </div>
-            <h2 className="section-h2 text-[40px] font-[800] leading-[1.1] tracking-[-0.03em] text-content-primary md:text-[44px]">
+            <h2 className="section-h2 text-[40px] font-[plus-eb] leading-[1.1] tracking-[-0.03em] text-content-primary md:text-[44px]">
               Questions about
               <br />
               <span className="text-brand-cyan">our courses.</span>
