@@ -17,7 +17,7 @@ export default function CoursesPage() {
       <PageClientEffects />
       <CoursesClientEffects />
       <CoursesHeroSection />
-      <CoursesBreadcrumbBar />
+      {/* <CoursesBreadcrumbBar /> */}
       <FilterBar />
       <CourseCatalogSection />
       <LearningPathwaySection />

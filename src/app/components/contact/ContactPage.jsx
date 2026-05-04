@@ -14,7 +14,7 @@ export default function ContactPage() {
       <ScrollProgressBar />
       <PageClientEffects />
       <ContactHeroSection />
-      <ContactBreadcrumbBar />
+      {/* <ContactBreadcrumbBar /> */}
       <ContactFormSection />
       <ChannelsSection />
       <PresenceSection />

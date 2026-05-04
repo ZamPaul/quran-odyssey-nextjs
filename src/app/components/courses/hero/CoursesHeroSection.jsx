@@ -1,7 +1,16 @@
+import Image from "next/image";
+
 export default function CoursesHeroSection() {
   return (
     <section className="relative overflow-hidden bg-surface-white pt-[68px]">
-      <div
+      <Image
+        src={`/Frame.png`}
+        className="absolute top-0 left-0 w-full h-full object-cover"
+        width={1000}
+        height={1000}
+        alt="zmdjic"
+      />
+      {/* <div
         className="absolute inset-0 pointer-events-none hero-grid-bg"
         style={{
           maskImage:
@@ -27,7 +36,7 @@ export default function CoursesHeroSection() {
           background:
             "radial-gradient(ellipse at bottom left, color-mix(in srgb, var(--brand-amber) 8%, transparent) 0%, transparent 70%)",
         }}
-      />
+      /> */}
 
       <div className="relative z-[2] mx-auto grid w-full max-w-[1240px] grid-cols-1 items-center gap-14 px-6 pb-16 pt-[72px] md:grid-cols-2 md:gap-20 md:px-[60px]">
         <div>
@@ -56,13 +65,25 @@ export default function CoursesHeroSection() {
               Find the right course for your child:
             </div>
             <div className="flex flex-wrap gap-2">
-              <button className="level-chip" data-level-filter="beginner" type="button">
+              <button
+                className="level-chip"
+                data-level-filter="beginner"
+                type="button"
+              >
                 🌱 Just starting out
               </button>
-              <button className="level-chip" data-level-filter="intermediate" type="button">
+              <button
+                className="level-chip"
+                data-level-filter="intermediate"
+                type="button"
+              >
                 📖 Can read Quran
               </button>
-              <button className="level-chip" data-level-filter="advanced" type="button">
+              <button
+                className="level-chip"
+                data-level-filter="advanced"
+                type="button"
+              >
                 🎯 Ready for Hifz
               </button>
             </div>
@@ -86,17 +107,66 @@ export default function CoursesHeroSection() {
             </div>
 
             <div className="flex flex-col">
-              <PathStep kind="done" num="✓" name="Noorani Qaida" desc="Arabic alphabet · Letter recognition" tag="Complete" />
-              <PathStep kind="active" num="2" name="Quran Recitation" desc="Fluency · Juz-by-Juz progress" tag="In Progress" />
-              <PathStep kind="locked" num="3" name="Tajweed" desc="Rules of beautiful recitation" tag="Next" />
-              <PathStep kind="locked" num="4" name="Hifz Programme" desc="Full Quran memorisation" tag="Advanced" lastBeforeParallel />
-              <PathStep kind="parallel" num="↕" name="Islamic Studies + 1-on-1" desc="Runs alongside any stage" tag="Parallel" isLast />
+              <PathStep
+                kind="done"
+                num="✓"
+                name="Noorani Qaida"
+                desc="Arabic alphabet · Letter recognition"
+                tag="Complete"
+              />
+              <PathStep
+                kind="active"
+                num="2"
+                name="Quran Recitation"
+                desc="Fluency · Juz-by-Juz progress"
+                tag="In Progress"
+              />
+              <PathStep
+                kind="locked"
+                num="3"
+                name="Tajweed"
+                desc="Rules of beautiful recitation"
+                tag="Next"
+              />
+              <PathStep
+                kind="locked"
+                num="4"
+                name="Hifz Programme"
+                desc="Full Quran memorisation"
+                tag="Advanced"
+                lastBeforeParallel
+              />
+              <PathStep
+                kind="parallel"
+                num="↕"
+                name="Islamic Studies + 1-on-1"
+                desc="Runs alongside any stage"
+                tag="Parallel"
+                isLast
+              />
             </div>
 
             <div className="mt-4 flex items-center gap-2 rounded-[var(--radius-sm)] bg-surface-light px-[14px] py-[10px] text-[12px] font-[600] text-content-muted">
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
-                <path d="M8 5v4M8 11v1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 16 16"
+                fill="none"
+                aria-hidden="true"
+              >
+                <circle
+                  cx="8"
+                  cy="8"
+                  r="7"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                />
+                <path
+                  d="M8 5v4M8 11v1"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
               </svg>
               Trial class → teacher recommends the right starting point
             </div>
@@ -131,7 +201,12 @@ function PathStep({ kind, num, name, desc, tag, isLast }) {
       {!isLast ? (
         <div className="absolute left-[15px] top-full h-3 w-[2px] bg-line-light" />
       ) : null}
-      <div className={["flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-[800]", numClass].join(" ")}>
+      <div
+        className={[
+          "flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-[800]",
+          numClass,
+        ].join(" ")}
+      >
         {num}
       </div>
       <div className="flex-1">
@@ -142,10 +217,14 @@ function PathStep({ kind, num, name, desc, tag, isLast }) {
           {desc}
         </div>
       </div>
-      <span className={["rounded px-2 py-[2px] text-[10px] font-[700] uppercase tracking-[0.06em]", tagClass].join(" ")}>
+      <span
+        className={[
+          "rounded px-2 py-[2px] text-[10px] font-[700] uppercase tracking-[0.06em]",
+          tagClass,
+        ].join(" ")}
+      >
         {tag}
       </span>
     </div>
   );
 }
-

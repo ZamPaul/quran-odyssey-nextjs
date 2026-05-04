@@ -16,7 +16,7 @@ export default function AboutPage() {
       <ScrollProgressBar />
       <PageClientEffects />
       <AboutHeroSection />
-      <BreadcrumbBar />
+      {/* <BreadcrumbBar /> */}
       <ProblemSection />
       <StorySection />
       <PhilosophySection />

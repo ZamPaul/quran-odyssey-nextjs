@@ -1,6 +1,6 @@
 export default function FilterBar() {
   return (
-    <div className="border-b border-line-light bg-white" id="filterBar">
+    <div className="border-b-[0px] border-line-light bg-white" id="filterBar">
       <div className="mx-auto w-full max-w-[1240px] px-6 py-5 md:px-[60px]">
         <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
           <div className="flex flex-wrap items-center gap-2">
