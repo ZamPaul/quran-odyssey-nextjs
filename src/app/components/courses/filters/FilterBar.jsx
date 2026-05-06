@@ -1,8 +1,8 @@
 export default function FilterBar() {
   return (
     <div className="border-b-[0px] border-line-light bg-white" id="filterBar">
-      <div className="mx-auto w-full max-w-[1240px] px-6 py-5 md:px-[60px]">
-        <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+      <div className="mx-auto w-full max-w-[95vw] px-6 py-5 md:px-[60px]">
+        <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-[12px] font-[800] uppercase tracking-[0.12em] text-content-subtle">
               Show
@@ -24,7 +24,7 @@ export default function FilterBar() {
             </button>
           </div>
 
-          <div className="hidden h-px w-full bg-line-light md:block md:h-6 md:w-px" />
+          {/* <div className="h-[5px] w-[1px] bg-line-light md:block md:h-6 md:w-px" /> */}
 
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-[12px] font-[800] uppercase tracking-[0.12em] text-content-subtle">
@@ -44,7 +44,7 @@ export default function FilterBar() {
             </button>
           </div>
 
-          <div className="ml-auto text-[13px] font-[700] text-content-muted">
+          <div className="text-[13px] font-[plus-b] text-content-muted">
             <span id="courseCount">6</span> courses
           </div>
         </div>

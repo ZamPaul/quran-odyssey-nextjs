@@ -479,6 +479,7 @@ body {
   font-size: 13px;
   font-weight: 600;
   transition: all 150ms ease;
+  cursor: pointer;
 }
 
 .filter-chip:hover,
