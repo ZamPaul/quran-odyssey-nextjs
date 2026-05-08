@@ -8,13 +8,16 @@ const ITEMS = [
 
 export default function TrustBar() {
   return (
-    <div className="border-y border-line-light bg-white">
-      <div className="mx-auto flex w-full max-w-[1240px] flex-wrap items-center justify-center gap-12 px-6 py-8 md:flex-nowrap md:gap-6 md:px-[60px]">
+    <div className="border-[0px] border-line-light bg-white">
+      <div
+        style={{
+          background:
+            "linear-gradient(140deg, #daf4fb 0%, #c2eaf9 45%, #a8e0f6 100%)",
+        }}
+        className="mx-auto flex w-full rounded-[10px] bg-brand-cyan/10 max-w-[1240px] flex-wrap items-center justify-center gap-12 px-6 py-5 md:flex-nowrap md:gap-6 md:px-[60px]"
+      >
         {ITEMS.map((item, idx) => (
-          <div
-            key={item.label}
-            className="flex items-center gap-12 md:gap-12"
-          >
+          <div key={item.label} className="flex items-center gap-12 md:gap-12">
             <div className="text-center">
               <div
                 className="trust-bar-stat inline-flex items-baseline justify-center gap-0 text-[20px] font-[plus-eb] tracking-[-0.03em] text-content-primary"

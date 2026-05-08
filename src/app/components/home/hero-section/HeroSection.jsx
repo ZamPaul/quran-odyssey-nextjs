@@ -10,7 +10,7 @@ const DASH_STATS = [
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-screen overflow-x-hidden bg-surface-white pt-[68px]">
+    <section className="relative min-h-screen pb-[10vw] overflow-x-hidden bg-surface-white pt-[68px]">
       {/* <div className="hero-grid-bg absolute inset-0 pointer-events-none" /> */}
       {/* <div className="hero-glow hero-glow-a absolute right-0 top-0 pointer-events-none" /> */}
       {/* <div className="hero-glow hero-glow-b absolute bottom-0 left-[200px] pointer-events-none" /> */}
