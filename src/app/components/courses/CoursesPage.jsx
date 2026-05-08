@@ -21,7 +21,7 @@ export default function CoursesPage() {
       <FilterBar />
       <CourseCatalogSection />
       <LearningPathwaySection />
-      <CoursesFaqSection />
+      {/* <CoursesFaqSection /> */}
       <CtaSection />
       <Footer />
     </div>

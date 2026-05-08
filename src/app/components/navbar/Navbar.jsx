@@ -87,7 +87,7 @@ export default function Navbar() {
           />
         </Link>
 
-        <ul className="hidden list-none items-center gap-1 md:flex">
+        <ul className="hidden list-none items-center gap-2 md:flex">
           {NAV_LINKS.map((link) => (
             <li key={link.label}>
               <Link
@@ -96,8 +96,8 @@ export default function Navbar() {
                   "rounded-[6px] px-[14px] py-[6px] text-[14px] font-[500] text-content-muted transition-all",
                   "hover:bg-surface-light hover:text-content-primary",
                   link.href === activeHref
-                    ? "text-content-primary font-[600]"
-                    : "",
+                    ? "text-content-primary font-[600] bg-neutral-300/50"
+                    : "hover:bg-neutral-200",
                 ].join(" ")}
               >
                 {link.label}

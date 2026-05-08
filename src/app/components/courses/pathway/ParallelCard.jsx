@@ -9,20 +9,23 @@ const ParallelCard = ({ tone, title, sub, orangeTint }) => {
       : "color-mix(in_srgb,var(--brand-cyan)_10%,transparent)";
   const iconBorder =
     tone === "amber"
-      ? "color-mix(in_srgb,var(--brand-amber)_20%,transparent)"
-      : "color-mix(in_srgb,var(--brand-cyan)_20%,transparent)";
+      // ? "color-mix(in_srgb,var(--brand-amber)_20%,transparent)"
+      ? "var(--brand-amber)"
+      : "var(--brand-cyan)"
+      // : "color-mix(in_srgb,var(--brand-cyan)_20%,transparent)";
 
   return (
     <div
       className={[
-        "parallel-card flex items-center gap-4 rounded-[var(--radius-lg)] border border-white/10 bg-white/5 px-5 py-4",
+        "parallel-card flex items-center gap-4 rounded-[var(--radius-lg)] border border-white/10 px-5 py-4",
         orangeTint
-          ? "bg-[color-mix(in_srgb,var(--brand-amber)_10%,transparent)]"
-          : "",
+          // ? "bg-[color-mix(in_srgb,var(--brand-amber)_10%,transparent)]"
+          ? "bg-brand-navy"
+          : "bg-brand-navy",
       ].join(" ")}
     >
       <div
-        className="pc-icon flex h-10 w-10 items-center justify-center rounded-[12px] border"
+        className="pc-icon flex h-10 w-10 items-center justify-center rounded-[12px] border-[0.1px]"
         style={{ background: iconBg, borderColor: iconBorder }}
       >
         {tone === "amber" ? (

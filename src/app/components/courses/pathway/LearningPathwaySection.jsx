@@ -3,7 +3,7 @@ import ParallelCard from "./ParallelCard";
 
 export default function LearningPathwaySection() {
   return (
-    <section className="relative overflow-hidden bg-brand-navy px-6 py-[100px] md:px-[60px]">
+    <section className="relative overflow-hidden bg-white bg-brand-navy px-6 py-[100px] md:px-[60px]">
       <div
         className="absolute inset-0 pointer-events-none opacity-60"
         style={{

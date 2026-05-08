@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 
-const CourseCard = ({ key, idx, c }) => {
+const CourseCard = ({ idx, c }) => {
   return (
     <div
       key={c.num}

@@ -90,7 +90,7 @@ export default function NumbersSection() {
           ))}
         </div>
 
-        <div className="country-row mt-8 rounded-[var(--radius-lg)] border-[1.5px] border-brand-cyan/50 bg-brand-cyan/2 px-6 py-5">
+        {/* <div className="country-row mt-8 rounded-[var(--radius-lg)] border-[1.5px] border-brand-cyan/50 bg-brand-cyan/2 px-6 py-5">
           <div className="country-label text-[11px] font-[plus-b] uppercase tracking-[0.10em] text-text-primary">
             Primary markets
           </div>
@@ -104,6 +104,17 @@ export default function NumbersSection() {
             <CountryItem dotColor="var(--brand-cyan)" delay="1.5s">
               <span className="text-text-secondary"> 🇨🇦 Canada </span>
             </CountryItem>
+          </div>
+        </div> */}
+
+        <div className="country-row reveal mt-8 rounded-[var(--radius-lg)] border border-white/10 bg-brand-navy px-6 py-5">
+          <div className="country-label text-[11px] font-[700] uppercase tracking-[0.10em] text-white/35">
+            Primary markets
+          </div>
+          <div className="country-flags mt-3 flex flex-wrap gap-3">
+            <CountryItem dotColor="var(--brand-amber)">🇬🇧 United Kingdom</CountryItem>
+            <CountryItem dotColor="var(--brand-amber)">🇺🇸 United States</CountryItem>
+            <CountryItem dotColor="var(--brand-cyan)">🇨🇦 Canada</CountryItem>
           </div>
         </div>
       </div>

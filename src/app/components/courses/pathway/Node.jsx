@@ -13,17 +13,19 @@ const Node = ({ n, tone, badge, title, sub, highlight, primary }) => {
   return (
     <div className="pathway-node flex flex-col items-start gap-3">
       <div
-        className="pn-circle flex h-10 w-10 items-center justify-center rounded-full text-[14px] font-[900] text-white"
-        style={{ background: circleBg }}
+        className="pn-circle flex h-10 w-10 items-center justify-center rounded-full text-[14px] font-[900] text-white bg-brand-navy"
+        // style={{ background: circleBg }}
       >
         {n}
       </div>
       <div
         className={[
-          "pn-card w-full rounded-[var(--radius-lg)] border px-5 py-4",
+          "pn-card bg-brand-cyan/30 w-full rounded-[var(--radius-lg)] border px-5 py-4",
           highlight
-            ? "border-[color-mix(in_srgb,var(--brand-amber)_35%,transparent)] bg-white/10"
-            : "border-white/10 bg-white/5",
+          ? ""
+          : "",
+            // ? "border-[color-mix(in_srgb,var(--brand-amber)_35%,transparent)] bg-white/10"
+            // : "border-white/10 bg-white/5",
           primary
             ? "ring-1 ring-[color-mix(in_srgb,var(--brand-cyan)_35%,transparent)]"
             : "",

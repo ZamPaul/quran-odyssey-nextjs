@@ -13,20 +13,20 @@ const STATS = [
 
 export default function AboutNumbersSection() {
   return (
-    <section className="relative overflow-hidden bg-brand-navy px-6 py-[110px] md:px-[60px]">
+    <section className="relative overflow-hidden bg-white bg-brand-navy px-6 py-[110px] md:px-[60px]">
       <div className="absolute inset-0 pointer-events-none opacity-60 numbers-bg" />
 
       <div className="relative z-[2] mx-auto w-full max-w-[1240px]">
         <div className="mb-14 grid grid-cols-1 gap-6 md:grid-cols-2 md:items-end">
           <div className="reveal-left">
-            <div className="section-chip inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-[6px] text-[12px] font-[700] tracking-[0.06em] text-white/70">
+            <div className="apply-cyan-chip font-[plus-eb] inline-flex items-center rounded-full px-4 py-[6px] text-[11px]">
               The odyssey so far
             </div>
-            <h2 className="mt-4 text-[40px] font-[800] leading-[1.08] tracking-[-0.03em] text-white md:text-[44px]">
+            <h2 className="mt-4 text-[40px] font-[plus-eb] leading-[1.08] tracking-[-0.03em] md:text-[44px]">
               Numbers that mean <span className="text-brand-cyan">something.</span>
             </h2>
           </div>
-          <p className="numbers-sub reveal-right max-w-[520px] text-[16px] font-[400] leading-[1.75] text-white/60">
+          <p className="numbers-sub reveal-right max-w-[520px] text-secondary-styling text-[16px]">
             We don&apos;t inflate these. Every number here is real — earned through
             consistent teaching, genuine relationships, and families that came back
             and told their friends.
@@ -41,7 +41,7 @@ export default function AboutNumbersSection() {
                 "stat-item rounded-[var(--radius-lg)] border px-6 py-6 transition",
                 s.featured
                   ? "border-transparent bg-brand-amber hover:bg-brand-amber-dark"
-                  : "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10",
+                  : "border-white/10 hover:border-white/20 bg-brand-navy hover:bg-brand-navy-dark/90",
               ].join(" ")}
               data-target={s.target}
             >
@@ -68,7 +68,7 @@ export default function AboutNumbersSection() {
           ))}
         </div>
 
-        <div className="country-row reveal mt-8 rounded-[var(--radius-lg)] border border-white/10 bg-white/5 px-6 py-5">
+        <div className="country-row reveal mt-8 rounded-[var(--radius-lg)] border border-white/10 bg-brand-navy px-6 py-5">
           <div className="country-label text-[11px] font-[700] uppercase tracking-[0.10em] text-white/35">
             Primary markets
           </div>

@@ -27,7 +27,7 @@ const METHODS = [
 
 export default function ContactHeroSection() {
   return (
-    <section className="relative overflow-hidden bg-surface-white pt-[68px]">
+    <section className="relative bg-surface-white pt-[68px] pb-[15vw]">
       {/* <div className="hero-grid-bg absolute inset-0 pointer-events-none" />
       <div className="hero-glow hero-glow-a absolute right-0 top-0 pointer-events-none" />
       <div className="hero-glow hero-glow-b absolute bottom-0 left-[180px] pointer-events-none" /> */}
@@ -41,7 +41,7 @@ export default function ContactHeroSection() {
       />
 
       <div className="relative z-[2] mx-auto w-full max-w-[1240px] px-6 pb-10 pt-[72px] md:px-[60px]">
-        <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-2 md:gap-14">
+        <div className="grid mt-10 grid-cols-1 items-center gap-10 md:grid-cols-2 md:gap-14">
           <div>
             <div className="hero-eyebrow flex items-center gap-3">
               <span className="h-[2px] w-8 rounded bg-brand-cyan" />
