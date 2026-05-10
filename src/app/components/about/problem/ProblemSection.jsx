@@ -91,7 +91,7 @@ export default function ProblemSection() {
                 <span className="text-brand-cyan">was solving.</span>
               </>
             }
-            subtitle="Thousands of families in the diaspora wanted structured, reliable Quran education for their children. What they found instead was this."
+            // subtitle="Thousands of families in the diaspora wanted structured, reliable Quran education for their children. What they found instead was this."
           />
         </div>
 

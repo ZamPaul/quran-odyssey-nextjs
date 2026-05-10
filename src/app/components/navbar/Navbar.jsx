@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -21,6 +21,7 @@ const NAV_SCROLL_CLASSES = ["scrolled", "backdrop-blur-xl", "bg-white/75"];
 
 export default function Navbar() {
   const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
   const navRef = useRef(null);
 
   const activeHref =
@@ -105,6 +106,18 @@ export default function Navbar() {
             </li>
           ))}
           <li>
+            <Link
+              href="/sign-in"
+              onClick={() => setMobileOpen(false)}
+              className={[
+                "ml-2 rounded-[6px] border-[1.5px] border-neutral-200 bg-neutral-100 px-5 py-2",
+                "text-[13px] font-[700] tracking-[0.02em] text-brand-navy transition",
+                "hover:-translate-y-[1px] hover:bg-neutral-100/50",
+              ].join(" ")}
+              // className="rounded-[6px] border border-line-light px-4 py-[11px] text-center text-[14px] font-[700] text-content-primary transition hover:bg-surface-light"
+            >
+              Sign in
+            </Link>
             <Link
               href="#"
               className={[
