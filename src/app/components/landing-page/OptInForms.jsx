@@ -73,7 +73,6 @@ function RadioPair({ name, value, onChange, error }) {
                   : "border-line-light bg-surface-off-white font-[600] text-content-muted hover:border-brand-cyan hover:bg-surface-cyan-tint hover:text-brand-cyan-dark",
               ].join(" ")}
             >
-              {/* Custom radio dot */}
               <span
                 className={[
                   "flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all",
@@ -103,9 +102,9 @@ function SubmitButton({ loading, label = "Book My Free Discovery Call →" }) {
       disabled={loading}
       className={[
         "flex w-full items-center justify-center gap-2 rounded-[var(--radius)] bg-brand-amber px-6 py-[15px]",
-        "font-[plus-eb] text-[16px] font-[800] tracking-[-0.01em] text-brand-navy",
-        "shadow-[0_6px_20px_rgba(250,167,26,0.35)] transition-all duration-150",
-        "hover:-translate-y-[1px] hover:bg-brand-amber-dark hover:shadow-[0_10px_28px_rgba(250,167,26,0.45)]",
+        "text-[16px] font-[800] tracking-[-0.01em] text-brand-navy",
+        "shadow-[0_6px_20px_rgba(250,167,26,0.30)] transition-all duration-150",
+        "hover:-translate-y-[1px] hover:bg-brand-amber-dark hover:shadow-[0_10px_28px_rgba(250,167,26,0.40)]",
         "active:translate-y-0",
         "disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0",
       ].join(" ")}
@@ -141,7 +140,7 @@ function SubmitButton({ loading, label = "Book My Free Discovery Call →" }) {
 function PrivacyAndProof() {
   return (
     <>
-      <p className="text-center font-[plus-r] text-[11px] text-content-subtle">
+      <p className="text-center text-[11px] text-content-subtle">
         <a
           href="/privacy"
           className="underline underline-offset-2 transition hover:text-brand-cyan-dark"
@@ -162,7 +161,7 @@ function PrivacyAndProof() {
             <span key={i}>★</span>
           ))}
         </div>
-        <p className="font-[plus-sb] text-[11px] font-[600] text-content-subtle">
+        <p className="text-[11px] font-[600] text-content-subtle">
           Rated 4.97/5 by 2,000+ Parents and Students
         </p>
       </div>
@@ -190,14 +189,7 @@ export function OptInMainForm({ onSuccess }) {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      /**
-       * TODO: Replace stub with real API call
-       * await fetch('/api/leads', {
-       *   method: 'POST',
-       *   headers: { 'Content-Type': 'application/json' },
-       *   body: JSON.stringify(data),
-       * });
-       */
+      // TODO: replace stub with real API call
       await new Promise((r) => setTimeout(r, 1200));
       onSuccess?.();
     } catch (err) {
@@ -210,7 +202,7 @@ export function OptInMainForm({ onSuccess }) {
   const inputClass = (hasError) =>
     [
       "w-full rounded-[var(--radius-sm)] border bg-white px-4 py-[11px]",
-      "font-[plus-r] text-[14px] font-[500] text-content-primary outline-none",
+      "text-[14px] font-[500] text-content-primary outline-none",
       "placeholder:text-content-subtle",
       "transition-all duration-150",
       "focus:shadow-[0_0_0_3px_color-mix(in_srgb,var(--brand-cyan)_12%,transparent)]",
@@ -225,6 +217,16 @@ export function OptInMainForm({ onSuccess }) {
       noValidate
       className="flex flex-col gap-[18px]"
     >
+      {/* Form header */}
+      <div className="mb-1 text-center">
+        <h2 className="text-[20px] font-[800] tracking-[-0.03em] text-content-primary">
+          Book Your Free Discovery Call
+        </h2>
+        <p className="mt-1 text-[13px] font-[500] text-content-muted">
+          Takes 60 seconds · We reply within 2 hours
+        </p>
+      </div>
+
       {/* Name row */}
       <div className="grid grid-cols-2 gap-[14px] max-[480px]:grid-cols-1">
         <InputField
@@ -290,11 +292,11 @@ export function OptInMainForm({ onSuccess }) {
       </div>
 
       {/* Programme description */}
-      <div className="rounded-[var(--radius)] border border-line-light bg-surface-off-white px-[18px] py-4">
-        <p className="font-[plus-b] text-[13px] font-[700] text-content-primary">
+      <div className="rounded-[var(--radius)] border border-[color-mix(in_srgb,var(--brand-cyan)_20%,transparent)] bg-[color-mix(in_srgb,var(--brand-cyan)_5%,white)] px-[18px] py-4">
+        <p className="text-[13px] font-[700] text-content-primary">
           Quran Odyssey is built for committed families.
         </p>
-        <p className="mt-2 font-[plus-r] text-[13px] leading-[1.7] text-content-muted">
+        <p className="mt-2 text-[13px] leading-[1.7] text-content-muted">
           We don&apos;t offer random one-off sessions. Instead we offer a fully
           structured programme with dedicated 1-on-1 teachers covering Tajweed,
           Hifz, Quran Recitation, and Islamic Studies — with weekly written
@@ -305,7 +307,7 @@ export function OptInMainForm({ onSuccess }) {
 
       {/* YES / NO question */}
       <div className="flex flex-col gap-3">
-        <p className="font-[plus-sb] text-[14px] font-[600] leading-[1.55] text-content-primary">
+        <p className="text-[14px] font-[600] leading-[1.55] text-content-primary">
           Is this what you are looking for — to give your child a real,
           structured Quran education?
         </p>
@@ -353,10 +355,10 @@ export function OptInStickyForm({ index, onYes }) {
   if (done) {
     return (
       <div className="flex flex-col items-center gap-3 py-2 text-center">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--success)_15%,white)] font-[800] text-[18px] text-success">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--success)_15%,white)] text-[18px] font-[800] text-success">
           ✓
         </div>
-        <p className="font-[plus-sb] text-[13px] font-[600] text-content-muted">
+        <p className="text-[13px] font-[600] text-content-muted">
           No problem! If you change your mind,{" "}
           <a
             href="#mainForm"
@@ -375,7 +377,7 @@ export function OptInStickyForm({ index, onYes }) {
       noValidate
       className="flex flex-col gap-[14px]"
     >
-      <p className="font-[plus-sb] text-[14px] font-[600] leading-[1.55] text-content-primary">
+      <p className="text-[14px] font-[600] leading-[1.55] text-content-primary">
         Is this what you are looking for — to give your child a real, structured
         Quran education?
       </p>
