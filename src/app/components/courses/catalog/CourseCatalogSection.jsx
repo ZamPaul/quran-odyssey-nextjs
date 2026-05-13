@@ -17,6 +17,7 @@ const COURSES = [
     tags: ["Ages 5–10", "Beginner", "🔥 Most popular start"],
     featured: false,
     gradient: "linear-gradient(140deg, #daf4fb 0%, #c2eaf9 45%, #a8e0f6 100%)",
+    price: 20,
   },
   {
     num: "02",
@@ -33,6 +34,7 @@ const COURSES = [
     tags: ["All Ages", "Intermediate"],
     featured: false,
     gradient: "linear-gradient(140deg, #fff7e0 0%, #feeec4 45%, #fde5a6 100%)",
+    price: 39,
   },
   {
     num: "03",
@@ -49,6 +51,7 @@ const COURSES = [
     tags: ["Ages 8+", "Intermediate"],
     featured: false,
     gradient: "linear-gradient(140deg, #eaeffe 0%, #d8e4fb 45%, #c6d8f8 100%)",
+    price: 45,
   },
   {
     num: "04",
@@ -65,6 +68,7 @@ const COURSES = [
     tags: ["Ages 7+", "Advanced", "⭐ Most prestigious"],
     featured: true,
     gradient: "linear-gradient(140deg, #daf8f1 0%, #c2f2e8 45%, #a8ecde 100%)",
+    price: 34,
   },
   {
     num: "05",
@@ -81,6 +85,7 @@ const COURSES = [
     tags: ["Ages 6–14", "All Levels"],
     featured: false,
     gradient: "linear-gradient(140deg, #e6ecfc 0%, #d0dafa 45%, #b8c8f8 100%)",
+    price: 18,
   },
   {
     num: "06",
@@ -97,6 +102,7 @@ const COURSES = [
     tags: ["All Ages", "All Levels"],
     featured: false,
     gradient: "linear-gradient(140deg, #e0f8eb 0%, #c8f0d8 45%, #b0e8c4 100%)",
+    price: 35,
   },
 ];
 

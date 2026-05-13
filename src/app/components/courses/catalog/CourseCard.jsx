@@ -5,7 +5,7 @@ const CourseCard = ({ idx, c }) => {
   return (
     <div
       key={c.num}
-      style={{background: c.gradient }}
+      style={{ background: c.gradient }}
       className={[
         "course-card flex flex-col overflow-hidden rounded-[var(--radius-lg)] border-[1.5px] border-neutral-200 bg-white transition-all duration-300 ease-in-out",
         c.featured ? "border-brand-amber" : "border-line-light",
@@ -22,14 +22,17 @@ const CourseCard = ({ idx, c }) => {
         <div className="flex h-11 w-11 items-center justify-center rounded-[12px] border border-line-light bg-surface-cyan-tint text-brand-navy-dark">
           <span className="text-[14px] font-[900]">{c.num}</span>
         </div>
-        <div
+        <div className="price-tag">
+          <h2 className="font-[plus-eb] text-2xl">${c.price}</h2>
+        </div>
+        {/* <div
           className={[
             "text-[12px] font-[900] tracking-[0.16em]",
             c.featured ? "text-brand-amber-dark" : "text-content-subtle",
           ].join(" ")}
         >
           {c.featured ? "FEATURED" : ""}
-        </div>
+        </div> */}
       </div>
 
       <div className="p-6 pt-5">
@@ -79,7 +82,7 @@ const CourseCard = ({ idx, c }) => {
         <div className="mt-6 w-full flex items-center justify-between">
           <Link
             href="#"
-            className="w-[72%] inline-flex items-center gap-2 rounded-[var(--radius)] bg-brand-amber px-5 py-[11px] text-[14px] font-[plus-b] text-brand-navy transition hover:-translate-y-[1px] hover:bg-brand-amber-dark"
+            className="w-[38%] inline-flex items-center gap-2 rounded-[var(--radius)] bg-brand-amber px-5 py-[11px] text-[14px] font-[plus-b] text-brand-navy transition hover:-translate-y-[1px] hover:bg-brand-amber-dark"
           >
             Enroll Now
             <svg
@@ -100,7 +103,28 @@ const CourseCard = ({ idx, c }) => {
           </Link>
           <Link
             href="#"
-            className="w-[25%] rounded-[var(--radius)] border-[0.1px] border-neutral-400 bg-transparent px-4 py-[11px] text-[14px] font-[plus-b] text-content-primary transition hover:bg-surface-light"
+            className="w-[33%] inline-flex items-center gap-2 rounded-[var(--radius)] bg-brand-navy-dark px-5 py-[11px] text-[14px] font-[plus-b] text-white transition hover:-translate-y-[1px] hover:bg-brand-navy"
+          >
+            Book free trial
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 16 16"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M3 8h10M9 4l4 4-4 4"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </Link>
+          <Link
+            href="#"
+            className="w-[25%] flex items-center justify-center rounded-[var(--radius)] border-[0.1px] border-neutral-400 bg-transparent px-4 py-[11px] text-[14px] font-[plus-b] text-content-primary transition hover:bg-surface-light"
           >
             Learn More
           </Link>
