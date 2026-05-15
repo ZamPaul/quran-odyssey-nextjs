@@ -6,39 +6,17 @@ export default function OptInHero() {
   const [videoPlaying, setVideoPlaying] = useState(false);
 
   return (
-    <section className="flex w-full max-w-[800px] flex-col items-center px-6 pb-10 pt-14 text-center">
-
-      {/* Badge strip */}
-      <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--brand-cyan)_25%,transparent)] bg-[color-mix(in_srgb,var(--brand-cyan)_10%,white)] px-4 py-[6px]">
-        <span className="h-[7px] w-[7px] animate-pulse rounded-full bg-brand-cyan" />
-        <span className="text-[12px] font-[700] tracking-[0.04em] text-brand-cyan-dark">
-          Live Classes · UK · USA · Canada
-        </span>
-      </div>
-
-      {/* Star rating */}
-      <div className="mb-5 flex items-center gap-1">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <span key={i} className="text-[20px] leading-none text-brand-amber">
-            ★
-          </span>
-        ))}
-        <span className="ml-2 text-[13px] font-[600] text-content-muted">
-          Rated 4.97 by 2,000+ Parents
-        </span>
-      </div>
-
-      {/* Headline */}
-      <h1 className="mb-4 text-[clamp(28px,5vw,48px)] font-[800] leading-[1.1] tracking-[-0.03em] text-content-primary">
-        Discover the{" "}
-        <span className="text-brand-cyan">Secret Quran Odyssey System</span>{" "}
-        That&apos;s Helped{" "}
+    <section className="flex w-full flex-col items-center px-5 pb-8 pt-12 text-center">
+      {/* ── Headline ─────────────────────────────────────────── */}
+      <h1 className="mb-5 max-w-[680px] text-[clamp(26px,4.5vw,44px)] font-[800] leading-[1.1] tracking-[-0.03em] text-content-primary">
+        Discover the <span className="italic text-brand-cyan">Secret</span>{" "}
+        Quran Odyssey System That&apos;s Helped{" "}
         <span className="text-brand-amber-dark">2,000+ Children</span> Build a
         Lifelong Connection With the Quran
       </h1>
 
-      {/* Subheadline */}
-      <p className="mb-9 text-[clamp(16px,2.8vw,22px)] font-[700] leading-tight tracking-[-0.02em] text-content-muted">
+      {/* ── Subheadline ──────────────────────────────────────── */}
+      <p className="mb-8 text-[clamp(18px,3vw,26px)] font-[700] leading-tight tracking-[-0.02em] text-content-muted">
         (With a{" "}
         <span className="font-[800] text-brand-cyan">
           97% Parent Satisfaction Rate
@@ -46,61 +24,74 @@ export default function OptInHero() {
         )
       </p>
 
-      {/* Video */}
-      <div className="mb-8 w-full max-w-[640px]">
-        <div className="relative w-full overflow-hidden rounded-[var(--radius-lg)] border border-line-light shadow-[0_20px_60px_rgba(0,0,0,0.12)] aspect-video">
+      {/* ── Video ─────────────────────────────────────────────── */}
+      <div className="w-full max-w-[620px]">
+        <div
+          className="relative w-full overflow-hidden rounded-[var(--radius-lg)] border border-line-light shadow-[0_16px_48px_rgba(0,0,0,0.12)]"
+          style={{ aspectRatio: "16/9" }}
+        >
           {!videoPlaying ? (
             <button
               type="button"
               aria-label="Play video"
               onClick={() => setVideoPlaying(true)}
-              className="group absolute inset-0 flex w-full cursor-pointer items-center justify-center border-none bg-[linear-gradient(135deg,#0a1f35_0%,#1a3d5c_60%,#0e4a5e_100%)] p-0 transition-opacity hover:opacity-95"
+              className="group absolute inset-0 flex w-full cursor-pointer items-center justify-center border-none p-0"
+              style={{
+                background:
+                  "linear-gradient(135deg, #071625 0%, #0d2840 55%, #0e3d5c 100%)",
+              }}
             >
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_30%,rgba(40,183,217,0.1)_0%,transparent_60%)]" />
-
+              <div
+                className="pointer-events-none absolute inset-0"
+                style={{
+                  background:
+                    "radial-gradient(ellipse at 30% 30%, rgba(40,183,217,0.10) 0%, transparent 65%)",
+                }}
+              />
               <div className="relative z-[1] flex flex-col items-center gap-4">
-                <div className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-brand-amber shadow-[0_0_0_12px_rgba(250,167,26,0.18),0_8px_24px_rgba(250,167,26,0.4)] transition-transform group-hover:scale-[1.08]">
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <div
+                  className="flex h-[68px] w-[68px] items-center justify-center rounded-full bg-brand-amber transition-transform group-hover:scale-[1.08]"
+                  style={{
+                    boxShadow:
+                      "0 0 0 14px rgba(250,167,26,0.18), 0 8px 24px rgba(250,167,26,0.45)",
+                  }}
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden="true"
+                  >
                     <polygon points="6 4 20 12 6 20 6 4" fill="white" />
                   </svg>
                 </div>
                 <div className="text-center">
-                  <p className="text-[16px] font-[700] text-white">
+                  <p className="text-[15px] font-[700] text-white">
                     Watch How Quran Odyssey Works
                   </p>
-                  <p className="mt-1 text-[13px] text-white/50">
+                  <p className="mt-1 text-[12px] text-white/45">
                     ▼ Click To Play
                   </p>
                 </div>
               </div>
             </button>
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-[#071625]">
-              <div className="flex flex-col items-center gap-2 text-center text-white">
+            <div
+              className="flex h-full w-full items-center justify-center"
+              style={{ background: "#071625" }}
+            >
+              <div className="flex flex-col items-center gap-2 text-center">
                 <span className="text-[40px]">🎬</span>
-                <p className="text-[14px] font-[700]">Video Playing</p>
-                <p className="text-[11px] text-white/35">Replace with your actual video embed</p>
+                <p className="text-[14px] font-[700] text-white">
+                  Video Playing
+                </p>
+                <p className="text-[11px] text-white/35">
+                  Replace with your actual video embed
+                </p>
               </div>
             </div>
           )}
-        </div>
-      </div>
-
-      {/* Trust strip */}
-      <div className="flex flex-wrap items-center justify-center gap-4 text-[12px] font-[600] text-content-muted">
-        <div className="flex items-center gap-[6px]">
-          <span className="h-[7px] w-[7px] animate-pulse rounded-full bg-success" />
-          <span>2,000+ Students Enrolled</span>
-        </div>
-        <div className="hidden h-[14px] w-px bg-line-light md:block" />
-        <div className="flex items-center gap-[6px]">
-          <span className="h-[7px] w-[7px] rounded-full bg-brand-amber" />
-          <span>40+ Qualified Teachers</span>
-        </div>
-        <div className="hidden h-[14px] w-px bg-line-light md:block" />
-        <div className="flex items-center gap-[6px]">
-          <span className="h-[7px] w-[7px] animate-pulse rounded-full bg-success" />
-          <span>UK · USA · Canada</span>
         </div>
       </div>
     </section>
