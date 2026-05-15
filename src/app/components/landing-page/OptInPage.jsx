@@ -156,6 +156,86 @@ function VideoTestimonialCard({ t }) {
   );
 }
 
+function VideoTestimonialCard2({ t }) {
+  const [playing, setPlaying] = useState(false);
+
+  return (
+    <div className="flex flex-col items-start justify-center gap-3">
+      {/* Stars */}
+      <div className="flex gap-[3px] text-[14px] text-brand-amber">
+        {Array.from({ length: t.stars }).map((_, i) => (
+          <span key={i}>★</span>
+        ))}
+      </div>
+
+      {/* Video thumbnail */}
+      <div
+        className="relative w-[310px] h-[220px] overflow-hidden rounded-[var(--radius-lg)] border border-line-light"
+        // style={{ aspectRatio: "16/9" }}
+      >
+        {!playing ? (
+          <button
+            type="button"
+            aria-label={`Play ${t.name} testimonial`}
+            onClick={() => setPlaying(true)}
+            className="group absolute inset-0 flex w-full cursor-pointer items-center justify-center border-none p-0"
+            style={{
+              background: "linear-gradient(135deg, #0a1f35 0%, #0d2840 100%)",
+            }}
+          >
+            {/* Initials avatar in bg */}
+            <div
+              className="absolute inset-0 flex items-center justify-center opacity-10"
+              style={{ background: t.bg }}
+            />
+            <div
+              className="relative z-[1] flex h-[48px] w-[48px] items-center justify-center rounded-full bg-brand-amber transition-transform group-hover:scale-[1.08]"
+              style={{ boxShadow: "0 0 0 10px rgba(250,167,26,0.15)" }}
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <polygon points="6 4 20 12 6 20 6 4" fill="white" />
+              </svg>
+            </div>
+          </button>
+        ) : (
+          <div
+            className="flex h-full w-full items-center justify-center"
+            style={{ background: "#0d2840" }}
+          >
+            <p className="text-[11px] font-[600] text-white/40">
+              Replace with video embed
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Attribution */}
+      <div className="flex items-center gap-3">
+        <div
+          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-[800] text-white"
+          style={{ background: t.bg }}
+        >
+          {t.initials}
+        </div>
+        <div>
+          <div className="text-[13px] text-start font-[800] text-content-primary">
+            {t.name}
+          </div>
+          <div className="text-[11px] font-[600] text-content-muted">
+            {t.location}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function TestimonialsSection() {
   return (
     <div className="w-full border-t border-line-light bg-surface-off-white px-5 py-14 text-center">
@@ -164,9 +244,14 @@ function TestimonialsSection() {
         <br />
         Our Students&apos; Lives!
       </h2>
-      <div className="mx-auto grid max-w-[680px] grid-cols-1 gap-8 md:grid-cols-3">
+      {/* <div className="mx-auto grid max-w-[680px] grid-cols-1 gap-5 md:grid-cols-3">
         {TESTIMONIALS.map((t) => (
           <VideoTestimonialCard key={t.name} t={t} />
+        ))}
+      </div> */}
+      <div className="flex items-center justify-center gap-[1.5vw]">
+        {TESTIMONIALS.map((t) => (
+          <VideoTestimonialCard2 key={t.name} t={t}/>
         ))}
       </div>
     </div>
@@ -358,18 +443,22 @@ function FAQSection() {
               <button
                 type="button"
                 onClick={() => setOpen(isOpen ? null : idx)}
-                className="flex w-full items-start justify-between gap-4 py-5 text-left"
+                className="flex cursor-pointer w-full items-start justify-between gap-4 py-5 text-left"
               >
                 <span className="text-[14px] font-[700] leading-[1.5] text-content-primary">
                   {item.q}
                 </span>
                 <span
                   className={[
-                    "mt-[2px] flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-line-light text-[14px] text-content-muted transition-transform duration-200",
+                    "mt-[2px] bg-brand-amber hover:bg-brand-amber-dark transition-all ease-in-out flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-line-light text-[14px] text-content-muted origin-center duration-200",
                     isOpen ? "rotate-45" : "",
                   ].join(" ")}
                 >
-                  +
+                  <span
+                    className={`plus-icon relative bottom-[1.5px] duration-200 transition-all ease-in-out ${isOpen ? "left-[1px]" : "left-0"}`}
+                  >
+                    +
+                  </span>
                 </span>
               </button>
               {isOpen && (

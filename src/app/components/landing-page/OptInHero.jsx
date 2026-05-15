@@ -9,7 +9,7 @@ export default function OptInHero() {
     <section className="flex w-full flex-col items-center px-5 pb-8 pt-12 text-center">
       {/* ── Headline ─────────────────────────────────────────── */}
       <h1 className="mb-5 max-w-[680px] text-[clamp(26px,4.5vw,44px)] font-[800] leading-[1.1] tracking-[-0.03em] text-content-primary">
-        Discover the <span className="italic text-brand-cyan">Secret</span>{" "}
+        Discover the <span className="text-brand-cyan">Secret</span>{" "}
         Quran Odyssey System That&apos;s Helped{" "}
         <span className="text-brand-amber-dark">2,000+ Children</span> Build a
         Lifelong Connection With the Quran
