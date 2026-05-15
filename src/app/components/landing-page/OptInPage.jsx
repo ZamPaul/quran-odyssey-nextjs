@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import OptInHero from "./OptInHero";
@@ -251,7 +251,7 @@ function TestimonialsSection() {
       </div> */}
       <div className="flex items-center justify-center gap-[1.5vw]">
         {TESTIMONIALS.map((t) => (
-          <VideoTestimonialCard2 key={t.name} t={t}/>
+          <VideoTestimonialCard2 key={t.name} t={t} />
         ))}
       </div>
     </div>
@@ -420,6 +420,62 @@ const FAQ_ITEMS = [
   },
 ];
 
+function FAQItem({ item, isOpen, onToggle }) {
+  const contentRef = useRef(null);
+  const [height, setHeight] = useState(0);
+
+  useEffect(() => {
+    if (!contentRef.current) return;
+    setHeight(isOpen ? contentRef.current.scrollHeight : 0);
+  }, [isOpen]);
+
+  return (
+    <div className="border-b border-line-light last:border-b-0">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full cursor-pointer items-start justify-between gap-4 py-5 text-left"
+      >
+        <span className="text-[14px] font-[700] leading-[1.5] text-content-primary">
+          {item.q}
+        </span>
+        <span
+          className={[
+            "mt-[2px] flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-brand-amber text-[16px] font-[400] text-white origin-center transition-transform duration-300 ease-in-out",
+            isOpen ? "rotate-45" : "rotate-0",
+          ].join(" ")}
+        >
+          <span
+            className={`plus-icon relative bottom-[2px] duration-200 transition-all ease-in-out ${isOpen ? "left-[0.5px]" : "left-0"}`}
+          >
+            +
+          </span>
+        </span>
+      </button>
+
+      <div
+        style={{
+          height: height,
+          overflow: "hidden",
+          transition: "height 300ms cubic-bezier(0.4, 0, 0.2, 1)",
+        }}
+      >
+        <div
+          ref={contentRef}
+          style={{
+            opacity: isOpen ? 1 : 0,
+            transform: isOpen ? "translateY(0)" : "translateY(-6px)",
+            transition: "opacity 250ms ease, transform 250ms ease",
+          }}
+          className="pb-5 text-[14px] leading-[1.75] text-content-muted"
+        >
+          {item.a}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function FAQSection() {
   const [open, setOpen] = useState(null);
 
@@ -433,48 +489,75 @@ function FAQSection() {
       </p>
 
       <div className="mx-auto max-w-[640px] text-left">
-        {FAQ_ITEMS.map((item, idx) => {
-          const isOpen = open === idx;
-          return (
-            <div
-              key={item.q}
-              className="border-b border-line-light last:border-b-0"
-            >
-              <button
-                type="button"
-                onClick={() => setOpen(isOpen ? null : idx)}
-                className="flex cursor-pointer w-full items-start justify-between gap-4 py-5 text-left"
-              >
-                <span className="text-[14px] font-[700] leading-[1.5] text-content-primary">
-                  {item.q}
-                </span>
-                <span
-                  className={[
-                    "mt-[2px] bg-brand-amber hover:bg-brand-amber-dark transition-all ease-in-out flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-line-light text-[14px] text-content-muted origin-center duration-200",
-                    isOpen ? "rotate-45" : "",
-                  ].join(" ")}
-                >
-                  <span
-                    className={`plus-icon relative bottom-[1.5px] duration-200 transition-all ease-in-out ${isOpen ? "left-[1px]" : "left-0"}`}
-                  >
-                    +
-                  </span>
-                </span>
-              </button>
-              {isOpen && (
-                <div className="pb-5 text-[14px] leading-[1.75] text-content-muted">
-                  {item.a}
-                </div>
-              )}
-            </div>
-          );
-        })}
+        {FAQ_ITEMS.map((item, idx) => (
+          <FAQItem
+            key={item.q}
+            item={item}
+            isOpen={open === idx}
+            onToggle={() => setOpen(open === idx ? null : idx)}
+          />
+        ))}
       </div>
     </div>
   );
 }
 
+// function FAQSection() {
+//   const [open, setOpen] = useState(null);
+
+//   return (
+//     <div className="w-full border-t border-line-light bg-white px-5 py-14 text-center">
+//       <h2 className="mb-2 text-[clamp(18px,3.5vw,26px)] font-[800] uppercase tracking-[-0.01em] text-content-primary">
+//         Frequently Asked Questions
+//       </h2>
+//       <p className="mb-8 text-[14px] font-[500] text-content-muted">
+//         What do our parents and students ask the most...
+//       </p>
+
+//       <div className="mx-auto max-w-[640px] text-left">
+//         {FAQ_ITEMS.map((item, idx) => {
+//           const isOpen = open === idx;
+//           return (
+//             <div
+//               key={item.q}
+//               className="border-b border-line-light last:border-b-0"
+//             >
+//               <button
+//                 type="button"
+//                 onClick={() => setOpen(isOpen ? null : idx)}
+//                 className="flex cursor-pointer w-full items-start justify-between gap-4 py-5 text-left"
+//               >
+//                 <span className="text-[14px] font-[700] leading-[1.5] text-content-primary">
+//                   {item.q}
+//                 </span>
+//                 <span
+//                   className={[
+//                     "mt-[2px] bg-brand-amber hover:bg-brand-amber-dark transition-all ease-in-out flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-line-light text-[14px] text-content-muted origin-center duration-200",
+//                     isOpen ? "rotate-45" : "",
+//                   ].join(" ")}
+//                 >
+//                   <span
+//                     className={`plus-icon relative bottom-[1.5px] duration-200 transition-all ease-in-out ${isOpen ? "left-[1px]" : "left-0"}`}
+//                   >
+//                     +
+//                   </span>
+//                 </span>
+//               </button>
+//               {isOpen && (
+//                 <div className="pb-5 text-[14px] leading-[1.75] text-content-muted">
+//                   {item.a}
+//                 </div>
+//               )}
+//             </div>
+//           );
+//         })}
+//       </div>
+//     </div>
+//   );
+// }
+
 // ─── Divider between sticky forms ────────────────────────────
+
 function SectionDivider({ label }) {
   return (
     <div className="flex w-full items-center gap-3 py-1">
