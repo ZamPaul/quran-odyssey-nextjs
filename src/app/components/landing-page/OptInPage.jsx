@@ -295,8 +295,8 @@ function MidCTASection({ onBookClick }) {
 // Equivalent to StudySmart's "HOW DOES STUDYSMARTUK GUARANTEE RESULTS?"
 const FEATURES = [
   {
-    title: "Dedicated 1-on-1 Teacher",
-    desc: "One teacher per student — not a rotation. Your child builds real rapport with a single verified teacher who knows exactly where they are and where they need to go.",
+    title: "Dedicated 1-on-1 Quran Teacher",
+    desc: "Your child is paired with a single verified teacher — not a rotating system. This builds trust, and consistency, while ensuring the teacher understands your child’s exact strengths, struggles, and learning pace.",
     icon: (
       <svg
         width="36"
@@ -316,8 +316,8 @@ const FEATURES = [
     ),
   },
   {
-    title: "Structured Tajweed & Hifz Programme",
-    desc: "Expert-led guidance through a full curriculum — Noorani Qaida, Tajweed rules, Quran Recitation, and full Hifz memorisation — progressed at your child's pace with weekly milestones.",
+    title: "Weekly Parent Progress Reports",
+    desc: "Stay fully informed with detailed weekly reports showing exactly what your child learned, which Arabic rules were mastered, and where extra support is needed — giving you clarity instead of guesswork.",
     icon: (
       <svg
         width="36"
@@ -347,8 +347,8 @@ const FEATURES = [
     ),
   },
   {
-    title: "Weekly Parent Progress Reports",
-    desc: "University-specific... just kidding — parent-specific weekly written reports detailing exactly what Tajweed rule your child worked on, what they mastered, and what needs more focus. No guessing.",
+    title: "Structured Islamic Learning Programs",
+    desc: "A complete, expert-designed curriculum covering Hifz, Salah, Duas, Noorani Qaida, and Arabic recitation — delivered step by step with clear weekly milestones tailored to your childs individual learning pace.",
     icon: (
       <svg
         width="36"
@@ -374,7 +374,7 @@ function FeaturesSection() {
       <h2 className="mb-10 text-[clamp(18px,3.5vw,26px)] font-[800] uppercase tracking-[-0.01em] text-content-primary">
         How Does Quran Odyssey
         <br />
-        Deliver Results?
+        Deliver Real Results?
       </h2>
       <div className="mx-auto grid max-w-[680px] grid-cols-1 gap-8 md:grid-cols-3">
         {FEATURES.map((f) => (
@@ -403,20 +403,20 @@ function FeaturesSection() {
 // Equivalent to StudySmart's "FREQUENTLY ASKED QUESTIONS"
 const FAQ_ITEMS = [
   {
-    q: "What kind of results can I expect from the programme?",
-    a: "Our students progress faster than any other tutoring setup because they have the same dedicated teacher every class. Most students move from zero Arabic reading to fluent Quran recitation within 6–12 months of consistent classes. However, every child's ability is different — what we can guarantee is that if you follow the guidance of your teacher, your child will make real, measurable progress every single month.",
+    q: "Will my child actually make progress with online learning?",
+    a: "Yes — with structured lessons, consistent teaching, and weekly progress tracking, children build steady improvement in reading fluency, pronunciation, and Islamic understanding over time.",
   },
   {
-    q: "How long do you work with each student for?",
-    a: "We typically work with families for a minimum of 3 months, and most families stay with us for 1 year or more. Quran learning is a journey — not a quick fix. We're built for families who are serious about giving their child a lifelong connection with the Quran.",
+    q: "How does the learning process work?",
+    a: "Each child follows a structured learning path with a dedicated teacher who guides them step by step, while parents receive regular updates to stay informed about progress.",
   },
   {
-    q: "What type of student is this for?",
-    a: "Quran Odyssey is designed for children aged 5–18 at any level — from complete beginners who don't know the Arabic alphabet yet, all the way to students pursuing full Hifz (memorisation of the entire Quran). If you're unsure where your child should start, the free discovery call is exactly for that.",
+    q: "Is this suitable for beginners?",
+    a: "Absolutely. The programme is designed for children at all levels — whether they are complete beginners starting from basics or already able to read and looking to improve further.",
   },
   {
-    q: "What background do your teachers have?",
-    a: "All teachers on Quran Odyssey are verified, qualified, and selected through a rigorous vetting process. They hold Ijazah (chain of transmission) in Quran recitation, have formal Islamic education backgrounds, and are experienced in teaching children online across UK, USA and Canada timezones. Each teacher is rated by parents after every class.",
+    q: "How is my child guided and supported during learning?",
+    a: "Every student is taught one-on-one by a dedicated teacher who adjusts lessons according to the child’s pace, ensuring consistent attention, correction, and encouragement.",
   },
 ];
 
@@ -485,7 +485,7 @@ function FAQSection() {
         Frequently Asked Questions
       </h2>
       <p className="mb-8 text-[14px] font-[500] text-content-muted">
-        What do our parents and students ask the most...
+        Everything parents usually want to know before getting started
       </p>
 
       <div className="mx-auto max-w-[640px] text-left">
@@ -606,15 +606,15 @@ export default function OptInPage() {
       {/* ── Bridge text ─────────────────────────────────────── */}
       <div className="flex w-full max-w-[720px] flex-col items-center gap-2 bg-white px-5 pb-6 text-center">
         <p className="text-[14px] font-[500] leading-[1.6] text-content-muted">
-          Ready to see how Quran Odyssey can give your child a real, structured
-          Quran education with a dedicated teacher?
+          Ready to see how Quran Odyssey can give your child a structured,
+          engaging Quran learning experience with a qualified teacher?
         </p>
         <button
           type="button"
           onClick={scrollToForm}
           className="text-[15px] font-[700] text-brand-cyan-dark underline decoration-brand-cyan/40 underline-offset-[3px] transition hover:text-brand-cyan"
         >
-          Book your free discovery call below 👇
+          Secure your child’s free demo class below 👇
         </button>
       </div>
 

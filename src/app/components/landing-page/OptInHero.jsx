@@ -8,18 +8,27 @@ export default function OptInHero() {
   return (
     <section className="flex w-full flex-col items-center px-5 pb-8 pt-12 text-center">
       {/* ── Headline ─────────────────────────────────────────── */}
-      <h1 className="mb-5 max-w-[680px] text-[clamp(26px,4.5vw,44px)] font-[800] leading-[1.1] tracking-[-0.03em] text-content-primary">
-        Discover the <span className="text-brand-cyan">Secret</span>{" "}
+      <h1 className="mb-5 max-w-[680px] text-[clamp(18px,4.5vw,35px)] font-[800] leading-[1.1] tracking-[-0.03em] text-content-primary">
+        {/* Discover the <span className="text-brand-cyan">Secret</span>{" "}
         Quran Odyssey System That&apos;s Helped{" "}
         <span className="text-brand-amber-dark">2,000+ Children</span> Build a
-        Lifelong Connection With the Quran
+        Lifelong Connection With the Quran */}
+        Help your child build a lifelong connection with the Quran through
+        <span className="text-brand-cyan">
+          {" "}
+          fun, faith, and guided learning
+        </span>{" "}
+        where Islamic education meets modern methods in a{" "}
+        <span className="text-brand-amber-dark">gamified experience</span> with
+        animated lessons, dedicated teachers, and structured, child-friendly
+        progress tracking.
       </h1>
 
       {/* ── Subheadline ──────────────────────────────────────── */}
       <p className="mb-8 text-[clamp(18px,3vw,26px)] font-[700] leading-tight tracking-[-0.02em] text-content-muted">
         (With a{" "}
         <span className="font-[800] text-brand-cyan">
-          97% Parent Satisfaction Rate
+          99% Parent Satisfaction Rate
         </span>
         )
       </p>

@@ -57,8 +57,8 @@ function RadioPair({ value, onChange, error }) {
     <div className="flex flex-col gap-2">
       <div className="grid grid-cols-2 gap-[10px]">
         {[
-          { val: "yes", label: "Yes, I am" },
-          { val: "no", label: "No, I am not" },
+          { val: "yes", label: "Yes, absolutely" },
+          { val: "no", label: "I’d like to learn more" },
         ].map(({ val, label }) => {
           const checked = value === val;
           return (
@@ -287,22 +287,26 @@ export function OptInMainForm({ onSuccess }) {
       {/* Programme description */}
       <div className="rounded-[var(--radius-sm)] border border-line-light bg-surface-off-white px-4 py-4">
         <p className="text-[13px] font-[700] text-content-primary">
-          Quran Odyssey is a programme for highly committed families.
+          Quran Odyssey is designed for families who want more than just Quran
+          classes.
         </p>
         <p className="mt-2 text-[13px] leading-[1.7] text-content-muted">
-          We do not offer hourly tutoring. Instead we offer a full structured
-          programme with dedicated 1-on-1 teachers covering Tajweed, Hifz, Quran
-          Recitation and Islamic Studies — with weekly written progress reports
-          for parents. Typically working with families for a minimum of 3
-          months, usually over 1 year+.
+          We provide a structured, engaging, and child-friendly Quran learning
+          journey through dedicated 1-on-1 sessions with qualified teachers,
+          interactive animated lessons, Noorani Qaida, Quran Reading, Quran
+          Memorization (Hifz), Salah (Namaz), duas, and regular progress reports
+          for parents. <br />
+          Our mission is simple: <br />
+          To help children build a lasting connection with the Quran — with
+          love, confidence, and consistency.
         </p>
       </div>
 
       {/* YES / NO */}
       <div className="flex flex-col gap-[10px]">
         <p className="text-[13px] font-[600] leading-[1.55] text-content-primary">
-          Is this what you are looking for — to give your child a real,
-          structured Quran education?
+          Would you like your child to experience Quran learning in a more
+          engaging and meaningful way?
         </p>
         <RadioPair
           value={watchInterested}
