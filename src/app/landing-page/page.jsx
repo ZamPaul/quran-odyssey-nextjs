@@ -1,4 +1,4 @@
-import OptInPage from "../components/landing-page/OptInPage";
+import OptInPage from "../../components/landing-page/OptInPage";
 
 export const metadata = {
   title: "Book Your Free Discovery Call — Quran Odyssey",

@@ -1,5 +1,5 @@
-import AuthLayout from "@/app/components/auth/AuthLayout";
-import SignUpForm from "@/app/components/auth/SignUpForm";
+import AuthLayout from "@/components/auth/AuthLayout";
+import SignUpForm from "@/components/auth/SignUpForm";
 
 export const metadata = {
   title: "Create Account — Quran Odyssey",

@@ -109,7 +109,7 @@ export default function Navbar() {
           ))}
           <li>
             <Link
-              href="/sign-in"
+              href="/login"
               onClick={() => setMobileOpen(false)}
               className={[
                 "ml-2 rounded-[6px] border-[1.5px] border-neutral-200 bg-neutral-100 px-5 py-2",

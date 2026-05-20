@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "./components/navbar/Navbar";
+import Navbar from "../components/navbar/Navbar";
+import { ClerkProvider } from "@clerk/nextjs";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,21 +15,24 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: "Quran Odyssey — Online Quran Classes for Children",
-  description: "Live Quran classes with verified teachers. Structured learning for children aged 5–18 across the UK, USA, and Canada. Book a free 30-minute trial class today.",
+  description:
+    "Live Quran classes with verified teachers. Structured learning for children aged 5–18 across the UK, USA, and Canada. Book a free 30-minute trial class today.",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="">
-        <main className="w-full overflow-x-hidden">
-          <Navbar />
-          {children}
-        </main>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html
+        lang="en"
+        className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      >
+        <body className="">
+          <main className="w-full overflow-x-hidden">
+            <Navbar />
+            {children}
+          </main>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

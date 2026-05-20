@@ -1,6 +1,6 @@
 // ─── src/app/auth/forgot-password/page.jsx ───────────────────
-import AuthLayout from "@/app/components/auth/AuthLayout";
-import ForgotPasswordForm from "@/app/components/auth/ForgotPasswordForm";
+import AuthLayout from "@/components/auth/AuthLayout";
+import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
 
 export const metadata = {
   title: "Forgot Password — Quran Odyssey",
