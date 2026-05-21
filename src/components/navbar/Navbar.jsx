@@ -24,7 +24,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navRef = useRef(null);
 
-  const isLandingPage = pathname == "/landing-page";
+  const shouldNotDisplay = pathname == "/landing-page" || pathname == "/dashboard";
 
   const activeHref =
     pathname === "/about"
@@ -74,7 +74,7 @@ export default function Navbar() {
     <nav
       ref={navRef}
       id="navbar"
-      className={`${isLandingPage ? "hidden" : "fixed"} inset-x-0 top-0 z-[100] h-[68px] border-b-[0.1px] border-neutral-300 transition-[box-shadow,backdrop-filter,background-color] duration-200`}
+      className={`${shouldNotDisplay ? "hidden" : "fixed"} inset-x-0 top-0 z-[100] h-[68px] border-b-[0.1px] border-neutral-300 transition-[box-shadow,backdrop-filter,background-color] duration-200`}
     >
       <div className="mx-auto flex h-full w-full max-w-[1240px] items-center justify-between px-6 md:px-[60px]">
         <Link
