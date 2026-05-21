@@ -59,6 +59,11 @@ export default function DashboardPage() {
     fetchProfile();
   }, [isLoaded, user]);
 
+  useEffect(() => {
+    console.log("Profile changed: ", profile);
+    
+  }, [profile])
+
   const handleLogout = () => signOut(() => router.push('/'));
 
   if (!isLoaded) {
