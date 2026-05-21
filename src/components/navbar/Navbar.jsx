@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useClerk, useUser } from "@clerk/nextjs";
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
@@ -24,7 +25,11 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navRef = useRef(null);
 
-  const shouldNotDisplay = pathname == "/landing-page" || pathname == "/dashboard";
+  const { user, isLoaded } = useUser();
+  const { signOut } = useClerk();
+
+  const shouldNotDisplay =
+    pathname == "/landing-page" || pathname == "/dashboard";
 
   const activeHref =
     pathname === "/about"
@@ -108,18 +113,34 @@ export default function Navbar() {
             </li>
           ))}
           <li>
-            <Link
-              href="/login"
-              onClick={() => setMobileOpen(false)}
-              className={[
-                "ml-2 rounded-[6px] border-[1.5px] border-neutral-200 bg-neutral-100 px-5 py-2",
-                "text-[13px] font-[700] tracking-[0.02em] text-brand-navy transition",
-                "hover:-translate-y-[1px] hover:bg-neutral-100/50",
-              ].join(" ")}
-              // className="rounded-[6px] border border-line-light px-4 py-[11px] text-center text-[14px] font-[700] text-content-primary transition hover:bg-surface-light"
-            >
-              Sign in
-            </Link>
+            {!user ? (
+              <Link
+                href="/login"
+                onClick={() => setMobileOpen(false)}
+                className={[
+                  "ml-2 rounded-[6px] border-[1.5px] border-neutral-200 bg-neutral-100 px-5 py-2",
+                  "text-[13px] font-[700] tracking-[0.02em] text-brand-navy transition",
+                  "hover:-translate-y-[1px] hover:bg-neutral-100/50",
+                ].join(" ")}
+                // className="rounded-[6px] border border-line-light px-4 py-[11px] text-center text-[14px] font-[700] text-content-primary transition hover:bg-surface-light"
+              >
+                Sign in
+              </Link>
+            ) : (
+              <Link
+                href="/dashboard"
+                onClick={() => setMobileOpen(false)}
+                className={[
+                  "ml-2 rounded-[6px] border-[1.5px] border-neutral-200 bg-neutral-100 px-5 py-2",
+                  "text-[13px] font-[700] tracking-[0.02em] text-brand-navy transition",
+                  "hover:-translate-y-[1px] hover:bg-neutral-100/50",
+                ].join(" ")}
+                // className="rounded-[6px] border border-line-light px-4 py-[11px] text-center text-[14px] font-[700] text-content-primary transition hover:bg-surface-light"
+              >
+                Dashboard
+              </Link>
+            )}
+
             <Link
               href="#"
               className={[
