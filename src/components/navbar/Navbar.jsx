@@ -29,7 +29,10 @@ export default function Navbar() {
   const { signOut } = useClerk();
 
   const shouldNotDisplay =
-    pathname == "/landing-page" || pathname == "/dashboard";
+    pathname == "/landing-page" ||
+    pathname == "/dashboard" ||
+    pathname == "/register" ||
+    pathname == "/login";
 
   const activeHref =
     pathname === "/about"
