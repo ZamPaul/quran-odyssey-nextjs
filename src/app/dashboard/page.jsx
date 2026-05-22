@@ -746,23 +746,43 @@ export default function DashboardPage() {
                     >
                       Book your free trial to get started
                     </div>
-                    <a
-                      href="/booking/trial"
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 6,
-                        background: "#0d2840",
-                        color: "white",
-                        padding: "10px 18px",
-                        borderRadius: 8,
-                        fontSize: 13,
-                        fontWeight: 700,
-                        textDecoration: "none",
-                      }}
-                    >
-                      Book Free Trial
-                    </a>
+                    {profile ? (
+                      <a
+                        href="/booking/trial"
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 6,
+                          background: "#0d2840",
+                          color: "white",
+                          padding: "10px 18px",
+                          borderRadius: 8,
+                          fontSize: 13,
+                          fontWeight: 700,
+                          textDecoration: "none",
+                        }}
+                      >
+                        Book Free Trial
+                      </a>
+                    ) : (
+                      <a
+                        href="/register/profile"
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 6,
+                          background: "#0d2840",
+                          color: "white",
+                          padding: "10px 18px",
+                          borderRadius: 8,
+                          fontSize: 13,
+                          fontWeight: 700,
+                          textDecoration: "none",
+                        }}
+                      >
+                        Complete Profile →
+                      </a>
+                    )}
                   </div>
                 </div>
 
