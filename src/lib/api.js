@@ -20,6 +20,7 @@ export function useApi() {
     if (!res.ok) {
       const body = await res.json().catch(() => ({ error: 'Request failed' }));
       const err = new Error(body.message || body.error || `HTTP ${res.status}`);
+      console.log("error occurred in useApi hook");
       err.code = body.code;
       err.status = res.status;
       throw err;
