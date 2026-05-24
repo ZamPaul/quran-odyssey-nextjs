@@ -190,14 +190,48 @@ export function OptInMainForm({ onSuccess }) {
 
   const watchInterested = watch("isInterested");
 
-  const onSubmit = async () => {
+  // const onSubmit = async () => {
+  //   setLoading(true);
+  //   try {
+  //     // TODO: replace stub with real API call
+  //     await new Promise((r) => setTimeout(r, 1200));
+  //     onSuccess?.();
+  //   } catch (err) {
+  //     console.error(err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  const onSubmit = async (data) => {
     setLoading(true);
     try {
-      // TODO: replace stub with real API call
-      await new Promise((r) => setTimeout(r, 1200));
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/leads/trial`,
+        {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({
+            firstName:    data.firstName,
+            lastName:     data.lastName,
+            email:        data.email,
+            phone:        data.phone,
+            isInterested: data.isInterested,
+          }),
+        }
+      );
+  
+      const result = await res.json();
+  
+      if (!res.ok) {
+        throw new Error(result.error || 'Something went wrong');
+      }
+  
       onSuccess?.();
     } catch (err) {
-      console.error(err);
+      // Show error inline
+      console.error('Lead submission failed:', err.message);
+      // Optionally set an error state here and display it
     } finally {
       setLoading(false);
     }
