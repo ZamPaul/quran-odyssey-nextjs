@@ -738,9 +738,9 @@ export default function BookTrialPage() {
 
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 36 }}>
-          <Link href="/" style={{ display: 'inline-block', marginBottom: 20 }}>
+          {/* <Link href="/" style={{ display: 'inline-block', marginBottom: 20 }}>
             <img src="/logo2.png" alt="Quran Odyssey" style={{ height: 36, objectFit: 'contain' }} />
-          </Link>
+          </Link> */}
           {!booking && (
             <>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(40,183,217,0.1)', border: '1px solid rgba(40,183,217,0.25)', borderRadius: 999, padding: '4px 14px', fontSize: 12, fontWeight: 700, color: '#0e6e8a', marginBottom: 12 }}>

@@ -132,6 +132,8 @@ export default function DashboardPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
   const [profile, setProfile] = useState(null);
+  // Add this hook inside DashboardPage component
+  const [trialBooking, setTrialBooking] = useState(null);
 
   // Try to fetch profile — gracefully ignore if backend is down
   useEffect(() => {
@@ -168,6 +170,26 @@ export default function DashboardPage() {
   useEffect(() => {
     console.log("Profile changed: ", profile);
   }, [profile]);
+
+  useEffect(() => {
+    if (!isLoaded || !user) return;
+    const fetchBooking = async () => {
+      try {
+        const token = await getToken();
+        if (!token) return;
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/booking/mine`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        if (res.ok) {
+          const data = await res.json();
+          console.log("booking data:", data);
+          setTrialBooking(data.booking);
+        }
+      } catch {}
+    };
+    fetchBooking();
+  }, [isLoaded, user]);
 
   const handleLogout = () => signOut(() => router.push("/"));
 
@@ -725,7 +747,7 @@ export default function DashboardPage() {
                       Upcoming
                     </span>
                   </div>
-                  <div style={{ textAlign: "center", padding: "32px 0" }}>
+                  {/* <div style={{ textAlign: "center", padding: "32px 0" }}>
                     <div style={{ fontSize: 36, marginBottom: 12 }}>📅</div>
                     <div
                       style={{
@@ -783,7 +805,133 @@ export default function DashboardPage() {
                         Complete Profile →
                       </a>
                     )}
-                  </div>
+                  </div> */}
+                  {trialBooking ? (
+                    <div>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          fontWeight: 700,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.6px",
+                          color: "#94a3b8",
+                          marginBottom: 16,
+                        }}
+                      >
+                        Upcoming Trial Class
+                      </div>
+                      {[
+                        ["Teacher", trialBooking.teacher?.name],
+                        [
+                          "Date",
+                          new Date(trialBooking.slotStart).toLocaleDateString(
+                            "en-GB",
+                            { weekday: "long", day: "numeric", month: "long" },
+                          ),
+                        ],
+                        [
+                          "Time",
+                          new Date(trialBooking.slotStart).toLocaleTimeString(
+                            "en-GB",
+                            { hour: "2-digit", minute: "2-digit" },
+                          ),
+                        ],
+                        ["Status", trialBooking.status],
+                      ].map(([label, value]) => (
+                        <div
+                          key={label}
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            padding: "10px 0",
+                            borderBottom: "1px solid #f0f4f8",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: 12,
+                              color: "#94a3b8",
+                              fontWeight: 600,
+                            }}
+                          >
+                            {label}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: 13,
+                              color: "#0f172a",
+                              fontWeight: 700,
+                            }}
+                          >
+                            {value}
+                          </span>
+                        </div>
+                      ))}
+                      {trialBooking.zoomLink && (
+                        <a
+                          href={trialBooking.zoomLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 6,
+                            background: "#0d2840",
+                            color: "white",
+                            padding: "10px 18px",
+                            borderRadius: 8,
+                            fontSize: 13,
+                            fontWeight: 700,
+                            textDecoration: "none",
+                            marginTop: 16,
+                          }}
+                        >
+                          ▶ Join Class
+                        </a>
+                      )}
+                    </div>
+                  ) : (
+                    // existing empty state + Book Free Trial button
+                    <div style={{ textAlign: "center", padding: "32px 0" }}>
+                      <div style={{ fontSize: 36, marginBottom: 12 }}>📅</div>
+                      <div
+                        style={{
+                          fontSize: 14,
+                          fontWeight: 700,
+                          color: "#0f172a",
+                          marginBottom: 6,
+                        }}
+                      >
+                        No classes scheduled yet
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 13,
+                          color: "#94a3b8",
+                          marginBottom: 20,
+                        }}
+                      >
+                        Book your free trial to get started
+                      </div>
+                      <a
+                        href="/booking/trial"
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 6,
+                          background: "#0d2840",
+                          color: "white",
+                          padding: "10px 18px",
+                          borderRadius: 8,
+                          fontSize: 13,
+                          fontWeight: 700,
+                          textDecoration: "none",
+                        }}
+                      >
+                        Book Free Trial
+                      </a>
+                    </div>
+                  )}
                 </div>
 
                 {/* Account info */}
