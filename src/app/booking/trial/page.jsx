@@ -391,13 +391,32 @@ function Step2({ form, setForm, onNext, onBack }) {
         )}
       </div>
 
+      {/* // In Step2, update the error display for no slots */}
+      {slots.length === 0 && !loadingSlots && form.selectedTeacher && (
+        <div style={{ background: '#fff7e0', border: '1px solid rgba(250,167,26,0.3)', borderRadius: 10, padding: 20, textAlign: 'center' }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#92400e', marginBottom: 6 }}>
+            No available slots in the next 14 days
+          </div>
+          <div style={{ fontSize: 12, color: '#b45309', marginBottom: 16 }}>
+            This teacher may be fully booked. Try a different teacher or contact us directly.
+          </div>
+          <a
+            href="https://wa.me/YOUR_WHATSAPP_NUMBER"
+            target="_blank"
+            rel="noreferrer"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#25d366', color: 'white', padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700, textDecoration: 'none' }}
+          >
+            Contact us on WhatsApp
+          </a>
+        </div>
+      )}
+
       {/* Slots — shown after teacher is selected */}
       {form.selectedTeacher && (
         <div style={{ marginBottom: 28 }}>
           <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.6px', color: '#94a3b8', marginBottom: 12 }}>
             Available Times
           </div>
-
           {loadingSlots ? (
             <div style={{ textAlign: 'center', padding: '32px 0', color: '#94a3b8', fontSize: 13 }}>
               Checking availability…
@@ -697,6 +716,7 @@ export default function BookTrialPage() {
   const [step,           setStep]    = useState(1);
   const [booking,        setBooking] = useState(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
+  const [alreadyBooked, setAlreadyBooked] = useState(false);
 
   const [form, setForm] = useState({
     childName:         '',
@@ -730,7 +750,40 @@ export default function BookTrialPage() {
       .finally(() => setLoadingProfile(false));
   }, [isLoaded, isSignedIn]);
 
+  // Add to your existing data fetch useEffect
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn) return;
+    apiFetch('/api/booking/mine')
+      .then(data => {
+        if (data.booking) setAlreadyBooked(true);
+      })
+      .catch(() => {});
+  }, [isLoaded, isSignedIn]);
+
   if (!isLoaded || !isSignedIn) return null;
+
+  // Add before the return statement
+  if (alreadyBooked) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#f7f9fb', padding: '40px 20px', fontFamily: "'Plus Jakarta Sans', sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ maxWidth: 480, width: '100%', background: 'white', borderRadius: 16, border: '1px solid #e2e8f0', padding: '48px 40px', textAlign: 'center' }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
+          <h2 style={{ fontSize: 22, fontWeight: 800, color: '#0f172a', marginBottom: 8 }}>
+            You already have a trial booked
+          </h2>
+          <p style={{ fontSize: 14, color: '#64748b', marginBottom: 28, lineHeight: 1.7 }}>
+            Check your dashboard for the class details and Zoom link. If you need to reschedule, contact us on WhatsApp.
+          </p>
+          <Link
+            href="/dashboard"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#0d2840', color: 'white', padding: '12px 24px', borderRadius: 10, fontSize: 14, fontWeight: 800, textDecoration: 'none' }}
+          >
+            Go to Dashboard →
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: '#f7f9fb', padding: '40px 20px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
