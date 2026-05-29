@@ -5,6 +5,8 @@ const isProtectedRoute = createRouteMatcher([
   '/dashboard(.*)',
   '/booking(.*)',
   '/register/profile(.*)',
+  '/teacher(.*)',          // ADD THIS
+  '/auth/callback(.*)',    // ADD THIS
 ]);
 
 const isPublicRoute = createRouteMatcher([
