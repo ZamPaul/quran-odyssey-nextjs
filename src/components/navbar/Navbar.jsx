@@ -27,12 +27,20 @@ export default function Navbar() {
 
   // const isLandingPage = pathname === "/landing-page";
 
-  const isLandingPage =
+  let isLandingPage =
     pathname == "/landing-page" ||
     pathname == "/booking/trial" ||
     pathname == "/dashboard" ||
     pathname == "/register" ||
     pathname == "/login";
+
+  isLandingPage = pathname.startsWith("/teacher")
+    ? true
+    : pathname.startsWith("/booking")
+      ? true
+      : pathname.startsWith("/login")
+        ? true
+        : false;
 
   const activeHref = pathname.startsWith("/about")
     ? "/about"
