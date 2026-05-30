@@ -102,7 +102,7 @@ const CourseCard = ({ idx, c }) => {
             </svg>
           </Link>
           <Link
-            href="#"
+            href="/booking/trial"
             className="w-[33%] inline-flex items-center gap-2 rounded-[var(--radius)] bg-brand-navy-dark px-5 py-[11px] text-[14px] font-[plus-b] text-white transition hover:-translate-y-[1px] hover:bg-brand-navy"
           >
             Book free trial

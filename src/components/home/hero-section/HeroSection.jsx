@@ -48,7 +48,7 @@ export default function HeroSection() {
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link
-              href="#"
+              href="/booking/trial"
               className="hero-cta-primary btn-primary inline-flex items-center gap-2 rounded-[var(--radius)] border-2 border-brand-amber bg-brand-amber px-7 py-[13px] text-[14px] font-[700] tracking-[-0.01em] text-brand-navy"
             >
               Book a Free Trial
