@@ -474,7 +474,7 @@ export default function Navbar() {
   if (pathname?.startsWith("/teacher")) return null;
   if (pathname?.startsWith("/booking")) return null;
   if (pathname?.startsWith("/login")) return null;
-  // if (pathname?.startsWith("/register")) return null;
+  if (pathname?.startsWith("/register")) return null;
   if (pathname?.startsWith("/dashboard")) return null;
 
   return (
