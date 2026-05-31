@@ -17,7 +17,7 @@ const TESTIMONIAL = {
 export default function AuthLayout({ children }) {
   return (
     <div className="flex justify-between min-h-screen">
-      <div className="relative hidden flex-col justify-between overflow-hidden bg-brand-navy px-10 py-10 md:flex md:w-[44%] lg:px-14 lg:py-14">
+      <div className="relative hidden flex-col justify-between overflow-hidden bg-brand-navy px-10 py-10 md:flex md:w-[44%] lg:px-14 lg:py-5">
         {/* Grid overlay */}
         <div
           className="absolute inset-0 pointer-events-none opacity-[0.035]"
@@ -130,7 +130,7 @@ export default function AuthLayout({ children }) {
 
       <div className="min-h-screen w-[55%] bg-surface-white flex flex-col">
         {/* Centered content */}
-        <div className="flex items-center justify-center px-6 pb-12 pt-[5vw]">
+        <div className="flex items-center justify-center px-6 pb-12 pt-[6vw]">
           {children}
         </div>
 

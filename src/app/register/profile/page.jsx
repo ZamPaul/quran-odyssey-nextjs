@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
+import Link from "next/link";
 
 const COURSES = [
   {
@@ -154,10 +155,10 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-surface-off-white flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-center py-8">
-        <a href="/">
-          <img src="/logo2.png" alt="Quran Odyssey" className="h-10 w-auto" />
-        </a>
+      <div className="relative h-[100px] flex items-center justify-center py-8">
+        {/* <Link href="/" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <img src="/logo2.png" alt="Quran Odyssey" className="w-[200px] object-cover" />
+        </Link> */}
       </div>
 
       <div className="flex-1 flex items-start justify-center px-6 pb-12 pt-4">

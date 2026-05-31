@@ -470,12 +470,12 @@ export default function Navbar() {
 
   // ── Hide on landing page + all teacher panel routes ───────
   // Teacher panel has its own sidebar — main navbar would overlap
-  if (pathname === "/landing-page") return null;
+  if (pathname?.startsWith("/landing-page")) return null;
   if (pathname?.startsWith("/teacher")) return null;
   if (pathname?.startsWith("/booking")) return null;
   if (pathname?.startsWith("/login")) return null;
+  // if (pathname?.startsWith("/register")) return null;
   if (pathname?.startsWith("/dashboard")) return null;
-
 
   return (
     <>
