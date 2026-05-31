@@ -15,9 +15,9 @@ export default function RegisterPage() {
         <h1 className="text-[28px] font-[800] tracking-[-0.03em] text-content-primary">
           Create your account
         </h1>
-        <p className="mt-2 text-[15px] text-content-muted">
+        {/* <p className="mt-2 text-[15px] text-content-muted">
           Start your child&apos;s Quran journey today.
-        </p>
+        </p> */}
       </div>
 
       <SignUp appearance={clerkAppearance} />

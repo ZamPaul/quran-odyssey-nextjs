@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Footer() {
   return (
@@ -9,15 +10,17 @@ export default function Footer() {
         </div>
         <div className="footer-brand text-[14px] font-[800] tracking-[-0.02em] text-white/70">
           {/* Quran <span className="text-brand-amber">Odyssey</span> */}
-          <div className="relative w-[200px] h-[40px] ">
-            <Image
-              src={`${"/logo2.png"}`}
-              width={100}
-              height={50}
-              alt="logo"
-              className="object-cover select-none pointer-events-none absolute right-0 top-1/2 -translate-y-1/2"
-            />
-          </div>
+          <Link href={"/"}>
+            <div className="relative w-[200px] h-[40px] ">
+              <Image
+                src={`${"/logo2.png"}`}
+                width={100}
+                height={50}
+                alt="logo"
+                className="object-cover select-none pointer-events-none absolute right-0 top-1/2 -translate-y-1/2"
+              />
+            </div>{" "}
+          </Link>
         </div>
       </div>
     </footer>

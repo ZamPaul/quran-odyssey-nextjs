@@ -160,9 +160,9 @@ export default function StudentDetailPage() {
             </div>
             <div style={{ display:'flex', flexWrap:'wrap', gap:12, marginTop:6 }}>
               {profile?.childAge    && <span style={{ fontSize:12, color:'#64748b' }}>👤 {profile.childAge} yrs</span>}
-              {profile?.country     && <span style={{ fontSize:12, color:'#64748b' }}>🌍 {profile.country}</span>}
-              {profile?.timezone    && <span style={{ fontSize:12, color:'#64748b' }}>🕐 {profile.timezone}</span>}
-              {profile?.parentName  && <span style={{ fontSize:12, color:'#64748b' }}>👨‍👩‍👧 {profile.parentName}</span>}
+              {/* {profile?.country     && <span style={{ fontSize:12, color:'#64748b' }}>🌍 {profile.country}</span>} */}
+              {/* {profile?.timezone    && <span style={{ fontSize:12, color:'#64748b' }}>🕐 {profile.timezone}</span>} */}
+              {/* {profile?.parentName  && <span style={{ fontSize:12, color:'#64748b' }}>👨‍👩‍👧 {profile.parentName}</span>} */}
             </div>
           </div>
           <div style={{ display:'flex', gap:10 }}>

@@ -72,7 +72,7 @@ export default function HeroSection() {
             </Link>
 
             <Link
-              href="#"
+              href="/about"
               className="hero-cta-secondary inline-flex items-center gap-2 rounded-[var(--radius)] border-2 border-line-default bg-transparent px-7 py-[13px] text-[14px] font-[600] tracking-[-0.01em] text-content-primary"
             >
               <span className="hero-cta-play inline-flex">

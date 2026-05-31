@@ -1253,7 +1253,7 @@ export default function FeaturesSection() {
 
                 {/* CTA */}
                 <Link
-                  href="#"
+                  href="/booking/trial"
                   className="inline-flex w-fit items-center gap-2 rounded-[var(--radius)] bg-brand-amber px-7 py-[13px] text-[14px] font-[900] text-brand-navy transition hover:-translate-y-[1px] hover:bg-brand-amber-dark"
                 >
                   Book a Free Trial

@@ -110,9 +110,9 @@ function StudentCard({ item }) {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           borderTop: '1px solid #f0f4f8', paddingTop: 12,
         }}>
-          <span style={{ fontSize: 12, color: '#94a3b8' }}>
+          {/* <span style={{ fontSize: 12, color: '#94a3b8' }}>
             {profile?.parentName ? `Parent: ${profile.parentName}` : student.email}
-          </span>
+          </span> */}
           <span style={{ fontSize: 13, fontWeight: 700, color: '#0e6e8a', display: 'flex', alignItems: 'center', gap: 4 }}>
             View profile
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none">

@@ -24,7 +24,7 @@ export default function CtaSection() {
 
             <div className="cta-right flex flex-col gap-3 md:items-end">
               <Link
-                href="#"
+                href="/booking/trial"
                 className="inline-flex items-center justify-center gap-2 rounded-[var(--radius)] bg-white px-7 py-[13px] text-[14px] font-[800] text-brand-navy transition hover:-translate-y-[2px] hover:bg-white/90"
               >
                 Book a Free Trial

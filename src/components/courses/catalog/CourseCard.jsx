@@ -79,9 +79,9 @@ const CourseCard = ({ idx, c }) => {
           ))}
         </div>
 
-        <div className="mt-6 w-full flex items-center justify-between">
+        <div className="mt-6 w-full flex gap-3 items-center justify-start">
           <Link
-            href="#"
+            href="/booking/trial"
             className="w-[38%] inline-flex items-center gap-2 rounded-[var(--radius)] bg-brand-amber px-5 py-[11px] text-[14px] font-[plus-b] text-brand-navy transition hover:-translate-y-[1px] hover:bg-brand-amber-dark"
           >
             Enroll Now
@@ -122,12 +122,12 @@ const CourseCard = ({ idx, c }) => {
               />
             </svg>
           </Link>
-          <Link
+          {/* <Link
             href="#"
             className="w-[25%] flex items-center justify-center rounded-[var(--radius)] border-[0.1px] border-neutral-400 bg-transparent px-4 py-[11px] text-[14px] font-[plus-b] text-content-primary transition hover:bg-surface-light"
           >
             Learn More
-          </Link>
+          </Link> */}
         </div>
       </div>
     </div>
