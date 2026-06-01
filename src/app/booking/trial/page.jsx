@@ -295,13 +295,13 @@ export default function BookTrialPage() {
             {step === 1 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 <div style={{ fontSize: 17, fontWeight: 800, color: '#0f172a' }}>
-                  Tell us about your child
+                  Tell us about yourself
                 </div>
 
                 {/* Child name */}
                 <div>
                   <label style={{ fontSize: 12, fontWeight: 700, color: '#64748b', display: 'block', marginBottom: 6 }}>
-                    Child's Name *
+                    Your Full Name *
                   </label>
                   <input
                     value={form.childName}
@@ -314,7 +314,7 @@ export default function BookTrialPage() {
                 {/* Child age */}
                 <div>
                   <label style={{ fontSize: 12, fontWeight: 700, color: '#64748b', display: 'block', marginBottom: 6 }}>
-                    Child's age
+                    Your age
                   </label>
                   <select
                     value={form.childAge}
@@ -331,7 +331,7 @@ export default function BookTrialPage() {
                 {/* Course interest */}
                 <div>
                   <label style={{ fontSize: 12, fontWeight: 700, color: '#64748b', display: 'block', marginBottom: 8 }}>
-                    What would you like your child to learn? *
+                    What would you like to learn? *
                   </label>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {COURSE_OPTIONS.map(c => (
