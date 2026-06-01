@@ -3,21 +3,21 @@ import TestimonialCard from "./TestimonialCard";
 const TESTIMONIALS = [
   {
     featured: false,
-    text: "My son refused to learn Quran with anyone. Three weeks in with Sister Aisha and he's asking me when his next class is. Whatever she's doing, it's working.",
+    text: "My son finally enjoys Quran learning. He now looks forward to every class.",
     author: "Fatimah K.",
-    meta: "UK · Parent of 9-year-old",
+    meta: "UK",
   },
   {
     featured: true,
-    text: "We tried four different online tutors before Quran Odyssey. The difference is the structure. My daughter actually progresses — there's a plan, not just weekly sessions that go nowhere.",
+    text: "The structured system made all the difference. We finally see real progress.",
     author: "Ibrahim A.",
-    meta: "Canada · Parent of 11-year-old",
+    meta: "Canada",
   },
   {
     featured: false,
-    text: "Ustadh Hassan is incredible with my kids. They've gone from struggling with basic letters to reciting Surah Al-Mulk in four months. The booking system alone is worth it — no chasing anyone.",
+    text: "From basic letters to fluent recitation in a few months — amazing teachers",
     author: "Mariam R.",
-    meta: "USA · Parent of two students",
+    meta: "USA",
   },
 ];
 
@@ -27,7 +27,7 @@ export default function TestimonialsSection() {
       <div className="mx-auto w-full max-w-[1240px]">
         <div className="testimonials-header reveal-left mb-14">
           <div className="section-chip inline-flex items-center rounded-full border border-[color-mix(in_srgb,var(--brand-cyan)_25%,transparent)] bg-[color-mix(in_srgb,var(--brand-cyan)_12%,transparent)] px-4 py-[6px] text-[12px] font-[700] tracking-[0.06em] text-brand-cyan-dark">
-            Parent voices
+            Parent Testimonials
           </div>
           <h2 className="mt-4 text-[40px] font-[plus-eb] leading-[1.08] tracking-[-0.03em] text-content-primary md:text-[44px]">
             What families <span className="text-brand-cyan">actually say.</span>

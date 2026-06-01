@@ -3,8 +3,8 @@ import Link from "next/link";
 
 const META = [
   { num: "2022", label: "Founded" },
-  { num: "3", label: "Countries (primary)" },
-  { num: "40+", label: "Qualified teachers" },
+  { num: "3", label: "Primary Markets" },
+  { num: "40+", label: "Verified Quran Teachers" },
 ];
 
 export default function AboutHeroSection() {
@@ -31,19 +31,19 @@ export default function AboutHeroSection() {
           </div>
 
           <h1 className="mt-6 text-[44px] font-[plus-eb] leading-[1.06] tracking-[-0.03em] text-content-primary md:text-[52px]">
-            Most children in the West grow up
-            <br />
-            from the Quran.
-            <br />
+            Most Muslim children growing up in the West &nbsp;
             <span className="text-brand-cyan">
-              We&apos;re fixing that.
-            </span>
+              face challenges staying&nbsp;
+            </span>{" "}
+            connected to the Quran.
           </h1>
 
           <p className="mt-4 max-w-[520px] text-[16px] font-[400] leading-[1.75] text-content-muted">
-            Quran Odyssey was built for families in the UK, USA, and Canada who
-            wanted a better answer than inconsistent local classes and
-            unreliable tutors. We built the platform we wished had existed.
+            Quran Odyssey was built for Muslim families in the UK, USA, and
+            Canada who wanted a better Quran learning experience. Parents needed
+            qualified teachers, flexible scheduling, measurable progress, and
+            classes their children would look forward to attending. We created
+            the platform we wished had existed for our own families.
           </p>
 
           <div className="mt-7 flex flex-wrap items-center gap-4">
@@ -70,7 +70,9 @@ export default function AboutHeroSection() {
             <span className="fc-dot fc-green" />
             <div>
               <div className="fc-label">Status</div>
-              <div className="fc-value">Platform live · 2,000+ students</div>
+              <div className="fc-value">
+                Platform Live · Serving Students Worldwide{" "}
+              </div>
             </div>
           </div>
 
@@ -188,7 +190,7 @@ export default function AboutHeroSection() {
 
               <FactRow
                 title="Courses Offered"
-                value="Qaida · Tajweed · Hifz · Ist. Studies"
+                value="Qaida · Quran Reading · Tajweed · Hifz · Islamic Studies"
                 icon={
                   <svg
                     width="16"

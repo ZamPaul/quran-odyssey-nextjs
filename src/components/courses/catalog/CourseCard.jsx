@@ -22,9 +22,9 @@ const CourseCard = ({ idx, c }) => {
         <div className="flex h-11 w-11 items-center justify-center rounded-[12px] border border-line-light bg-surface-cyan-tint text-brand-navy-dark">
           <span className="text-[14px] font-[900]">{c.num}</span>
         </div>
-        <div className="price-tag">
+        {/* <div className="price-tag">
           <h2 className="font-[plus-eb] text-2xl">${c.price}</h2>
-        </div>
+        </div> */}
         {/* <div
           className={[
             "text-[12px] font-[900] tracking-[0.16em]",

@@ -9,16 +9,16 @@ const FEATURES = [
   {
     id: "gamified",
     icon: "🎮",
-    label: "Gamified LMS",
+    label: "Gamified LMS (motivation system)",
     num: "Feature 01",
     tag: "Learning Platform",
-    title: "Learning that feels like\na game — not a chore.",
-    desc: "Our gamified LMS rewards every lesson, every streak, every milestone. Students earn XP, unlock badges, and climb leaderboards — motivation built into the platform itself.",
+    title: "Gamified Quran learning that keeps children engaged",
+    desc: "Most children lose interest in traditional online Quran classes. Quran Odyssey solves this with a gamified learning system designed for motivation and consistency.",
     bullets: [
-      "XP points earned for every completed class and homework task",
-      "Daily streak tracking with bonus XP for consistency",
-      "Badges and certificates for Quran milestones — Juz completed, Surah mastered",
-      "Weekly leaderboards to spark friendly competition between classmates",
+      "XP points for every class and homework",
+      "Daily streak system for consistency",
+      "Badges for Quran milestones",
+      "Weekly leaderboards for healthy motivation",
     ],
     gradient: "linear-gradient(140deg, #daf4fb 0%, #c2eaf9 45%, #a8e0f6 100%)",
     accentDot: "#28b7d9",
@@ -1120,14 +1120,15 @@ export default function FeaturesSection() {
               Why Quran Odyssey
             </div>
             <h2 className="mt-4 text-[40px] font-[plus-eb] leading-[1.08] tracking-[-0.03em] text-content-primary md:text-[44px]">
-              Everything your child needs,{" "}
-              <span className="text-brand-cyan">in one platform.</span>
+              {/* Everything your child needs,{" "} */}A complete online Quran
+              learning system{"  "}
+              <span className="text-brand-cyan">{"  "} not just classes</span>
             </h2>
           </div>
           <p className="reveal-right max-w-[520px] text-[16px] leading-[1.75] text-secondary-styling">
-            We didn&apos;t patch together existing tools. We built every feature
-            from scratch around one goal — a child who loves learning Quran and
-            parents who can see the difference.
+            We didn’t assemble tutors. We built a structured digital Quran
+            academy with tools that help children stay consistent, motivated,
+            and spiritually connected.
           </p>
         </div>
 
@@ -1194,124 +1195,124 @@ export default function FeaturesSection() {
             <ChevronIcon direction="right" />
           </button>
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeId}
-            variants={cardVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            className="overflow-hidden rounded-[var(--radius-lg)]"
-            style={{ background: feature.gradient }}
-          >
-            <div className="grid grid-cols-1 gap-0 md:grid-cols-[1fr_1fr]">
-              {/* Left — Content */}
-              <motion.div
-                variants={contentVariants}
-                initial="initial"
-                animate="animate"
-                className="flex flex-col justify-center p-10 md:p-14"
-              >
-                {/* Feature number + tag */}
-                <div className="mb-5 flex items-center gap-3">
-                  <span
-                    className="h-2 w-2 rounded-full"
-                    style={{ background: feature.accentDot }}
-                  />
-                  <span className="text-[12px] font-[800] uppercase tracking-[0.12em] text-content-muted">
-                    {feature.num} · {feature.tag}
-                  </span>
-                </div>
-
-                {/* Title */}
-                <h3 className="mb-4 whitespace-pre-line text-[30px] font-[900] leading-[1.1] tracking-[-0.03em] text-content-primary md:text-[34px]">
-                  {feature.title}
-                </h3>
-
-                {/* Description */}
-                <p className="mb-6 max-w-[420px] text-[15px] leading-[1.8] text-content-muted">
-                  {feature.desc}
-                </p>
-
-                {/* Bullets */}
-                <ul className="mb-8 space-y-3">
-                  {feature.bullets.map((b) => (
-                    <li
-                      key={b}
-                      className="flex items-start gap-3 text-[14px] text-content-muted"
-                    >
-                      <span
-                        className="mt-[3px] inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-[900] text-white"
-                        style={{ background: feature.accentDot }}
-                      >
-                        ✓
-                      </span>
-                      <span className="leading-[1.6]">{b}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                {/* CTA */}
-                <Link
-                  href="/booking/trial"
-                  className="inline-flex w-fit items-center gap-2 rounded-[var(--radius)] bg-brand-amber px-7 py-[13px] text-[14px] font-[900] text-brand-navy transition hover:-translate-y-[1px] hover:bg-brand-amber-dark"
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeId}
+              variants={cardVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className="overflow-hidden rounded-[var(--radius-lg)]"
+              style={{ background: feature.gradient }}
+            >
+              <div className="grid grid-cols-1 gap-0 md:grid-cols-[1fr_1fr]">
+                {/* Left — Content */}
+                <motion.div
+                  variants={contentVariants}
+                  initial="initial"
+                  animate="animate"
+                  className="flex flex-col justify-center p-10 md:p-14"
                 >
-                  Book a Free Trial
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 16 16"
-                    fill="none"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M3 8h10M9 4l4 4-4 4"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                  {/* Feature number + tag */}
+                  <div className="mb-5 flex items-center gap-3">
+                    <span
+                      className="h-2 w-2 rounded-full"
+                      style={{ background: feature.accentDot }}
                     />
-                  </svg>
-                </Link>
-              </motion.div>
+                    <span className="text-[12px] font-[800] uppercase tracking-[0.12em] text-content-muted">
+                      {feature.num} · {feature.tag}
+                    </span>
+                  </div>
 
-              {/* Right — Illustration + Badges */}
-              <motion.div
-                variants={illustrationVariants}
-                initial="initial"
-                animate="animate"
-                className="relative flex items-center justify-center p-10 md:p-14"
-              >
-                {/* Illustration */}
-                <div className="relative flex items-center justify-center">
-                  {ILLUSTRATIONS[feature.id]}
+                  {/* Title */}
+                  <h3 className="mb-4 whitespace-pre-line text-[30px] font-[900] leading-[1.1] tracking-[-0.03em] text-content-primary md:text-[34px]">
+                    {feature.title}
+                  </h3>
 
-                  {/* Floating badge 1 — top right of illustration */}
-                  <motion.div
-                    initial={{ opacity: 0, y: -8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3, duration: 0.4 }}
-                    className="absolute -right-4 top-0 flex items-center gap-2 rounded-full border border-white/60 bg-white px-4 py-2 text-[13px] font-[800] text-content-primary shadow-[0_8px_24px_rgba(0,0,0,0.10)]"
-                    style={{ whiteSpace: "nowrap" }}
+                  {/* Description */}
+                  <p className="mb-6 max-w-[420px] text-[15px] leading-[1.8] text-content-muted">
+                    {feature.desc}
+                  </p>
+
+                  {/* Bullets */}
+                  <ul className="mb-8 space-y-3">
+                    {feature.bullets.map((b) => (
+                      <li
+                        key={b}
+                        className="flex items-start gap-3 text-[14px] text-content-muted"
+                      >
+                        <span
+                          className="mt-[3px] inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-[900] text-white"
+                          style={{ background: feature.accentDot }}
+                        >
+                          ✓
+                        </span>
+                        <span className="leading-[1.6]">{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* CTA */}
+                  <Link
+                    href="/booking/trial"
+                    className="inline-flex w-fit items-center gap-2 rounded-[var(--radius)] bg-brand-amber px-7 py-[13px] text-[14px] font-[900] text-brand-navy transition hover:-translate-y-[1px] hover:bg-brand-amber-dark"
                   >
-                    {feature.badge1}
-                  </motion.div>
+                    Book a Free Trial
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M3 8h10M9 4l4 4-4 4"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </Link>
+                </motion.div>
 
-                  {/* Floating badge 2 — bottom left of illustration */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.42, duration: 0.4 }}
-                    className="absolute -bottom-2 -left-4 flex items-center gap-2 rounded-full border border-white/60 bg-white px-4 py-2 text-[13px] font-[800] text-content-primary shadow-[0_8px_24px_rgba(0,0,0,0.10)]"
-                    style={{ whiteSpace: "nowrap" }}
-                  >
-                    {feature.badge2}
-                  </motion.div>
-                </div>
-              </motion.div>
-            </div>
-          </motion.div>
-        </AnimatePresence>
+                {/* Right — Illustration + Badges */}
+                <motion.div
+                  variants={illustrationVariants}
+                  initial="initial"
+                  animate="animate"
+                  className="relative flex items-center justify-center p-10 md:p-14"
+                >
+                  {/* Illustration */}
+                  <div className="relative flex items-center justify-center">
+                    {ILLUSTRATIONS[feature.id]}
+
+                    {/* Floating badge 1 — top right of illustration */}
+                    <motion.div
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3, duration: 0.4 }}
+                      className="absolute -right-4 top-0 flex items-center gap-2 rounded-full border border-white/60 bg-white px-4 py-2 text-[13px] font-[800] text-content-primary shadow-[0_8px_24px_rgba(0,0,0,0.10)]"
+                      style={{ whiteSpace: "nowrap" }}
+                    >
+                      {feature.badge1}
+                    </motion.div>
+
+                    {/* Floating badge 2 — bottom left of illustration */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.42, duration: 0.4 }}
+                      className="absolute -bottom-2 -left-4 flex items-center gap-2 rounded-full border border-white/60 bg-white px-4 py-2 text-[13px] font-[800] text-content-primary shadow-[0_8px_24px_rgba(0,0,0,0.10)]"
+                      style={{ whiteSpace: "nowrap" }}
+                    >
+                      {feature.badge2}
+                    </motion.div>
+                  </div>
+                </motion.div>
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </section>

@@ -4,8 +4,8 @@ import StepCard from "./StepCard";
 const STEPS = [
   {
     num: "1",
-    title: "Choose your teacher",
-    text: "Browse verified teachers filtered by gender, timezone, speciality, and availability. Every profile includes real student ratings and a short intro video.",
+    title: "Choose a verified Quran teacher",
+    text: "Select from qualified male and female Quran teachers based on availability, specialization, and ratings.",
     icon: (
       <svg
         width="24"
@@ -32,8 +32,8 @@ const STEPS = [
   },
   {
     num: "2",
-    title: "Book a free trial",
-    text: "Pick a time slot that works for your family. A 30-minute trial class is booked automatically — email confirmation and WhatsApp reminder included, no back-and-forth.",
+    title: "Book a free trial class instantly",
+    text: "No calls, no waiting. Schedule a 30-minute trial class in seconds with WhatsApp + email confirmation.",
     icon: (
       <svg
         width="24"
@@ -82,8 +82,8 @@ const STEPS = [
   },
   {
     num: "3",
-    title: "Join and start learning",
-    text: "Your child joins the class directly from their dashboard — one click, no downloads. Track progress, review homework, and see improvement week by week.",
+    title: "Start structured learning immediately",
+    text: "Your child joins live classes through a simple dashboard — track progress, homework, and weekly improvement reports.",
     icon: (
       <svg
         width="24"
@@ -113,8 +113,9 @@ export default function HowItWorksSection() {
             chipClassName="border-[color-mix(in_srgb,var(--brand-cyan)_25%,transparent)] bg-[color-mix(in_srgb,var(--brand-cyan)_12%,transparent)] text-brand-cyan-dark"
             title={
               <>
-                From signup to{" "}
-                <span className="text-brand-cyan">first class</span> in 3 steps.
+                Start your child’s
+                <span className="text-brand-cyan"> Quran journey </span>in 3
+                simple steps.
               </>
             }
           />

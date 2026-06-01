@@ -4,10 +4,16 @@ const PILLARS = [
   {
     num: "1",
     counter: "01 / 03",
-    title: "Consistency over intensity",
-    text: "One dedicated teacher per student, not a rotation. Learning Quran is a relationship — between the student, the text, and the teacher. We protect that relationship. Your child will not be passed around.",
+    title: "Consistency creates confidence",
+    text: "Every student learns with one dedicated teacher who understands their strengths, challenges, and goals. Strong relationships lead to stronger learning outcomes.",
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        aria-hidden="true"
+      >
         <path
           d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"
           stroke="currentColor"
@@ -27,11 +33,21 @@ const PILLARS = [
   {
     num: "2",
     counter: "02 / 03",
-    title: "Parents in the loop, always",
-    text: "Weekly progress updates, not vague reassurances. You'll know exactly what Tajweed rule your child worked on this week, what they've mastered, and what needs more attention. Transparency is not optional here.",
+    title: "Parents stay informed",
+    text: "Weekly progress updates provide clear visibility into what your child is learning, what has been achieved, and where additional focus is needed. Communication matters.",
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="1.6" />
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        aria-hidden="true"
+      >
+        <path
+          d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+          stroke="currentColor"
+          strokeWidth="1.6"
+        />
         <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.6" />
       </svg>
     ),
@@ -39,11 +55,23 @@ const PILLARS = [
   {
     num: "3",
     counter: "03 / 03",
-    title: "Learning that fits your life",
-    text: "Timezone-matched scheduling means no more choosing between bedtime and class time. Slots available across UK, North American, and Australian hours. Your schedule is real — we work around it.",
+    title: "Learning should fit family life",
+    text: "Flexible scheduling across multiple timezones helps families learn without unnecessary stress. Quran education should work alongside your routine, not compete with it.",
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.6" />
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        aria-hidden="true"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="1.6"
+        />
         <path
           d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
           stroke="currentColor"
@@ -67,15 +95,16 @@ export default function PhilosophySection() {
                 <>
                   Three principles that
                   <br />
-                  <span className="text-brand-cyan">guide everything</span> we do.
+                  <span className="text-brand-cyan">guide everything</span> we
+                  do.
                 </>
               }
             />
           </div>
           <p className="section-sub reveal-right max-w-[520px] text-[16px] font-[400] leading-[1.75] text-content-muted">
-            These aren&apos;t values we wrote for a website. They&apos;re the actual
-            decisions we make every day — about teacher hiring, scheduling policies,
-            and how we build this platform.
+            These are not just statements on a website. They influence every
+            decision we make—from teacher selection and student support to
+            curriculum planning and platform development.
           </p>
         </div>
 
@@ -117,4 +146,3 @@ export default function PhilosophySection() {
     </section>
   );
 }
-

@@ -7,7 +7,7 @@ const CARDS = [
     state: "active",
     badge: "● This Week",
     episode: "Ep. 24",
-    topic: "Rules of Noon Sakinah",
+    topic: "The Kids Corner — Story of “Four Important Angels in Islam”",
     desc: "Professor Hoot explains Izhar, Idgham, Iqlab and Ikhfa with memorable visual examples.",
     svg: (
       <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
@@ -68,7 +68,7 @@ const CARDS = [
     state: "past",
     badge: "Week 23",
     episode: "Ep. 23",
-    topic: "Surah Al-Fatiha — Deep Dive",
+    topic: "The Kids Corner — Guide on “Wuzu Steps with Duas”",
     desc: "Scholar Star breaks down every ayah with meaning and context for young learners.",
     svg: (
       <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
@@ -169,7 +169,7 @@ const CARDS = [
     state: "past",
     badge: "Week 22",
     episode: "Ep. 22",
-    topic: "The 5 Pillars of Islam",
+    topic: "The Kids Corner — Story about “Protection through Dua’s”",
     desc: "An illustrated journey through the foundations of faith — perfect for ages 6 to 10.",
     svg: (
       <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
@@ -241,7 +241,7 @@ const CARDS = [
     state: "past",
     badge: "Week 21",
     episode: "Ep. 21",
-    topic: "Story of Prophet Musa ﷺ",
+    topic: "The Kids Corner — Story of “ZamZam Water”",
     desc: "Animated storytelling that brings the life of Prophet Musa to life for young hearts.",
     svg: (
       <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
@@ -325,18 +325,17 @@ export default function CartoonLecturesSection() {
               chipClassName="border-[color-mix(in_srgb,var(--brand-cyan)_25%,transparent)] bg-[color-mix(in_srgb,var(--brand-cyan)_12%,transparent)] text-brand-cyan-dark"
               title={
                 <>
-                  Learning that speaks
-                  <br />
-                  <span className="text-brand-cyan">their language.</span>
+                  Animated Quran lessons children
+                  {/* <br /> */}
+                  <span className="text-brand-cyan"> actually enjoy.</span>
                 </>
               }
             />
           </div>
           <p className="section-sub reveal-right max-w-[520px] text-[16px] font-[400] leading-[1.75] text-content-muted">
-            Every week, a new animated AI character walks students through a
-            Quran topic — Tajweed rules, Surahs, Islamic stories. Short, visual,
-            and designed for the way kids actually learn. A supplement to live
-            classes, not a replacement.
+            Every week, students learn Quran topics through interactive animated
+            AI lessons designed to simplify Islamic concepts and improve
+            retention.
           </p>
         </div>
 

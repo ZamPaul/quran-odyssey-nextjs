@@ -22,11 +22,20 @@ const MARKERS = {
   uk: {
     x: 705,
     y: 265,
-    labelX: 80.2,
+    labelX: 75.2,
     labelY: 39.8,
     label: "UK",
     flag: "🇬🇧",
     tone: "cyan",
+  },
+  pakistan: {
+    x: 530,
+    y: 315,
+    labelX: 58.5,
+    labelY: 68.5,
+    label: "Pakistan",
+    flag: "🇵🇰",
+    tone: "green",
   },
 };
 
@@ -55,9 +64,20 @@ function CountryPill({ x, y, flag, label, tone, className = "" }) {
   const border =
     flag === "🇬🇧"
       ? "border-brand-cyan/70"
-      : flag == "🇺🇸"
+      : flag === "🇺🇸"
         ? "border-brand-amber/70"
-        : "border-red-500/70";
+        : flag === "🇵🇰"
+          ? "border-emerald-600/70"
+          : "border-red-500/70";
+
+  const flagColor =
+    flag === "🇺🇸"
+      ? "text-brand-amber"
+      : flag === "🇬🇧"
+        ? "text-brand-cyan"
+        : flag === "🇵🇰"
+          ? "text-emerald-600"
+          : "text-red-500";
 
   return (
     <div
@@ -69,7 +89,7 @@ function CountryPill({ x, y, flag, label, tone, className = "" }) {
       style={{ left: `${x}%`, top: `${y}%` }}
     >
       <span
-        className={`text-[16px] font-[plus-l] leading-none ${flag === "🇺🇸" ? "text-brand-amber" : flag === "🇬🇧" ? "text-brand-cyan" : "text-red-500"}`}
+        className={`text-[16px] font-[plus-l] leading-none ${flagColor}`}
       >
         {flag}
       </span>
@@ -128,6 +148,10 @@ export default function HeroCountriesMap() {
               className="map-arc map-arc-amber"
               d="M 370 375 C 340 330, 305 300, 260 250"
             />
+            {/* <path
+              className="map-arc map-arc-cyan"
+              d="M 705 265 C 745 275, 790 295, 830 315"
+            /> */}
 
             {/* <Marker id="canada" {...MARKERS.canada} />
             <Marker id="usa" {...MARKERS.usa} />
@@ -157,6 +181,14 @@ export default function HeroCountriesMap() {
             label={MARKERS.uk.label}
             tone={MARKERS.uk.tone}
             className="map-pill map-pill-uk bg-brand-cyan/10"
+          />
+          <CountryPill
+            x={MARKERS.pakistan.labelX}
+            y={MARKERS.pakistan.labelY}
+            flag={MARKERS.pakistan.flag}
+            label={MARKERS.pakistan.label}
+            tone={MARKERS.pakistan.tone}
+            className="map-pill map-pill-pakistan bg-emerald-500/10"
           />
         </div>
       </div>

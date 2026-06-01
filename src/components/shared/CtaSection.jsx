@@ -11,14 +11,17 @@ export default function CtaSection() {
                 Ready to begin
               </div>
               <h2 className="cta-h2 text-[40px] font-[800] leading-[1.08] tracking-[-0.03em] text-white md:text-[44px]">
-                Give your child the start
-                <br />
-                they <span className="text-brand-cyan">deserve.</span>
+                Give your child a{" "}
+                <span className="text-brand-cyan">
+                  {" "}
+                  Quran learning experience built &nbsp;
+                </span>
+                for long-term success.
               </h2>
               <p className="cta-text mt-4 max-w-[520px] text-[16px] leading-[1.75] text-white/50">
-                Book a free 30-minute trial class — no commitment, no pressure.
-                If it&apos;s not the right fit for your family, we&apos;ll tell
-                you honestly. That&apos;s the kind of academy we are.
+                Book a free 30-minute trial class, meet a qualified teacher,
+                receive a level assessment, and discover how Quran Odyssey helps
+                children stay motivated, consistent, and connected to the Quran.
               </p>
             </div>
 
@@ -46,7 +49,9 @@ export default function CtaSection() {
               </Link>
 
               <Link
-                href="#"
+                href="https://wa.me/+61424824604"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 rounded-[var(--radius)] border border-white/15 bg-white/5 px-7 py-[13px] text-[14px] font-[800] text-white transition hover:-translate-y-[1px] hover:bg-white/10"
               >
                 <svg
@@ -71,4 +76,3 @@ export default function CtaSection() {
     </section>
   );
 }
-

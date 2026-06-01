@@ -3,10 +3,16 @@ import SectionHeader from "../../home/shared/SectionHeader";
 const PROBLEMS = [
   {
     num: "1",
-    title: "Revolving-door teachers",
-    text: "Students were cycled through multiple teachers with no continuity. Every new teacher reset progress. Rapport — the foundation of learning — was never built.",
+    title: "Changing teachers, changing progress",
+    text: "Many students were assigned different teachers every few weeks. Each change disrupted learning, reduced confidence, and made it difficult to build a meaningful teacher-student relationship.",
     icon: (
-      <svg width="24" height="24" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 36 36"
+        fill="none"
+        aria-hidden="true"
+      >
         <path
           d="M18 4C10.268 4 4 10.268 4 18s6.268 14 14 14 14-6.268 14-14S25.732 4 18 4z"
           stroke="currentColor"
@@ -23,10 +29,16 @@ const PROBLEMS = [
   },
   {
     num: "2",
-    title: "Inflexible scheduling",
-    text: "Fixed class times built around one timezone. Families in Canada, the UK, and Australia were choosing between their child's bedtime and Quran class. That's not a real choice.",
+    title: "Schedules that didn't fit real life",
+    text: "Fixed class times often forced families to choose between school, work, activities, and Quran learning. Parents needed flexibility that worked around their routines, not against them.",
     icon: (
-      <svg width="24" height="24" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 36 36"
+        fill="none"
+        aria-hidden="true"
+      >
         <rect
           x="4"
           y="6"
@@ -53,10 +65,16 @@ const PROBLEMS = [
   },
   {
     num: "3",
-    title: "Parents kept in the dark",
-    text: "No updates. No visibility. Parents were paying monthly and had no idea if their child was progressing, struggling, or simply being babysat through a screen.",
+    title: "Parents had little visibility",
+    text: "Many families had no clear way to track progress. They didn't know what their child had learned, where improvement was needed, or whether goals were being achieved consistently.",
     icon: (
-      <svg width="24" height="24" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 36 36"
+        fill="none"
+        aria-hidden="true"
+      >
         <circle cx="14" cy="12" r="6" stroke="currentColor" strokeWidth="1.6" />
         <path
           d="M4 30c0-5.523 4.477-10 10-10"
@@ -86,9 +104,9 @@ export default function ProblemSection() {
             chipClassName="border-[color-mix(in_srgb,var(--brand-cyan)_25%,transparent)] bg-[color-mix(in_srgb,var(--brand-cyan)_12%,transparent)] text-brand-cyan-dark"
             title={
               <>
-                The problem no one
+                The challenges families
                 <br />
-                <span className="text-brand-cyan">was solving.</span>
+                <span className="text-brand-cyan">were facing.</span>
               </>
             }
             // subtitle="Thousands of families in the diaspora wanted structured, reliable Quran education for their children. What they found instead was this."
@@ -126,4 +144,3 @@ export default function ProblemSection() {
     </section>
   );
 }
-

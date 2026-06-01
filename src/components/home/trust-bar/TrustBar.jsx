@@ -1,9 +1,9 @@
 const ITEMS = [
   { target: 4.97, decimals: 2, suffix: "", label: "Avg. teacher rating" },
-  { target: 2000, suffix: "+", label: "Students enrolled" },
-  { target: 40, suffix: "+", label: "Qualified teachers" },
-  { target: 18, suffix: "+", label: "Countries served" },
-  { target: 97, suffix: "%", label: "Parent satisfaction" },
+  { target: 2000, suffix: "+", label: "students enrolled globally" },
+  { target: 40, suffix: "+", label: "certified Quran teachers" },
+  { target: 18, suffix: "+", label: "countries served (UK, USA, Canada & more)" },
+  { target: 97, suffix: "%", label: "parent satisfaction rate" },
 ];
 
 export default function TrustBar() {

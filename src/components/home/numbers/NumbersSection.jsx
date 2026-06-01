@@ -2,25 +2,25 @@ const STATS = [
   {
     target: 2000,
     suffix: "+",
-    label: "Students enrolled globally",
+    label: "active students globally",
     featured: false,
   },
   {
     target: 97,
     suffix: "%",
-    label: "Parent satisfaction rate — students who start, stay",
+    label: "Parent satisfaction rate",
     featured: true,
   },
   {
     target: 40,
     suffix: "+",
-    label: "Qualified, vetted teachers",
+    label: "verified Quran teachers",
     featured: false,
   },
   {
     target: 18,
     suffix: "+",
-    label: "Countries · families everywhere",
+    label: "countries served",
     featured: false,
   },
 ];
@@ -34,17 +34,17 @@ export default function NumbersSection() {
         <div className="mb-14 grid grid-cols-1 gap-6 md:grid-cols-2 md:items-end">
           <div className="reveal-left">
             <div className="section-chip inline-flex items-center rounded-full border-[0.1px] apply-cyan-chip px-4 py-[6px] text-[12px] font-[700] tracking-[0.06em]">
-              By the numbers
+              Trust section
             </div>
             <h2 className="mt-4 text-[40px] font-[plus-eb] leading-[1.08] tracking-[-0.03em] md:text-[44px]">
-              A platform parents{" "}
-              <span className="text-brand-cyan">actually trust.</span>
+              A trusted Quran academy for{" "}
+              <span className="text-brand-cyan">families worldwide.</span>
             </h2>
           </div>
 
           <p className="numbers-sub max-w-[520px] text-secondary-styling">
-            Real numbers from real families who chose Quran Odyssey. No inflated
-            metrics. No borrowed testimonials. These are our students.
+            Parents choose Quran Odyssey because we focus on structure,
+            consistency, and measurable learning outcomes.
           </p>
         </div>
 
@@ -112,8 +112,12 @@ export default function NumbersSection() {
             Primary markets
           </div>
           <div className="country-flags mt-3 flex flex-wrap gap-3">
-            <CountryItem dotColor="var(--brand-amber)">🇬🇧 United Kingdom</CountryItem>
-            <CountryItem dotColor="var(--brand-amber)">🇺🇸 United States</CountryItem>
+            <CountryItem dotColor="var(--brand-amber)">
+              🇬🇧 United Kingdom
+            </CountryItem>
+            <CountryItem dotColor="var(--brand-amber)">
+              🇺🇸 United States
+            </CountryItem>
             <CountryItem dotColor="var(--brand-cyan)">🇨🇦 Canada</CountryItem>
           </div>
         </div>

@@ -15,110 +15,113 @@ export default function HeroSection() {
       {/* <div className="hero-glow hero-glow-a absolute right-0 top-0 pointer-events-none" /> */}
       {/* <div className="hero-glow hero-glow-b absolute bottom-0 left-[200px] pointer-events-none" /> */}
       {/* <div className="w-"> */}
-        <Image
-          src={`/Frame.png`}
-          className="absolute top-0 left-0 w-full h-full object-cover"
-          width={1000}
-          height={1000}
-          alt="zmdjic"
-        />
+      <Image
+        src={`/Frame.png`}
+        className="absolute top-0 left-0 w-full h-full object-cover"
+        width={1000}
+        height={1000}
+        alt="zmdjic"
+      />
       {/* </div> */}
 
       <div className="relative w-full flex items-center justify-center py-[10vh]">
         <div className="w-[85%] grid items-center gap-10 md:grid-cols-2">
           <div className="flex flex-col items-start">
-          <div className="hero-badge inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--brand-cyan)_25%,transparent)] bg-surface-cyan-tint px-[14px] py-[5px] text-[12px] font-[600] tracking-[0.02em] text-brand-cyan-dark">
-            <span className="hero-badge-dot h-[7px] w-[7px] rounded-full bg-brand-cyan" />
-            Live classes · UK · USA · Canada
-          </div>
+            <div className="hero-badge inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--brand-cyan)_25%,transparent)] bg-surface-cyan-tint px-[14px] py-[5px] text-[12px] font-[600] tracking-[0.02em] text-brand-cyan-dark">
+              <span className="hero-badge-dot h-[7px] w-[7px] rounded-full bg-brand-cyan" />
+              Live classes · UK · USA · Canada
+            </div>
 
-          <h1 className="mt-7 text-[44px] font-[plus-eb] leading-[1.06] tracking-[-0.03em] text-content-primary md:text-[52px]">
-            Your child deserves
-            <br />
-            more than <span className="text-brand-cyan">inconsistent</span>
-            <br />
-            <span className="text-brand-cyan">tutors.</span>
-          </h1>
+            <h1 className="mt-7 text-[44px] font-[plus-eb] leading-[1.06] tracking-[-0.03em] text-content-primary md:text-[52px]">
+              Your child deserves
+              <br />
+              more than <span className="text-brand-cyan">inconsistent</span>
+              <br />
+              <span className="text-brand-cyan">tutors.</span>
+            </h1>
 
-          <p className="mt-4 max-w-[460px] text-[16px] font-[400] leading-[1.75] text-content-muted">
-            Quran Odyssey connects families with verified Quran teachers for
-            live online classes — structured, consistent, and built around your
-            child&apos;s pace.
-          </p>
+            <p className="mt-4 max-w-[550px] text-[16px] font-[400] leading-[1.75] text-content-muted">
+              Quran Odyssey is a next-generation online Quran academy for kids
+              that connects families with verified, qualified Quran teachers for
+              structured 1-to-1 live classes — designed to meet today’s learning
+              needs, featuring a gamified LMS, Animated lessons, A Kids Corner,
+              The Dua Tree, Prophetic Stories, and much more.
+            </p>
 
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Link
-              href="/booking/trial"
-              className="hero-cta-primary btn-primary inline-flex items-center gap-2 rounded-[var(--radius)] border-2 border-brand-amber bg-brand-amber px-7 py-[13px] text-[14px] font-[700] tracking-[-0.01em] text-brand-navy"
-            >
-              Book a Free Trial
-              <span className="hero-cta-arrow inline-flex">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M3 8h10M9 4l4 4-4 4"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </span>
-            </Link>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Link
+                href="/booking/trial"
+                className="hero-cta-primary btn-primary inline-flex items-center gap-2 rounded-[var(--radius)] border-2 border-brand-amber bg-brand-amber px-7 py-[13px] text-[14px] font-[700] tracking-[-0.01em] text-brand-navy"
+              >
+                Book a Free Trial
+                <span className="hero-cta-arrow inline-flex">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M3 8h10M9 4l4 4-4 4"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
+              </Link>
 
-            <Link
-              href="/about"
-              className="hero-cta-secondary inline-flex items-center gap-2 rounded-[var(--radius)] border-2 border-line-default bg-transparent px-7 py-[13px] text-[14px] font-[600] tracking-[-0.01em] text-content-primary"
-            >
-              <span className="hero-cta-play inline-flex">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  aria-hidden="true"
-                >
-                  <circle
-                    cx="8"
-                    cy="8"
-                    r="7"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                  />
-                  <polygon points="6,5 12,8 6,11" fill="currentColor" />
-                </svg>
-              </span>
-              <span className="hero-cta-label">See how it works</span>
-            </Link>
-          </div>
+              <Link
+                href="/about"
+                className="hero-cta-secondary inline-flex items-center gap-2 rounded-[var(--radius)] border-2 border-line-default bg-transparent px-7 py-[13px] text-[14px] font-[600] tracking-[-0.01em] text-content-primary"
+              >
+                <span className="hero-cta-play inline-flex">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <circle
+                      cx="8"
+                      cy="8"
+                      r="7"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                    />
+                    <polygon points="6,5 12,8 6,11" fill="currentColor" />
+                  </svg>
+                </span>
+                <span className="hero-cta-label">See how it works</span>
+              </Link>
+            </div>
 
-          <div className="mt-8 flex items-center gap-4">
-            <div className="flex">
-              <div className="hero-avatar -ml-2 first:ml-0 bg-[linear-gradient(135deg,var(--brand-cyan),var(--brand-cyan-dark))]">
-                FK
+            <div className="mt-8 flex items-center gap-4">
+              <div className="flex">
+                <div className="hero-avatar -ml-2 first:ml-0 bg-[linear-gradient(135deg,var(--brand-cyan),var(--brand-cyan-dark))]">
+                  FK
+                </div>
+                <div className="hero-avatar -ml-2 bg-[linear-gradient(135deg,var(--brand-amber),var(--brand-amber-dark))]">
+                  IA
+                </div>
+                <div className="hero-avatar -ml-2 bg-[linear-gradient(135deg,var(--brand-navy),var(--bg-dark-blue))]">
+                  MR
+                </div>
+                <div className="hero-avatar -ml-2 bg-[linear-gradient(135deg,var(--success),color-mix(in_srgb,var(--success)_70%,black))]">
+                  SA
+                </div>
               </div>
-              <div className="hero-avatar -ml-2 bg-[linear-gradient(135deg,var(--brand-amber),var(--brand-amber-dark))]">
-                IA
-              </div>
-              <div className="hero-avatar -ml-2 bg-[linear-gradient(135deg,var(--brand-navy),var(--bg-dark-blue))]">
-                MR
-              </div>
-              <div className="hero-avatar -ml-2 bg-[linear-gradient(135deg,var(--success),color-mix(in_srgb,var(--success)_70%,black))]">
-                SA
+              <div className="text-[13px] font-[500] leading-[1.4] text-content-muted">
+                {/* <span className="font-[800] text-content-primary">
+                  2,000+ families
+                </span>{" "} */}
+                Trusted by 2,000+ families across 18+ countries
+                {/* across 18+ countries trust Quran Odyssey */}
               </div>
             </div>
-            <div className="text-[13px] font-[500] leading-[1.4] text-content-muted">
-              <span className="font-[800] text-content-primary">
-                2,000+ families
-              </span>{" "}
-              across 18+ countries trust Quran Odyssey
-            </div>
-          </div>
           </div>
 
           <div className="relative left-[-3vw] md:justify-self-end">

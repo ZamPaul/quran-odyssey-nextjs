@@ -643,6 +643,11 @@ body {
   animation-delay: 0.35s;
 }
 
+.map-pill-pakistan {
+  animation-duration: 5.3s;
+  animation-delay: 0.5s;
+}
+
 @keyframes mapDash {
   to {
     stroke-dashoffset: -420;

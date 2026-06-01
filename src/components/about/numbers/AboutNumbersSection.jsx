@@ -6,9 +6,24 @@ const STATS = [
     label: "Parent satisfaction rating — students who start, stay",
     featured: true,
   },
-  { target: 6, suffix: " yrs", label: "Avg. teacher tenure on platform", featured: false },
-  { target: 18, suffix: "+", label: "Countries students connect from", featured: false },
-  { target: 40, suffix: "+", label: "Qualified teachers on the platform", featured: false },
+  {
+    target: 6,
+    suffix: " yrs",
+    label: "Average Teaching Experience",
+    featured: false,
+  },
+  {
+    target: 18,
+    suffix: "+",
+    label: "Countries Served",
+    featured: false,
+  },
+  {
+    target: 40,
+    suffix: "+",
+    label: "Verified Quran Teachers",
+    featured: false,
+  },
 ];
 
 export default function AboutNumbersSection() {
@@ -23,13 +38,17 @@ export default function AboutNumbersSection() {
               The odyssey so far
             </div>
             <h2 className="mt-4 text-[40px] font-[plus-eb] leading-[1.08] tracking-[-0.03em] md:text-[44px]">
-              Numbers that mean <span className="text-brand-cyan">something.</span>
+              Numbers that represent &nbsp;
+              <span className="text-brand-cyan">
+                real students, real progress, and real families
+              </span>
+              &nbsp; who trust us.
             </h2>
           </div>
           <p className="numbers-sub reveal-right max-w-[520px] text-secondary-styling text-[16px]">
-            We don&apos;t inflate these. Every number here is real — earned through
-            consistent teaching, genuine relationships, and families that came back
-            and told their friends.
+            We don&apos;t inflate these. Every number here is real — earned
+            through consistent teaching, genuine relationships, and families
+            that came back and told their friends.
           </p>
         </div>
 
@@ -52,7 +71,11 @@ export default function AboutNumbersSection() {
                 ].join(" ")}
               >
                 <span className="counter">{s.target}</span>
-                <span className={s.featured ? "text-brand-navy/50" : "text-white/50"}>
+                <span
+                  className={
+                    s.featured ? "text-brand-navy/50" : "text-white/50"
+                  }
+                >
                   {s.suffix}
                 </span>
               </div>
@@ -73,8 +96,12 @@ export default function AboutNumbersSection() {
             Primary markets
           </div>
           <div className="country-flags mt-3 flex flex-wrap gap-3">
-            <CountryItem dotColor="var(--brand-amber)">🇬🇧 United Kingdom</CountryItem>
-            <CountryItem dotColor="var(--brand-amber)">🇺🇸 United States</CountryItem>
+            <CountryItem dotColor="var(--brand-amber)">
+              🇬🇧 United Kingdom
+            </CountryItem>
+            <CountryItem dotColor="var(--brand-amber)">
+              🇺🇸 United States
+            </CountryItem>
             <CountryItem dotColor="var(--brand-cyan)">🇨🇦 Canada</CountryItem>
           </div>
         </div>
@@ -86,9 +113,11 @@ export default function AboutNumbersSection() {
 function CountryItem({ children, dotColor }) {
   return (
     <div className="country-item inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[13px] font-[600] text-white/80">
-      <span className="country-dot h-[8px] w-[8px] rounded-full" style={{ background: dotColor }} />
+      <span
+        className="country-dot h-[8px] w-[8px] rounded-full"
+        style={{ background: dotColor }}
+      />
       {children}
     </div>
   );
 }
-

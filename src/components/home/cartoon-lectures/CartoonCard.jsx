@@ -41,9 +41,9 @@ const CartoonCard = ({ c, idx }) => {
       <div className="text-[1.2vw] font-[plus-eb] tracking-[-0.02em] text-content-primary">
         {c.topic}
       </div>
-      <p className="mt-2 font-[plus-r] text-[13px] leading-[1.7] text-content-muted">
+      {/* <p className="mt-2 font-[plus-r] text-[13px] leading-[1.7] text-content-muted">
         {c.desc}
-      </p>
+      </p> */}
 
       <Link
         href="#"

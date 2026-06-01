@@ -54,7 +54,7 @@ export default function CoursesHeroSection() {
             <span className="text-brand-amber-dark">progress.</span>
           </h1>
           <p className="mt-4 max-w-[440px] text-[16px] leading-[1.75] text-content-muted">
-            Six structured courses covering the full spectrum of Quranic
+            Four structured courses covering the full spectrum of Quranic
             education — from first letters to complete memorisation. Every
             course is teacher-led, tracked, and built to move your child
             forward.
@@ -117,15 +117,15 @@ export default function CoursesHeroSection() {
               <PathStep
                 kind="active"
                 num="2"
-                name="Quran Recitation"
-                desc="Fluency · Juz-by-Juz progress"
+                name="Salah (Namaz) Course"
+                desc="Kalima’s  · Meaning  · Posture"
                 tag="In Progress"
               />
               <PathStep
                 kind="locked"
                 num="3"
-                name="Tajweed"
-                desc="Rules of beautiful recitation"
+                name="Quran Recitation"
+                desc="Fluency  · Juz-by-Juz progress"
                 tag="Next"
               />
               <PathStep
@@ -139,7 +139,7 @@ export default function CoursesHeroSection() {
               <PathStep
                 kind="parallel"
                 num="↕"
-                name="Islamic Studies + 1-on-1"
+                name="Custom 1-on-1 Plan (with Duas, Prophetic History)"
                 desc="Runs alongside any stage"
                 tag="Parallel"
                 isLast

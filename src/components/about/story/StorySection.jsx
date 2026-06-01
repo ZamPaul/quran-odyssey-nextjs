@@ -26,7 +26,7 @@ export default function StorySection() {
                 The Quran Odyssey Team
               </div>
               <div className="text-[12px] font-[600] text-content-muted">
-                Educators · Technologists · Parents
+                Educators · Mentors · Parents
               </div>
             </div>
           </div>
@@ -34,47 +34,55 @@ export default function StorySection() {
 
         <div className="story-content reveal-right">
           <p className="story-p mb-6 text-[15px] leading-[1.85] text-content-muted">
-            Quran Odyssey didn&apos;t begin as a startup idea. It began as a
+            {/* Quran Odyssey didn&apos;t begin as a startup idea. It began as a
             frustration.{" "}
             <strong className="font-[700] text-content-primary">
               The founders had watched too many children — their own included —
               lose interest in Quran education not because of the Quran itself,
               but because of how it was being taught.
             </strong>{" "}
-            Inconsistent teachers. Rigid timetables. Zero feedback for parents.
+            Inconsistent teachers. Rigid timetables. Zero feedback for parents. */}
+            Quran Odyssey didn't begin as a business idea. It began with a
+            simple observation. Too many children were losing motivation in
+            Quran learning—not because they lacked ability, but because the
+            experience lacked consistency, engagement, and structure.
           </p>
 
           <div className="story-highlight-block mb-6 rounded-[var(--radius-lg)] border border-[color-mix(in_srgb,var(--brand-cyan)_20%,transparent)] bg-surface-cyan-tint p-6 text-[14px] font-[700] leading-[1.7] text-brand-cyan-dark">
-            A family in Manchester with a child who goes to bed at 8pm. A family
-            in Toronto with two working parents. A family in Dallas whose
-            nearest mosque is forty minutes away.
+            A family in Manchester trying to balance school and Quran classes. A
+            family in Toronto managing busy work schedules. A family in Texas
+            searching for a trustworthy teacher online.
           </div>
 
           <p className="story-p mb-6 text-[15px] leading-[1.85] text-content-muted">
-            The existing solutions were built for a world where everyone lived
-            in the same city, attended the same madrassa, and followed the same
-            schedule. The Muslim diaspora in the West doesn&apos;t look like
-            that.
+            The reality is that Muslim families today live across different
+            countries, cultures, and timezones. Traditional solutions weren't
+            designed for the needs of modern families abroad.
           </p>
 
           <p className="story-p mb-6 text-[15px] leading-[1.85] text-content-muted">
-            So we built something different. A platform designed from the ground
+            {/* So we built something different. A platform designed from the ground
             up for{" "}
             <strong className="font-[700] text-content-primary">
               committed, dedicated teachers and the students who deserve
               consistency from them.
             </strong>{" "}
             One teacher per student. Flexible scheduling across timezones.
-            Weekly progress updates that actually tell parents something.
+            Weekly progress updates that actually tell parents something. */}
+            So we built something different. Every student is matched with a
+            dedicated teacher. Flexible scheduling makes attendance easier.
+            Weekly progress updates keep parents informed. Our gamified learning
+            system encourages consistency and keeps children engaged throughout
+            their journey.
           </p>
 
           <p className="story-p text-[15px] leading-[1.85] text-content-muted">
-            The journey — the odyssey — belongs to the student. We just make
-            sure the path is clear.
+            The journey—the odyssey—belongs to the student. Our role is to
+            provide the guidance, support, and consistency needed to help them
+            succeed.
           </p>
         </div>
       </div>
     </section>
   );
 }
-
