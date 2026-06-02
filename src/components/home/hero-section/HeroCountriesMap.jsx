@@ -28,16 +28,40 @@ const MARKERS = {
     flag: "🇬🇧",
     tone: "cyan",
   },
-  pakistan: {
+  gulf: {
     x: 530,
     y: 315,
     labelX: 58.5,
     labelY: 68.5,
-    label: "Pakistan",
-    flag: "🇵🇰",
-    tone: "green",
+    label: "Gulf countries",
+    flag: "★",
+    tone: "gulf",
   },
 };
+
+const TONE_STYLES = {
+  cyan: {
+    border: "border-brand-cyan/70",
+    flag: "text-brand-cyan",
+    pill: "bg-brand-cyan/10",
+  },
+  amber: {
+    border: "border-brand-amber/70",
+    flag: "text-brand-amber",
+    pill: "bg-amber-400/10",
+  },
+  red: {
+    border: "border-red-500/70",
+    flag: "text-red-500",
+    pill: "bg-red-400/10",
+  },
+  gulf: {
+    border: "border-amber-900/45",
+    flag: "text-amber-900",
+    pill: "bg-amber-900/[0.07]",
+  },
+};
+
 
 function Marker({ id, x, y, tone }) {
   const dotClass = tone === "amber" ? "fill-brand-amber" : "fill-brand-cyan";
@@ -61,35 +85,19 @@ function Marker({ id, x, y, tone }) {
 }
 
 function CountryPill({ x, y, flag, label, tone, className = "" }) {
-  const border =
-    flag === "🇬🇧"
-      ? "border-brand-cyan/70"
-      : flag === "🇺🇸"
-        ? "border-brand-amber/70"
-        : flag === "🇵🇰"
-          ? "border-emerald-600/70"
-          : "border-red-500/70";
-
-  const flagColor =
-    flag === "🇺🇸"
-      ? "text-brand-amber"
-      : flag === "🇬🇧"
-        ? "text-brand-cyan"
-        : flag === "🇵🇰"
-          ? "text-emerald-600"
-          : "text-red-500";
+  const styles = TONE_STYLES[tone] ?? TONE_STYLES.cyan;
 
   return (
     <div
       className={[
         "absolute z-20 inline-flex rounded-[5px] items-center gap-2 bg-surface-white px-3 py-[7px] shadow-[0_14px_30px_rgba(0,0,0,0.06)] border-[0.5px]",
-        border,
+        styles.border,
         className,
       ].join(" ")}
       style={{ left: `${x}%`, top: `${y}%` }}
     >
       <span
-        className={`text-[16px] font-[plus-l] leading-none ${flagColor}`}
+        className={`text-[14px] font-[plus-eb] leading-none ${styles.flag}`}
       >
         {flag}
       </span>
@@ -163,32 +171,32 @@ export default function HeroCountriesMap() {
             y={MARKERS.canada.labelY}
             flag={MARKERS.canada.flag}
             label={MARKERS.canada.label}
-            tone={MARKERS.canada.tone}
-            className="map-pill map-pill-canada bg-red-400/10"
+            tone="red"
+            className={`map-pill map-pill-canada ${TONE_STYLES.red.pill}`}
           />
           <CountryPill
             x={MARKERS.usa.labelX}
             y={MARKERS.usa.labelY}
             flag={MARKERS.usa.flag}
             label={MARKERS.usa.label}
-            tone={MARKERS.usa.tone}
-            className="map-pill map-pill-usa bg-amber-400/10"
+            tone="amber"
+            className={`map-pill map-pill-usa ${TONE_STYLES.amber.pill}`}
           />
           <CountryPill
             x={MARKERS.uk.labelX}
             y={MARKERS.uk.labelY}
             flag={MARKERS.uk.flag}
             label={MARKERS.uk.label}
-            tone={MARKERS.uk.tone}
-            className="map-pill map-pill-uk bg-brand-cyan/10"
+            tone="cyan"
+            className={`map-pill map-pill-uk ${TONE_STYLES.cyan.pill}`}
           />
           <CountryPill
-            x={MARKERS.pakistan.labelX}
-            y={MARKERS.pakistan.labelY}
-            flag={MARKERS.pakistan.flag}
-            label={MARKERS.pakistan.label}
-            tone={MARKERS.pakistan.tone}
-            className="map-pill map-pill-pakistan bg-emerald-500/10"
+            x={MARKERS.gulf.labelX}
+            y={MARKERS.gulf.labelY}
+            flag={MARKERS.gulf.flag}
+            label={MARKERS.gulf.label}
+            tone="gulf"
+            className={`map-pill map-pill-gulf ${TONE_STYLES.gulf.pill}`}
           />
         </div>
       </div>
