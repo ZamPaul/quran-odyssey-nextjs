@@ -62,7 +62,6 @@ const TONE_STYLES = {
   },
 };
 
-
 function Marker({ id, x, y, tone }) {
   const dotClass = tone === "amber" ? "fill-brand-amber" : "fill-brand-cyan";
 

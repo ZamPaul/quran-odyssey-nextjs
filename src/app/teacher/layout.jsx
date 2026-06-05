@@ -1,19 +1,51 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useUser, useAuth, useClerk } from '@clerk/nextjs';
-import { useRouter, usePathname } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
+import { useState, useEffect } from "react";
+import { useUser, useAuth, useClerk } from "@clerk/nextjs";
+import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
 
 // ─── Icons ───────────────────────────────────────────────
 function IconDashboard({ size = 18 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.6" />
-      <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.6" />
-      <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.6" />
-      <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.6" />
+      <rect
+        x="3"
+        y="3"
+        width="7"
+        height="7"
+        rx="1.5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <rect
+        x="14"
+        y="3"
+        width="7"
+        height="7"
+        rx="1.5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <rect
+        x="3"
+        y="14"
+        width="7"
+        height="7"
+        rx="1.5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <rect
+        x="14"
+        y="14"
+        width="7"
+        height="7"
+        rx="1.5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
     </svg>
   );
 }
@@ -21,8 +53,21 @@ function IconDashboard({ size = 18 }) {
 function IconCalendar({ size = 18 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <rect
+        x="3"
+        y="4"
+        width="18"
+        height="18"
+        rx="2"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <path
+        d="M16 2v4M8 2v4M3 10h18"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -31,8 +76,18 @@ function IconStudents({ size = 18 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <path
+        d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+      <path
+        d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-2a4 4 0 0 0-3-3.87"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -40,9 +95,27 @@ function IconStudents({ size = 18 }) {
 function IconAssignment({ size = 18 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-      <rect x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M9 12h6M9 16h4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <path
+        d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+      <rect
+        x="9"
+        y="3"
+        width="6"
+        height="4"
+        rx="1"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <path
+        d="M9 12h6M9 16h4"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -50,16 +123,27 @@ function IconAssignment({ size = 18 }) {
 function IconReports({ size = 18 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M18 20V10M12 20V4M6 20v-6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <path
+        d="M18 20V10M12 20V4M6 20v-6"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
 
-function IconChevron({ direction = 'right', size = 16 }) {
-  const d = direction === 'right' ? 'M9 18l6-6-6-6' : 'M15 18l-6-6 6-6';
+function IconChevron({ direction = "right", size = 16 }) {
+  const d = direction === "right" ? "M9 18l6-6-6-6" : "M15 18l-6-6 6-6";
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d={d} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d={d}
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -67,7 +151,12 @@ function IconChevron({ direction = 'right', size = 16 }) {
 function IconMenu({ size = 20 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path
+        d="M3 12h18M3 6h18M3 18h18"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -75,54 +164,69 @@ function IconMenu({ size = 20 }) {
 function IconX({ size = 20 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path
+        d="M18 6L6 18M6 6l12 12"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
 
 // ─── Nav config ───────────────────────────────────────────
 const NAV = [
-  { label: 'Dashboard',        href: '/teacher/dashboard',   Icon: IconDashboard },
-  { label: 'Class Schedule',   href: '/teacher/schedule',    Icon: IconCalendar },
-  { label: 'My Students',      href: '/teacher/students',    Icon: IconStudents },
-  { label: 'Assignments',      href: '/teacher/assignments', Icon: IconAssignment },
-  { label: 'Progress Reports', href: '/teacher/reports',     Icon: IconReports },
+  { label: "Dashboard", href: "/teacher/dashboard", Icon: IconDashboard },
+  { label: "Class Schedule", href: "/teacher/schedule", Icon: IconCalendar },
+  { label: "My Students", href: "/teacher/students", Icon: IconStudents },
+  { label: "Assignments", href: "/teacher/assignments", Icon: IconAssignment },
+  { label: "Progress Reports", href: "/teacher/reports", Icon: IconReports },
 ];
 
 // ─── Sidebar content ──────────────────────────────────────
 function SidebarContent({ teacher, pathname, onSignOut, onClose }) {
   return (
-    <div style={{
-      display:        'flex',
-      flexDirection:  'column',
-      height:         '100%',
-      background:     '#0d2840',
-    }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        background: "#0d2840",
+      }}
+    >
       {/* Logo */}
-      <div style={{
-        padding:      '24px 20px 20px',
-        borderBottom: '1px solid rgba(255,255,255,0.08)',
-        display:      'flex',
-        alignItems:   'center',
-        justifyContent: 'space-between',
-      }}>
-        <Link href="/" style={{ display: 'block' }}>
-          <Image src="/logo2.png" width={120} height={32} alt="Quran Odyssey" style={{ objectFit: 'contain' }} />
+      <div
+        style={{
+          padding: "24px 20px 20px",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <Link href="/" style={{ display: "block" }}>
+          <Image
+            src="/logo2.png"
+            width={120}
+            height={32}
+            alt="Quran Odyssey"
+            style={{ objectFit: "contain" }}
+          />
         </Link>
         {/* Close button — mobile only */}
         <button
           onClick={onClose}
           style={{
-            display:    'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width:      32,
-            height:     32,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 32,
+            height: 32,
             borderRadius: 8,
-            border:     'none',
-            background: 'rgba(255,255,255,0.08)',
-            color:      'rgba(255,255,255,0.6)',
-            cursor:     'pointer',
+            border: "none",
+            background: "rgba(255,255,255,0.08)",
+            color: "rgba(255,255,255,0.6)",
+            cursor: "pointer",
           }}
           className="sidebar-close-btn"
         >
@@ -132,43 +236,59 @@ function SidebarContent({ teacher, pathname, onSignOut, onClose }) {
 
       {/* Teacher badge */}
       {teacher && (
-        <div style={{
-          margin:       '16px 12px',
-          padding:      '12px 14px',
-          borderRadius: 10,
-          background:   'rgba(40,183,217,0.12)',
-          border:       '1px solid rgba(40,183,217,0.2)',
-          display:      'flex',
-          alignItems:   'center',
-          gap:          10,
-        }}>
-          <div style={{
-            width:          36,
-            height:         36,
-            borderRadius:   '50%',
-            background:     'linear-gradient(135deg, #28b7d9, #0e6e8a)',
-            display:        'flex',
-            alignItems:     'center',
-            justifyContent: 'center',
-            fontSize:       12,
-            fontWeight:     800,
-            color:          'white',
-            flexShrink:     0,
-          }}>
-            {teacher.name?.split(' ').map(w => w[0]).join('').slice(0, 2)}
+        <div
+          style={{
+            margin: "16px 12px",
+            padding: "12px 14px",
+            borderRadius: 10,
+            background: "rgba(40,183,217,0.12)",
+            border: "1px solid rgba(40,183,217,0.2)",
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+          }}
+        >
+          <div
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
+              background: "linear-gradient(135deg, #28b7d9, #0e6e8a)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 12,
+              fontWeight: 800,
+              color: "white",
+              flexShrink: 0,
+            }}
+          >
+            {teacher.name
+              ?.split(" ")
+              .map((w) => w[0])
+              .join("")
+              .slice(0, 2)}
           </div>
           <div style={{ minWidth: 0 }}>
-            <div style={{
-              fontSize:     13,
-              fontWeight:   700,
-              color:        'white',
-              whiteSpace:   'nowrap',
-              overflow:     'hidden',
-              textOverflow: 'ellipsis',
-            }}>
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 700,
+                color: "white",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
               {teacher.name}
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginTop: 1 }}>
+            <div
+              style={{
+                fontSize: 11,
+                color: "rgba(255,255,255,0.45)",
+                marginTop: 1,
+              }}
+            >
               Teacher
             </div>
           </div>
@@ -176,39 +296,43 @@ function SidebarContent({ teacher, pathname, onSignOut, onClose }) {
       )}
 
       {/* Nav */}
-      <nav style={{ flex: 1, padding: '8px 12px', overflowY: 'auto' }}>
-        <div style={{
-          fontSize:       10,
-          fontWeight:     700,
-          textTransform:  'uppercase',
-          letterSpacing:  '0.08em',
-          color:          'rgba(255,255,255,0.3)',
-          padding:        '8px 8px 6px',
-          marginBottom:   4,
-        }}>
+      <nav style={{ flex: 1, padding: "8px 12px", overflowY: "auto" }}>
+        <div
+          style={{
+            fontSize: 10,
+            fontWeight: 700,
+            textTransform: "uppercase",
+            letterSpacing: "0.08em",
+            color: "rgba(255,255,255,0.3)",
+            padding: "8px 8px 6px",
+            marginBottom: 4,
+          }}
+        >
           Menu
         </div>
         {NAV.map(({ label, href, Icon }) => {
-          const isActive = pathname === href || pathname.startsWith(href + '/');
+          const isActive = pathname === href || pathname.startsWith(href + "/");
           return (
             <Link
               key={href}
               href={href}
               onClick={onClose}
               style={{
-                display:        'flex',
-                alignItems:     'center',
-                gap:            10,
-                padding:        '10px 12px',
-                borderRadius:   8,
-                marginBottom:   2,
-                fontSize:       13,
-                fontWeight:     isActive ? 700 : 500,
-                color:          isActive ? 'white' : 'rgba(255,255,255,0.55)',
-                background:     isActive ? 'rgba(255,255,255,0.10)' : 'transparent',
-                textDecoration: 'none',
-                transition:     'all 150ms ease',
-                borderLeft:     isActive ? '3px solid #28b7d9' : '3px solid transparent',
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "10px 12px",
+                borderRadius: 8,
+                marginBottom: 2,
+                fontSize: 13,
+                fontWeight: isActive ? 700 : 500,
+                color: isActive ? "white" : "rgba(255,255,255,0.55)",
+                background: isActive ? "rgba(255,255,255,0.10)" : "transparent",
+                textDecoration: "none",
+                transition: "all 150ms ease",
+                borderLeft: isActive
+                  ? "3px solid #28b7d9"
+                  : "3px solid transparent",
               }}
             >
               <Icon size={17} />
@@ -219,39 +343,47 @@ function SidebarContent({ teacher, pathname, onSignOut, onClose }) {
       </nav>
 
       {/* Sign out */}
-      <div style={{
-        padding:      '12px',
-        borderTop:    '1px solid rgba(255,255,255,0.08)',
-      }}>
+      <div
+        style={{
+          padding: "12px",
+          borderTop: "1px solid rgba(255,255,255,0.08)",
+        }}
+      >
         <button
           onClick={onSignOut}
           style={{
-            display:        'flex',
-            alignItems:     'center',
-            gap:            10,
-            width:          '100%',
-            padding:        '10px 12px',
-            borderRadius:   8,
-            border:         'none',
-            background:     'transparent',
-            color:          'rgba(255,255,255,0.45)',
-            fontSize:       13,
-            fontWeight:     500,
-            cursor:         'pointer',
-            textAlign:      'left',
-            transition:     'all 150ms ease',
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            width: "100%",
+            padding: "10px 12px",
+            borderRadius: 8,
+            border: "none",
+            background: "transparent",
+            color: "rgba(255,255,255,0.45)",
+            fontSize: 13,
+            fontWeight: 500,
+            cursor: "pointer",
+            textAlign: "left",
+            transition: "all 150ms ease",
           }}
-          onMouseEnter={e => {
-            e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
-            e.currentTarget.style.color = 'rgba(255,255,255,0.8)';
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+            e.currentTarget.style.color = "rgba(255,255,255,0.8)";
           }}
-          onMouseLeave={e => {
-            e.currentTarget.style.background = 'transparent';
-            e.currentTarget.style.color = 'rgba(255,255,255,0.45)';
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "transparent";
+            e.currentTarget.style.color = "rgba(255,255,255,0.45)";
           }}
         >
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
           Sign out
         </button>
@@ -263,16 +395,39 @@ function SidebarContent({ teacher, pathname, onSignOut, onClose }) {
 // ─── Loading skeleton ─────────────────────────────────────
 function LoadingSkeleton() {
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#f7f9fb' }}>
-      <div style={{ width: 240, background: '#0d2840', flexShrink: 0 }} />
-      <div style={{ flex: 1, padding: 32, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: 80 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-          <div style={{
-            width: 36, height: 36, borderRadius: '50%',
-            border: '3px solid #e2e8f0', borderTopColor: '#28b7d9',
-            animation: 'spin 0.8s linear infinite',
-          }} />
-          <p style={{ fontSize: 14, color: '#94a3b8', fontFamily: 'system-ui' }}>
+    <div style={{ display: "flex", minHeight: "100vh", background: "#f7f9fb" }}>
+      <div style={{ width: 240, background: "#0d2840", flexShrink: 0 }} />
+      <div
+        style={{
+          flex: 1,
+          padding: 32,
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "center",
+          paddingTop: 80,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 12,
+          }}
+        >
+          <div
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
+              border: "3px solid #e2e8f0",
+              borderTopColor: "#28b7d9",
+              animation: "spin 0.8s linear infinite",
+            }}
+          />
+          <p
+            style={{ fontSize: 14, color: "#94a3b8", fontFamily: "system-ui" }}
+          >
             Loading teacher portal…
           </p>
         </div>
@@ -284,39 +439,73 @@ function LoadingSkeleton() {
 
 // ─── Main layout ──────────────────────────────────────────
 export default function TeacherLayout({ children }) {
-  const { user, isLoaded }   = useUser();
-  const { getToken }         = useAuth();
-  const { signOut }          = useClerk();
-  const router               = useRouter();
-  const pathname             = usePathname();
-  const [teacher, setTeacher]       = useState(null);
+  const { user, isLoaded } = useUser();
+  const { getToken } = useAuth();
+  const { signOut } = useClerk();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [teacher, setTeacher] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoaded) return;
-    if (!user) { router.push('/login'); return; }
+    if (!user) {
+      router.push("/login");
+      return;
+    }
 
     const verify = async () => {
       try {
         const token = await getToken();
-        const res   = await fetch(
+        if (!token) {
+          router.push("/login");
+          return;
+        }
+
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 10000);
+
+        const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/teacher/me`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          {
+            signal: controller.signal,
+            headers: { Authorization: `Bearer ${token}` },
+          },
         );
-        if (!res.ok) { router.push('/dashboard'); return; }
+        clearTimeout(timer);
+
+        if (res.status === 401) {
+          router.push("/login");
+          return;
+        }
+        if (res.status === 403) {
+          router.push("/dashboard");
+          return;
+        }
+        if (!res.ok) {
+          router.push("/dashboard");
+          return;
+        }
+
         const data = await res.json();
         setTeacher(data.teacher);
         setAuthChecked(true);
-      } catch {
-        router.push('/dashboard');
+      } catch (err) {
+        if (err.name === "AbortError") {
+          // API timeout — show error instead of redirect to avoid false logouts
+          console.error("Teacher auth check timed out");
+          setAuthChecked(true); // let them through, routes will fail individually
+        } else {
+          router.push("/login");
+        }
       }
     };
 
     verify();
   }, [isLoaded, user]);
 
-  const handleSignOut = () => signOut(() => router.push('/'));
+  const handleSignOut = () => signOut(() => router.push("/"));
 
   if (!authChecked) return <LoadingSkeleton />;
 
@@ -356,31 +545,37 @@ export default function TeacherLayout({ children }) {
         className="sidebar-overlay"
         onClick={() => setSidebarOpen(false)}
         style={{
-          display:  'none',
-          position: 'fixed',
-          inset:    0,
-          background: 'rgba(0,0,0,0.5)',
-          zIndex:   199,
-          opacity:  sidebarOpen ? 1 : 0,
-          pointerEvents: sidebarOpen ? 'auto' : 'none',
-          transition: 'opacity 250ms ease',
+          display: "none",
+          position: "fixed",
+          inset: 0,
+          background: "rgba(0,0,0,0.5)",
+          zIndex: 199,
+          opacity: sidebarOpen ? 1 : 0,
+          pointerEvents: sidebarOpen ? "auto" : "none",
+          transition: "opacity 250ms ease",
         }}
       />
 
-      <div style={{ display: 'flex', minHeight: '100vh', background: '#f7f9fb', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
-
+      <div
+        style={{
+          display: "flex",
+          minHeight: "100vh",
+          background: "#f7f9fb",
+          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+        }}
+      >
         {/* Sidebar */}
         <div
-          className={`teacher-sidebar${sidebarOpen ? ' open' : ''}`}
+          className={`teacher-sidebar${sidebarOpen ? " open" : ""}`}
           style={{
-            width:      240,
+            width: 240,
             flexShrink: 0,
-            position:   'fixed',
-            top:        0,
-            left:       0,
-            height:     '100vh',
-            overflowY:  'auto',
-            zIndex:     100,
+            position: "fixed",
+            top: 0,
+            left: 0,
+            height: "100vh",
+            overflowY: "auto",
+            zIndex: 100,
           }}
         >
           <SidebarContent
@@ -400,43 +595,47 @@ export default function TeacherLayout({ children }) {
           <div
             className="teacher-mobile-header"
             style={{
-              display:        'none',
-              alignItems:     'center',
-              justifyContent: 'space-between',
-              padding:        '0 20px',
-              height:         60,
-              background:     'white',
-              borderBottom:   '1px solid #e2e8f0',
-              position:       'sticky',
-              top:            0,
-              zIndex:         50,
+              display: "none",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "0 20px",
+              height: 60,
+              background: "white",
+              borderBottom: "1px solid #e2e8f0",
+              position: "sticky",
+              top: 0,
+              zIndex: 50,
             }}
           >
             <button
               onClick={() => setSidebarOpen(true)}
               style={{
-                display:        'flex',
-                alignItems:     'center',
-                justifyContent: 'center',
-                width:          36,
-                height:         36,
-                borderRadius:   8,
-                border:         '1px solid #e2e8f0',
-                background:     'white',
-                color:          '#64748b',
-                cursor:         'pointer',
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 36,
+                height: 36,
+                borderRadius: 8,
+                border: "1px solid #e2e8f0",
+                background: "white",
+                color: "#64748b",
+                cursor: "pointer",
               }}
             >
               <IconMenu />
             </button>
-            <Image src="/logo2.png" width={100} height={28} alt="Quran Odyssey" style={{ objectFit: 'contain' }} />
+            <Image
+              src="/logo2.png"
+              width={100}
+              height={28}
+              alt="Quran Odyssey"
+              style={{ objectFit: "contain" }}
+            />
             <div style={{ width: 36 }} />
           </div>
 
           {/* Page content */}
-          <main style={{ padding: '32px', maxWidth: 1200 }}>
-            {children}
-          </main>
+          <main style={{ padding: "32px", maxWidth: 1200 }}>{children}</main>
         </div>
       </div>
     </>
