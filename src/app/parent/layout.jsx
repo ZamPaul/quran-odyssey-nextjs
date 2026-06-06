@@ -435,7 +435,12 @@ export default function ParentLayout({ children }) {
           setNoChildren(true);
         } else {
           setChildList(data.children);
-          setActiveChildId(data.children[0].id);
+          // Set first child as active and sync to window
+          const firstId = data.children[0].id;
+          setActiveChildId(firstId);
+          window.__parentActiveChild = firstId;
+          window.__parentChildren = data.children;
+          window.__parentChildIds = data.children.map((c) => c.id);
         }
 
         setAuthChecked(true);
@@ -447,18 +452,22 @@ export default function ParentLayout({ children }) {
     verify();
   }, [isLoaded, user]);
 
+  // ── Child selector handler ─────────────────────────────
+  // Updates window globals AND forces the current page to remount
+  // so each tab re-fetches data for the newly selected child.
+  // Without router.replace(pathname), the page component stays
+  // mounted and still shows the previous child's data.
+  const handleChildSelect = (id) => {
+    window.__parentActiveChild = id; // page reads this on mount
+    window.__parentChildren = childList; // keep in sync
+    window.__parentChildIds = childList.map((c) => c.id);
+    setActiveChildId(id); // updates selector UI
+    router.replace(pathname); // forces page remount → re-fetches
+  };
+
   const handleSignOut = () => signOut(() => router.push("/"));
 
   if (!authChecked) return <LoadingSkeleton />;
-
-  // Clone children with activeChildId + setter so pages can use them
-  // via a context — for Phase 4 we pass via a simple global on window
-  // Phase 5 will use React context properly
-  if (typeof window !== "undefined") {
-    window.__parentChildIds = childList.map((c) => c.id);
-    window.__parentActiveChild = activeChildId;
-    window.__parentChildren = childList;
-  }
 
   return (
     <>
@@ -466,12 +475,12 @@ export default function ParentLayout({ children }) {
         @keyframes spin { to { transform: rotate(360deg); } }
         .sidebar-close-btn { display: none !important; }
         @media (max-width: 768px) {
-          .parent-sidebar  { transform: translateX(-100%); transition: transform 250ms ease; z-index: 200; }
-          .parent-sidebar.open { transform: translateX(0); }
-          .parent-main     { margin-left: 0 !important; }
-          .parent-mobile-header { display: flex !important; }
-          .sidebar-close-btn { display: flex !important; }
-          .sidebar-overlay  { display: block !important; }
+          .parent-sidebar            { transform: translateX(-100%); transition: transform 250ms ease; z-index: 200; }
+          .parent-sidebar.open       { transform: translateX(0); }
+          .parent-main               { margin-left: 0 !important; }
+          .parent-mobile-header      { display: flex !important; }
+          .sidebar-close-btn         { display: flex !important; }
+          .sidebar-overlay           { display: block !important; }
         }
       `}</style>
 
@@ -576,12 +585,12 @@ export default function ParentLayout({ children }) {
             <div style={{ width: 36 }} />
           </div>
 
-          {/* Child selector strip */}
+          {/* Child selector strip — only shown when 2+ children linked */}
           {childList.length > 1 && (
             <ChildSelector
               children={childList}
               activeChildId={activeChildId}
-              onSelect={setActiveChildId}
+              onSelect={handleChildSelect} // ← was setActiveChildId, now handleChildSelect
             />
           )}
 

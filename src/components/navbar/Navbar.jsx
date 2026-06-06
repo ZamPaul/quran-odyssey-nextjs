@@ -18,11 +18,10 @@ const NAV_LINKS = [
 const NAV_SCROLL_CLASSES = ["scrolled", "backdrop-blur-xl", "bg-white/75"];
 
 // ─── User avatar + dropdown ───────────────────────────────
-function UserDropdown({ user, isTeacher, onSignOut }) {
+function UserDropdown({ user, isTeacher, isParent, onSignOut }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
-  // Close on outside click
   useEffect(() => {
     const handler = (e) => {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false);
@@ -38,6 +37,34 @@ function UserDropdown({ user, isTeacher, onSignOut }) {
     user.emailAddresses?.[0]?.emailAddress?.[0]?.toUpperCase() ||
     "?";
 
+  // ── Per-role visual config ─────────────────────────────
+  const roleCfg = isTeacher
+    ? {
+        borderColor: "rgba(40,183,217,0.35)",
+        borderHover: "#28b7d9",
+        avatarBg: "linear-gradient(135deg, #28b7d9, #0e6e8a)",
+        badgeBg: "rgba(40,183,217,0.10)",
+        badgeColor: "#0e6e8a",
+        badgeLabel: "👩‍🏫 Teacher",
+      }
+    : isParent
+    ? {
+        borderColor: "rgba(250,167,26,0.40)",
+        borderHover: "#faa71a",
+        avatarBg: "linear-gradient(135deg, #faa71a, #e8920a)",
+        badgeBg: "rgba(250,167,26,0.12)",
+        badgeColor: "#92400e",
+        badgeLabel: "👨‍👩‍👧 Parent",
+      }
+    : {
+        borderColor: "#e2e8f0",
+        borderHover: "#cbd5e1",
+        avatarBg: "linear-gradient(135deg, #0d2840, #142f4a)",
+        badgeBg: "rgba(13,40,64,0.08)",
+        badgeColor: "#0d2840",
+        badgeLabel: "🎓 Student",
+      };
+
   return (
     <div ref={ref} style={{ position: "relative" }}>
       {/* Avatar button */}
@@ -51,18 +78,20 @@ function UserDropdown({ user, isTeacher, onSignOut }) {
           gap: 8,
           padding: "6px 12px 6px 6px",
           borderRadius: 8,
-          border: `1.5px solid ${isTeacher ? "rgba(40,183,217,0.35)" : "#e2e8f0"}`,
-          background: isTeacher ? "rgba(40,183,217,0.08)" : "#f7f9fb",
+          border: `1.5px solid ${roleCfg.borderColor}`,
+          background: isTeacher
+            ? "rgba(40,183,217,0.08)"
+            : isParent
+            ? "rgba(250,167,26,0.07)"
+            : "#f7f9fb",
           cursor: "pointer",
           transition: "all 150ms ease",
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = isTeacher ? "#28b7d9" : "#cbd5e1";
+          e.currentTarget.style.borderColor = roleCfg.borderHover;
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = isTeacher
-            ? "rgba(40,183,217,0.35)"
-            : "#e2e8f0";
+          e.currentTarget.style.borderColor = roleCfg.borderColor;
         }}
       >
         {/* Initials circle */}
@@ -71,66 +100,41 @@ function UserDropdown({ user, isTeacher, onSignOut }) {
             width: 30,
             height: 30,
             borderRadius: "50%",
-            background: isTeacher
-              ? "linear-gradient(135deg, #28b7d9, #0e6e8a)"
-              : "linear-gradient(135deg, #0d2840, #1a3d5c)",
+            background: roleCfg.avatarBg,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: 11,
+            fontSize: 12,
             fontWeight: 800,
-            color: "white",
+            color: isParent ? "#0d2840" : "white",
             flexShrink: 0,
-            letterSpacing: "0.04em",
           }}
         >
           {initials}
         </div>
 
-        {/* Name + role pill */}
-        <div
+        {/* Name */}
+        <span
           style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-start",
-            gap: 1,
+            fontSize: 13,
+            fontWeight: 600,
+            color: "#0f172a",
+            maxWidth: 100,
+            overflow: "hidden",
+            whiteSpace: "nowrap",
+            textOverflow: "ellipsis",
           }}
         >
-          <span
-            style={{
-              fontSize: 13,
-              fontWeight: 700,
-              color: "#0f172a",
-              lineHeight: 1.2,
-              whiteSpace: "nowrap",
-            }}
-          >
-            {firstName || "Account"}
-          </span>
-          {isTeacher && (
-            <span
-              style={{
-                fontSize: 10,
-                fontWeight: 700,
-                color: "#0e6e8a",
-                letterSpacing: "0.04em",
-                textTransform: "uppercase",
-                lineHeight: 1,
-              }}
-            >
-              Teacher
-            </span>
-          )}
-        </div>
+          {firstName || user.emailAddresses?.[0]?.emailAddress?.split("@")[0]}
+        </span>
 
         {/* Chevron */}
         <svg
-          width="12"
-          height="12"
-          viewBox="0 0 16 16"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
           fill="none"
           style={{
-            color: "#94a3b8",
             transform: open ? "rotate(180deg)" : "rotate(0deg)",
             transition: "transform 200ms ease",
             flexShrink: 0,
@@ -173,6 +177,7 @@ function UserDropdown({ user, isTeacher, onSignOut }) {
             <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 2 }}>
               {user.emailAddresses?.[0]?.emailAddress}
             </div>
+            {/* Role badge */}
             <div
               style={{
                 display: "inline-flex",
@@ -181,150 +186,83 @@ function UserDropdown({ user, isTeacher, onSignOut }) {
                 marginTop: 6,
                 padding: "2px 8px",
                 borderRadius: 20,
-                background: isTeacher
-                  ? "rgba(40,183,217,0.10)"
-                  : "rgba(13,40,64,0.08)",
+                background: roleCfg.badgeBg,
                 fontSize: 11,
                 fontWeight: 700,
-                color: isTeacher ? "#0e6e8a" : "#0d2840",
+                color: roleCfg.badgeColor,
               }}
             >
-              {isTeacher ? "👩‍🏫 Teacher" : "🎓 Student"}
+              {roleCfg.badgeLabel}
             </div>
           </div>
 
-          {/* Menu items */}
+          {/* Menu items — role-specific */}
           <div style={{ padding: "6px 0" }}>
-            {isTeacher ? (
+            {/* ── TEACHER ── */}
+            {isTeacher && (
               <DropdownLink
                 href="/teacher/dashboard"
                 onClick={() => setOpen(false)}
-                icon={
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                    <rect
-                      x="3"
-                      y="3"
-                      width="7"
-                      height="7"
-                      rx="1.5"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                    />
-                    <rect
-                      x="14"
-                      y="3"
-                      width="7"
-                      height="7"
-                      rx="1.5"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                    />
-                    <rect
-                      x="3"
-                      y="14"
-                      width="7"
-                      height="7"
-                      rx="1.5"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                    />
-                    <rect
-                      x="14"
-                      y="14"
-                      width="7"
-                      height="7"
-                      rx="1.5"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                    />
-                  </svg>
-                }
+                icon={<DashboardIcon />}
               >
                 Teacher Portal
               </DropdownLink>
-            ) : (
+            )}
+
+            {/* ── PARENT ── */}
+            {isParent && (
+              <>
+                <DropdownLink
+                  href="/parent/dashboard"
+                  onClick={() => setOpen(false)}
+                  icon={<HomeIcon />}
+                >
+                  Parent Dashboard
+                </DropdownLink>
+                <DropdownLink
+                  href="/parent/schedule"
+                  onClick={() => setOpen(false)}
+                  icon={<CalendarIcon />}
+                >
+                  Class Schedule
+                </DropdownLink>
+                <DropdownLink
+                  href="/parent/progress"
+                  onClick={() => setOpen(false)}
+                  icon={<ProgressIcon />}
+                >
+                  Progress Reports
+                </DropdownLink>
+              </>
+            )}
+
+            {/* ── STUDENT ── */}
+            {!isTeacher && !isParent && (
               <>
                 <DropdownLink
                   href="/dashboard"
                   onClick={() => setOpen(false)}
-                  icon={
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                      <rect
-                        x="3"
-                        y="3"
-                        width="7"
-                        height="7"
-                        rx="1.5"
-                        stroke="currentColor"
-                        strokeWidth="1.6"
-                      />
-                      <rect
-                        x="14"
-                        y="3"
-                        width="7"
-                        height="7"
-                        rx="1.5"
-                        stroke="currentColor"
-                        strokeWidth="1.6"
-                      />
-                      <rect
-                        x="3"
-                        y="14"
-                        width="7"
-                        height="7"
-                        rx="1.5"
-                        stroke="currentColor"
-                        strokeWidth="1.6"
-                      />
-                      <rect
-                        x="14"
-                        y="14"
-                        width="7"
-                        height="7"
-                        rx="1.5"
-                        stroke="currentColor"
-                        strokeWidth="1.6"
-                      />
-                    </svg>
-                  }
+                  icon={<HomeIcon />}
                 >
                   My Dashboard
                 </DropdownLink>
                 <DropdownLink
-                  href="/booking/trial"
+                  href="/dashboard?tab=classes"
                   onClick={() => setOpen(false)}
-                  icon={
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                      <rect
-                        x="3"
-                        y="4"
-                        width="18"
-                        height="18"
-                        rx="2"
-                        stroke="currentColor"
-                        strokeWidth="1.6"
-                      />
-                      <path
-                        d="M16 2v4M8 2v4M3 10h18"
-                        stroke="currentColor"
-                        strokeWidth="1.6"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  }
+                  icon={<CalendarIcon />}
                 >
-                  Book a Trial
+                  My Classes
                 </DropdownLink>
               </>
             )}
           </div>
 
-          {/* Sign out */}
+          {/* Divider + sign out */}
           <div style={{ borderTop: "1px solid #f0f4f8", padding: "6px 0" }}>
             <button
               onClick={() => {
-                onSignOut();
                 setOpen(false);
+                onSignOut();
               }}
               style={{
                 display: "flex",
@@ -337,20 +275,23 @@ function UserDropdown({ user, isTeacher, onSignOut }) {
                 cursor: "pointer",
                 fontSize: 13,
                 fontWeight: 600,
-                color: "#94a3b8",
+                color: "#ef4444",
                 textAlign: "left",
-                transition: "all 150ms ease",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = "#f7f9fb";
-                e.currentTarget.style.color = "#0f172a";
+                e.currentTarget.style.background = "#fff5f5";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = "transparent";
-                e.currentTarget.style.color = "#94a3b8";
               }}
             >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                style={{ color: "#ef4444", flexShrink: 0 }}
+              >
                 <path
                   d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"
                   stroke="currentColor"
@@ -368,6 +309,7 @@ function UserDropdown({ user, isTeacher, onSignOut }) {
   );
 }
 
+// ─── Reusable dropdown link ───────────────────────────────
 function DropdownLink({ href, onClick, icon, children }) {
   return (
     <Link
@@ -397,7 +339,106 @@ function DropdownLink({ href, onClick, icon, children }) {
   );
 }
 
-// ─── Skeleton for auth buttons while Clerk loads ──────────
+// ─── Inline SVG icons ─────────────────────────────────────
+function DashboardIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+      <rect
+        x="3"
+        y="3"
+        width="7"
+        height="7"
+        rx="1.5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <rect
+        x="14"
+        y="3"
+        width="7"
+        height="7"
+        rx="1.5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <rect
+        x="3"
+        y="14"
+        width="7"
+        height="7"
+        rx="1.5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <rect
+        x="14"
+        y="14"
+        width="7"
+        height="7"
+        rx="1.5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+    </svg>
+  );
+}
+
+function HomeIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M9 22V12h6v10"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function CalendarIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+      <rect
+        x="3"
+        y="4"
+        width="18"
+        height="18"
+        rx="2"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <path
+        d="M3 10h18M8 2v4M16 2v4"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function ProgressIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M18 20V10M12 20V4M6 20v-6"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+// ─── Loading skeleton ─────────────────────────────────────
 function AuthSkeleton() {
   return (
     <div
@@ -420,97 +461,83 @@ export default function Navbar() {
   const { signOut } = useClerk();
   const navRef = useRef(null);
 
-  // Role from Clerk publicMetadata — no API call needed
+  // ── Role detection — reads Clerk publicMetadata, no API call ──
   const role = user?.publicMetadata?.role || "STUDENT";
   const isTeacher = isLoaded && !!user && role === "TEACHER";
+  const isParent = isLoaded && !!user && role === "PARENT";
   const isLoggedIn = isLoaded && !!user;
+
+  // Hide navbar entirely on portal routes
+  const hideNavbar =
+    pathname?.startsWith("/teacher") ||
+    pathname?.startsWith("/parent") ||
+    pathname === "/landing-page" ||
+    pathname?.startsWith("/booking") ||
+    pathname?.startsWith("/dashboard") ||
+    pathname?.startsWith("/register") ||
+    pathname?.startsWith("/login");
 
   // Active link detection
   const activeHref =
     pathname === "/about"
       ? "/about"
       : pathname === "/courses"
-        ? "/courses"
-        : pathname === "/contact"
-          ? "/contact"
-          : "/";
+      ? "/courses"
+      : pathname === "/contact"
+      ? "/contact"
+      : "/";
 
-  // ── Scroll-to-top on route change ─────────────────────────
-  useLayoutEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
-  // ── GSAP scroll shadow ────────────────────────────────────
+  // GSAP scroll effect
   useLayoutEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
-    const nav = navRef.current;
-    if (!nav) return;
+    if (!navRef.current || hideNavbar) return;
 
-    const ctx = gsap.context(() => {
-      const applyForScrollY = (y) => {
-        NAV_SCROLL_CLASSES.forEach((cls) => nav.classList.toggle(cls, y > 1));
-      };
+    ScrollTrigger.create({
+      start: "top+=80 top",
+      onEnter: () => navRef.current?.classList.add(...NAV_SCROLL_CLASSES),
+      onLeaveBack: () =>
+        navRef.current?.classList.remove(...NAV_SCROLL_CLASSES),
+    });
 
-      ScrollTrigger.create({
-        trigger: "main",
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 2,
-        onUpdate: (self) => applyForScrollY(self.scroll()),
-      });
-
-      applyForScrollY(window.scrollY || document.documentElement.scrollTop);
-      ScrollTrigger.refresh();
-    }, nav);
-
-    return () => ctx.revert();
-  }, []);
+    return () => ScrollTrigger.getAll().forEach((t) => t.kill());
+  }, [hideNavbar]);
 
   const handleSignOut = () => signOut(() => router.push("/"));
 
-  // ── Hide on landing page + all teacher panel routes ───────
-  // Teacher panel has its own sidebar — main navbar would overlap
-  if (pathname?.startsWith("/landing-page")) return null;
-  if (pathname?.startsWith("/teacher")) return null;
-  if (pathname?.startsWith("/booking")) return null;
-  if (pathname?.startsWith("/login")) return null;
-  if (pathname?.startsWith("/register")) return null;
-  if (pathname?.startsWith("/dashboard")) return null;
+  if (hideNavbar) return null;
 
   return (
     <>
-      <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }`}</style>
-
       <nav
         ref={navRef}
-        id="navbar"
-        className={`fixed inset-x-0 top-0 z-[100] h-[68px] border-b-[0.1px] border-neutral-300 transition-[box-shadow,backdrop-filter,background-color] duration-200`}
+        className="fixed top-0 left-0 right-0 z-50 border-b=none shadow-sm border-line-light bg-white transition-all duration-300"
+        style={{ height: 68 }}
       >
-        <div className="mx-auto flex h-full w-full max-w-[1240px] items-center justify-between px-6 md:px-[60px]">
+        <div
+          className="mx-auto flex h-full items-center justify-between"
+          style={{ maxWidth: 1240, padding: "0 100px" }}
+        >
           {/* Logo */}
-          <Link
-            href="/"
-            className="logo flex items-center gap-[10px] no-underline"
-          >
+          <Link href="/" className="flex items-center gap-2 shrink-0">
             <Image
               src="/logo2.png"
-              width={100}
-              height={100}
               alt="Quran Odyssey"
-              className=""
+              width={130}
+              height={36}
+              style={{ objectFit: "contain" }}
+              priority
             />
           </Link>
 
-          {/* Desktop navigation */}
-          <ul className="hidden list-none items-center gap-2 md:flex">
+          {/* Nav links */}
+          <ul className="hidden items-center gap-1 md:flex">
             {NAV_LINKS.map((link) => (
-              <li key={link.label}>
+              <li key={link.href}>
                 <Link
                   href={link.href}
                   className={[
-                    "rounded-[6px] px-[14px] py-[6px] text-[14px] font-[500] text-content-muted transition-all",
-                    "hover:bg-surface-light hover:text-content-primary",
-                    link.href === activeHref
+                    "rounded-md px-4 py-2 text-[13px] transition",
+                    pathname === link.href
                       ? "text-content-primary font-[600] bg-neutral-300/50"
                       : "hover:bg-neutral-200",
                   ].join(" ")}
@@ -531,85 +558,38 @@ export default function Navbar() {
                   <UserDropdown
                     user={user}
                     isTeacher={isTeacher}
+                    isParent={isParent}
                     onSignOut={handleSignOut}
                   />
 
                   {/* Primary CTA — role-specific */}
-                  {isTeacher ? (
+                  {isTeacher && (
                     <Link
                       href="/teacher/dashboard"
-                      className="inline-flex items-center gap-[6px] rounded-[6px] bg-brand-cyan px-5 py-2 text-[13px] font-[700] text-white transition hover:-translate-y-[1px] hover:bg-brand-cyan-dark"
+                      className="inline-flex items-center gap-[6px] rounded-[6px] bg-brand-cyan px-5 py-2 text-[13px] font-[700] text-white transition hover:-translate-y-[1px] hover:opacity-90"
                     >
-                      <svg
-                        width="13"
-                        height="13"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                      >
-                        <rect
-                          x="3"
-                          y="3"
-                          width="7"
-                          height="7"
-                          rx="1.5"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                        />
-                        <rect
-                          x="14"
-                          y="3"
-                          width="7"
-                          height="7"
-                          rx="1.5"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                        />
-                        <rect
-                          x="3"
-                          y="14"
-                          width="7"
-                          height="7"
-                          rx="1.5"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                        />
-                        <rect
-                          x="14"
-                          y="14"
-                          width="7"
-                          height="7"
-                          rx="1.5"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                        />
-                      </svg>
+                      <DashboardIcon />
                       Teacher Portal
                     </Link>
-                  ) : (
+                  )}
+
+                  {isParent && (
+                    <Link
+                      href="/parent/dashboard"
+                      className="inline-flex items-center gap-[6px] rounded-[6px] px-5 py-2 text-[13px] font-[700] text-white transition hover:-translate-y-[1px] hover:opacity-90"
+                      style={{ background: "#faa71a", color: "#0d2840" }}
+                    >
+                      <HomeIcon />
+                      Parent Portal
+                    </Link>
+                  )}
+
+                  {!isTeacher && !isParent && (
                     <Link
                       href="/dashboard"
                       className="inline-flex items-center gap-[6px] rounded-[6px] bg-brand-navy px-5 py-2 text-[13px] font-[700] text-white transition hover:-translate-y-[1px] hover:opacity-90"
                     >
-                      <svg
-                        width="13"
-                        height="13"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                      >
-                        <path
-                          d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M9 22V12h6v10"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
+                      <HomeIcon />
                       Dashboard
                     </Link>
                   )}
