@@ -4,6 +4,7 @@ import CourseCard from "./CourseCard";
 const COURSES = [
   {
     num: "01",
+    value: "NOORANI_QAIDA",
     level: "beginner",
     age: "young mid",
     title: "Noorani Qaida",
@@ -21,6 +22,7 @@ const COURSES = [
   },
   {
     num: "02",
+    value: "QURAN_RECITATION",
     level: "intermediate",
     age: "mid teen",
     title: "Salah Course",
@@ -38,6 +40,7 @@ const COURSES = [
   },
   {
     num: "03",
+    value: "QURAN_RECITATION",
     level: "intermediate",
     age: "mid teen",
     title: "Quran Recitation with Tajweed",
@@ -55,8 +58,10 @@ const COURSES = [
   },
   {
     num: "04",
+    value: "NOORANI_QAIDA",
     level: "advanced",
     age: "mid teen",
+    value: 'HIFZ',  
     title: "Hifz Programme",
     desc: "A structured Quran memorisation programme with dedicated Hifz teachers, revision planning, and regular progress tracking. Students memorise at their own pace with consistency and teacher guidance.",
     outcomes: [
