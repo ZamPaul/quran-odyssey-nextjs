@@ -8,7 +8,7 @@ import { useRouter }   from 'next/navigation';
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const TIMEOUT_MS = 15000; // 15 seconds
 
-export function useTeacherFetch() {
+export default function useTeacherFetch() {
   const { getToken, signOut } = useAuth();
   const router = useRouter();
 

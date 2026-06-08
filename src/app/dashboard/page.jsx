@@ -4,6 +4,7 @@ import { useUser, useClerk, useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
+import FileUpload, { FileCard, FilePreview } from '../../components/FileUpload';
 
 // ─── Constants ────────────────────────────────────────────
 const COURSE_LABELS = {
@@ -728,52 +729,88 @@ function HomeworkTab() {
 }
 
 function AssignmentCard({ assignment, expanded, onToggle, onSubmitSuccess }) {
-  const cfg     = ASSIGNMENT_STATUS_CFG[assignment.status] || ASSIGNMENT_STATUS_CFG.PENDING;
-  const due     = new Date(assignment.dueDate);
-  const isPast  = due < new Date();
-  const sub     = assignment.submission;
-
+  const cfg    = ASSIGNMENT_STATUS_CFG[assignment.status] || ASSIGNMENT_STATUS_CFG.PENDING;
+  const due    = new Date(assignment.dueDate);
+  const isPast = due < new Date() && assignment.status === 'PENDING';
+  const sub    = assignment.submission;
+ 
   return (
-    <div style={{ background: 'white', borderRadius: 12, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-      <button onClick={onToggle} style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '16px 20px', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>{assignment.title}</span>
-            <span style={{ fontSize: 11, fontWeight: 700, color: cfg.color, background: cfg.bg, borderRadius: 4, padding: '2px 7px' }}>{cfg.label}</span>
+    <div style={{ background:'white', borderRadius:12, border:'1px solid #e2e8f0', overflow:'hidden' }}>
+      <button onClick={onToggle} style={{ display:'flex', alignItems:'center', gap:12, width:'100%', padding:'16px 20px', background:'transparent', border:'none', cursor:'pointer', textAlign:'left' }}>
+        <div style={{ flex:1, minWidth:0 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap', marginBottom:4 }}>
+            <span style={{ fontSize:14, fontWeight:700, color:'#0f172a' }}>{assignment.title}</span>
+            <span style={{ fontSize:11, fontWeight:700, color:cfg.color, background:cfg.bg, borderRadius:4, padding:'2px 7px' }}>{cfg.label}</span>
+            {assignment.attachmentUrl && (
+              <span style={{ fontSize:11, fontWeight:600, color:'#94a3b8', background:'#f0f4f8', borderRadius:4, padding:'2px 7px' }}>📎 Has attachment</span>
+            )}
           </div>
-          <div style={{ fontSize: 12, color: isPast && assignment.status === 'PENDING' ? '#ef4444' : '#94a3b8', marginTop: 3 }}>
-            {assignment.teacher?.name || 'Teacher'} · Due {due.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-            {sub?.grade && <span style={{ color: '#22c55e', fontWeight: 700 }}> · Grade: {sub.grade}</span>}
+          <div style={{ fontSize:12, color: isPast ? '#ef4444' : '#94a3b8', display:'flex', gap:10, flexWrap:'wrap' }}>
+            <span>👤 {assignment.teacher?.name || 'Teacher'}</span>
+            <span>📅 Due {due.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })}</span>
+            {sub?.grade && <span style={{ color:'#22c55e', fontWeight:700 }}>Grade: {sub.grade}</span>}
           </div>
         </div>
-        <span style={{ color: '#94a3b8', transform: expanded ? 'rotate(180deg)' : 'none', transition: '200ms', flexShrink: 0 }}>▾</span>
+        <span style={{ color:'#94a3b8', transform: expanded ? 'rotate(180deg)' : 'none', transition:'200ms', flexShrink:0 }}>▾</span>
       </button>
-
+ 
       {expanded && (
-        <div style={{ borderTop: '1px solid #e2e8f0', padding: '20px', background: '#fafbfc' }}>
+        <div style={{ borderTop:'1px solid #e2e8f0', padding:'20px', background:'#fafbfc' }}>
+          {/* Description */}
           {assignment.description && (
-            <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.7, marginBottom: 16 }}>{assignment.description}</div>
+            <div style={{ fontSize:13, color:'#64748b', lineHeight:1.7, marginBottom:16 }}>{assignment.description}</div>
           )}
-
-          {/* Graded — show result */}
+ 
+          {/* Teacher's attachment — always visible if present */}
+          {assignment.attachmentUrl && (
+            <FilePreview
+              url={assignment.attachmentUrl}
+              fileName={assignment.attachmentName}
+              fileType={assignment.attachmentType}
+              label="Teacher's attachment"
+            />
+          )}
+ 
+          {/* ── Graded ── */}
           {sub && sub.grade && (
-            <div style={{ padding: '14px 16px', borderRadius: 8, background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', marginBottom: 12 }}>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#15803d' }}>Grade: {sub.grade}</div>
-              {sub.feedback && <div style={{ fontSize: 13, color: '#15803d', marginTop: 4 }}>{sub.feedback}</div>}
+            <div style={{ marginTop:14, padding:'14px 16px', borderRadius:8, background:'rgba(34,197,94,0.08)', border:'1px solid rgba(34,197,94,0.2)' }}>
+              <div style={{ fontSize:13, fontWeight:800, color:'#15803d', marginBottom:4 }}>
+                Grade: {sub.grade}
+              </div>
+              {sub.feedback && (
+                <div style={{ fontSize:13, color:'#15803d', lineHeight:1.6 }}>{sub.feedback}</div>
+              )}
             </div>
           )}
-
-          {/* Submitted, not yet graded */}
+ 
+          {/* ── Submitted, awaiting grade ── */}
           {sub && !sub.grade && (
-            <div style={{ padding: '12px 16px', borderRadius: 8, background: 'rgba(40,183,217,0.08)', border: '1px solid rgba(40,183,217,0.2)' }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#0e6e8a' }}>✓ Submitted — awaiting grade</div>
-              {sub.content && <div style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>{sub.content}</div>}
+            <div style={{ marginTop:14 }}>
+              <div style={{ padding:'10px 14px', borderRadius:8, background:'rgba(40,183,217,0.08)', border:'1px solid rgba(40,183,217,0.2)', marginBottom:10 }}>
+                <div style={{ fontSize:13, fontWeight:700, color:'#0e6e8a' }}>
+                  ✓ Submitted — awaiting grade
+                </div>
+                {sub.content && (
+                  <div style={{ fontSize:13, color:'#64748b', marginTop:6, lineHeight:1.6 }}>{sub.content}</div>
+                )}
+              </div>
+              {/* Student's submitted file */}
+              {sub.fileUrl && (
+                <FilePreview
+                  url={sub.fileUrl}
+                  fileName={sub.fileName}
+                  fileType={sub.fileType}
+                  label="Your submitted file"
+                />
+              )}
             </div>
           )}
-
-          {/* Not yet submitted — show form */}
+ 
+          {/* ── Not yet submitted ── */}
           {!sub && assignment.status !== 'GRADED' && (
-            <SubmitForm assignmentId={assignment.id} onSuccess={onSubmitSuccess} />
+            <div style={{ marginTop: assignment.attachmentUrl ? 16 : 0 }}>
+              <SubmitForm assignmentId={assignment.id} onSuccess={onSubmitSuccess} />
+            </div>
           )}
         </div>
       )}
@@ -782,29 +819,43 @@ function AssignmentCard({ assignment, expanded, onToggle, onSubmitSuccess }) {
 }
 
 function SubmitForm({ assignmentId, onSuccess }) {
-  const [content,     setContent]     = useState('');
-  const [fileUrl,     setFileUrl]     = useState('');
-  const [submitting,  setSubmitting]  = useState(false);
-  const [error,       setError]       = useState('');
-  const { getToken } = useAuth();
-
+  const { getToken, userId } = useAuth();
+  const [content,    setContent]    = useState('');
+  const [fileData,   setFileData]   = useState(null); // { url, fileName, fileType }
+  const [submitting, setSubmitting] = useState(false);
+  const [error,      setError]      = useState('');
+ 
+  const handleUploadComplete = (result) => {
+    setFileData(result);
+    setError('');
+  };
+ 
+  const handleFileClear = () => {
+    setFileData(null);
+  };
+ 
   const handleSubmit = async () => {
-    if (!content.trim() && !fileUrl.trim()) {
-      setError('Please add some text or a file URL before submitting.');
+    if (!content.trim() && !fileData) {
+      setError('Please add an answer or upload a file before submitting.');
       return;
     }
     setSubmitting(true);
     setError('');
     try {
       const token = await getToken();
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/students/assignments/${assignmentId}/submit`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({
-          content: content.trim() || undefined,
-          fileUrl: fileUrl.trim() || undefined,
-        }),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/students/assignments/${assignmentId}/submit`,
+        {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            content:  content.trim() || undefined,
+            fileUrl:  fileData?.url       || undefined,
+            fileName: fileData?.fileName  || undefined,
+            fileType: fileData?.fileType  || undefined,
+          }),
+        }
+      );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Submission failed');
       onSuccess(data.submission);
@@ -814,35 +865,49 @@ function SubmitForm({ assignmentId, onSuccess }) {
       setSubmitting(false);
     }
   };
-
+ 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+      {/* Text answer */}
       <div>
-        <label style={{ fontSize: 12, fontWeight: 700, color: '#64748b', display: 'block', marginBottom: 6 }}>Your Answer</label>
+        <label style={{ fontSize:12, fontWeight:700, color:'#64748b', display:'block', marginBottom:6 }}>
+          Your Answer
+        </label>
         <textarea
           value={content}
           onChange={e => setContent(e.target.value)}
           placeholder="Write your answer here…"
           maxLength={3000}
           rows={4}
-          style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 13, fontFamily: 'inherit', outline: 'none', resize: 'vertical', boxSizing: 'border-box', color: '#0f172a' }}
+          style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1px solid #e2e8f0', fontSize:13, fontFamily:'inherit', outline:'none', resize:'vertical', boxSizing:'border-box', color:'#0f172a' }}
         />
-        <div style={{ fontSize: 11, color: '#94a3b8', textAlign: 'right', marginTop: 2 }}>{content.length}/3000</div>
+        <div style={{ fontSize:11, color:'#94a3b8', textAlign:'right', marginTop:2 }}>{content.length}/3000</div>
       </div>
+ 
+      {/* File upload */}
       <div>
-        <label style={{ fontSize: 12, fontWeight: 700, color: '#64748b', display: 'block', marginBottom: 6 }}>File URL (optional)</label>
-        <input
-          value={fileUrl}
-          onChange={e => setFileUrl(e.target.value)}
-          placeholder="https://drive.google.com/..."
-          style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 13, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box', color: '#0f172a' }}
+        <label style={{ fontSize:12, fontWeight:700, color:'#64748b', display:'block', marginBottom:6 }}>
+          File Upload <span style={{ fontWeight:400, color:'#94a3b8' }}>(optional — images, PDF, audio recording)</span>
+        </label>
+        <FileUpload
+          role="student"
+          userId={userId}
+          label="Upload a file with your submission"
+          compact={true}
+          onUploadComplete={handleUploadComplete}
+          onClear={handleFileClear}
+          existingFile={fileData ? { url: fileData.url, fileName: fileData.fileName, fileType: fileData.fileType } : null}
         />
       </div>
-      {error && <div style={{ fontSize: 12, color: '#ef4444', fontWeight: 600 }}>{error}</div>}
+ 
+      {error && (
+        <div style={{ fontSize:12, color:'#ef4444', fontWeight:600 }}>⚠️ {error}</div>
+      )}
+ 
       <button
         onClick={handleSubmit}
         disabled={submitting}
-        style={{ padding: '10px 20px', borderRadius: 8, border: 'none', background: submitting ? '#e2e8f0' : '#0d2840', color: submitting ? '#94a3b8' : 'white', fontSize: 13, fontWeight: 700, cursor: submitting ? 'wait' : 'pointer', alignSelf: 'flex-start' }}
+        style={{ padding:'10px 20px', borderRadius:8, border:'none', background: submitting ? '#e2e8f0' : '#0d2840', color: submitting ? '#94a3b8' : 'white', fontSize:13, fontWeight:700, cursor: submitting ? 'wait' : 'pointer', alignSelf:'flex-start' }}
       >
         {submitting ? 'Submitting…' : 'Submit Assignment'}
       </button>
