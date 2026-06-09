@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import OptInHero from "./OptInHero";
 import { OptInMainForm, OptInStickyForm, RatingRow } from "./OptInForms";
+import WhatsAppButton from "./WhatsAppButton";
 
 const STICKY_COUNT = 7;
 
@@ -709,6 +710,8 @@ export default function OptInPage() {
             </div>
           </div>
         ))} */}
+
+      <WhatsAppButton />
 
       {/* ── Footer ──────────────────────────────────────────── */}
       <footer className="mt-4 w-full border-t border-line-light bg-white px-5 py-8 text-center">
