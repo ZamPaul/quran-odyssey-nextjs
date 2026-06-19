@@ -1,9 +1,12 @@
-// ─────────────────────────────────────────────────────────
-// FILE 1: app/auth/callback/page.jsx  (FULL REPLACEMENT)
-// Adds PARENT role redirect alongside existing TEACHER/STUDENT
-// ─────────────────────────────────────────────────────────
-
 'use client';
+
+// ═══════════════════════════════════════════════════════════
+// FILE: src/app/auth/callback/page.jsx   (FULL REPLACEMENT)
+//
+// Multi-learner change: the PARENT/STUDENT split is gone. Everyone
+// who isn't a teacher lands on the unified /dashboard. Teachers still
+// go to their portal.
+// ═══════════════════════════════════════════════════════════
 
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
@@ -21,10 +24,8 @@ export default function AuthCallbackPage() {
 
     if (role === 'TEACHER') {
       router.push('/teacher/dashboard');
-    } else if (role === 'PARENT') {
-      router.push('/parent/dashboard');
     } else {
-      // STUDENT or no role set
+      // PARENT, STUDENT (legacy), or no role → the unified dashboard
       router.push('/dashboard');
     }
   }, [isLoaded, user]);
@@ -39,103 +40,3 @@ export default function AuthCallbackPage() {
     </div>
   );
 }
-
-
-// ─────────────────────────────────────────────────────────
-// FILE 2: middleware.js  — ADD /parent(.*) to protected routes
-// Find the isProtectedRoute matcher and add the parent route.
-// Only showing the relevant lines to add — do NOT replace the
-// whole file, just add the parent route to the existing matcher.
-// ─────────────────────────────────────────────────────────
-
-/*
-  BEFORE (in your existing middleware.js):
-  const isProtectedRoute = createRouteMatcher([
-    '/dashboard(.*)',
-    '/teacher(.*)',
-    '/booking(.*)',
-  ]);
-
-  AFTER — add '/parent(.*)':
-  const isProtectedRoute = createRouteMatcher([
-    '/dashboard(.*)',
-    '/teacher(.*)',
-    '/parent(.*)',       // ← ADD THIS LINE
-    '/booking(.*)',
-  ]);
-*/
-
-
-// ─────────────────────────────────────────────────────────
-// FILE 3: src/index.js  — ADD parent router registration
-// Add these two lines in the router registration block.
-// ─────────────────────────────────────────────────────────
-
-/*
-  // After existing router imports, add:
-  import parentRouter from './routes/parent.js';
-
-  // After existing app.use('/api/enrollment', enrollmentRouter), add:
-  app.use('/api/parent', parentRouter);
-*/
-
-
-// ─────────────────────────────────────────────────────────
-// FILE 4: app/courses/page.jsx — Enroll button patch
-// Find each course card's CTA button/link and replace with:
-// ─────────────────────────────────────────────────────────
-
-/*
-  BEFORE (typical course card CTA):
-  <Link href="/booking/trial">Book Free Trial</Link>
-
-  AFTER — keep trial + add enroll:
-  <div style={{ display: 'flex', gap: 8 }}>
-    <Link
-      href="/booking/trial"
-      style={{ ... existing styles ... }}
-    >
-      Book Free Trial
-    </Link>
-    <Link
-      href={`/enroll?course=${course.value}`}
-      style={{
-        display:        'inline-flex',
-        alignItems:     'center',
-        gap:            6,
-        padding:        '10px 18px',
-        borderRadius:   8,
-        background:     '#0d2840',
-        color:          'white',
-        fontSize:       13,
-        fontWeight:     700,
-        textDecoration: 'none',
-      }}
-    >
-      Enroll Now →
-    </Link>
-  </div>
-
-  The ?course= query param pre-selects the course in Step 1
-  of the enrollment form. Map each course to its enum value:
-    Noorani Qaida      → ?course=NOORANI_QAIDA
-    Quran Recitation   → ?course=QURAN_RECITATION
-    Tajweed            → ?course=TAJWEED
-    Hifz               → ?course=HIFZ
-    Islamic Studies    → ?course=ISLAMIC_STUDIES
-    One-to-One         → ?course=ONE_TO_ONE
-*/
-
-
-// ─────────────────────────────────────────────────────────
-// FILE 5: .env additions (Render backend)
-// ─────────────────────────────────────────────────────────
-
-/*
-  # Already present — no change needed:
-  CLERK_SECRET_KEY=...
-  DATABASE_URL=...
-
-  # Add if not already present (Phase 3):
-  ADMIN_SECRET=<generate: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))">
-*/

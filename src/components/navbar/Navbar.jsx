@@ -18,7 +18,7 @@ const NAV_LINKS = [
 const NAV_SCROLL_CLASSES = ["scrolled", "backdrop-blur-xl", "bg-white/75"];
 
 // ─── User avatar + dropdown ───────────────────────────────
-function UserDropdown({ user, isTeacher, isParent, onSignOut }) {
+function UserDropdown({ user, isTeacher, onSignOut }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -39,31 +39,20 @@ function UserDropdown({ user, isTeacher, isParent, onSignOut }) {
 
   // ── Per-role visual config ─────────────────────────────
   const roleCfg = isTeacher
-    ? {
-        borderColor: "rgba(40,183,217,0.35)",
-        borderHover: "#28b7d9",
-        avatarBg: "linear-gradient(135deg, #28b7d9, #0e6e8a)",
-        badgeBg: "rgba(40,183,217,0.10)",
-        badgeColor: "#0e6e8a",
-        badgeLabel: "👩‍🏫 Teacher",
-      }
-    : isParent
-    ? {
-        borderColor: "rgba(250,167,26,0.40)",
-        borderHover: "#faa71a",
-        avatarBg: "linear-gradient(135deg, #faa71a, #e8920a)",
-        badgeBg: "rgba(250,167,26,0.12)",
-        badgeColor: "#92400e",
-        badgeLabel: "👨‍👩‍👧 Parent",
-      }
-    : {
-        borderColor: "#e2e8f0",
-        borderHover: "#cbd5e1",
-        avatarBg: "linear-gradient(135deg, #0d2840, #142f4a)",
-        badgeBg: "rgba(13,40,64,0.08)",
-        badgeColor: "#0d2840",
-        badgeLabel: "🎓 Student",
-      };
+  ? {
+      borderColor: "rgba(40,183,217,0.35)",
+      avatarBg:    "linear-gradient(135deg, #28b7d9, #0e6e8a)",
+      badgeBg:     "rgba(40,183,217,0.10)",
+      badgeColor:  "#0e6e8a",
+      badgeLabel:  "👩‍🏫 Teacher",
+    }
+  : {
+      borderColor: "rgba(250,167,26,0.40)",
+      avatarBg:    "linear-gradient(135deg, #faa71a, #e8920a)",
+      badgeBg:     "rgba(250,167,26,0.12)",
+      badgeColor:  "#92400e",
+      badgeLabel:  "👤 My Account",
+    };
 
   return (
     <div ref={ref} style={{ position: "relative" }}>
@@ -81,8 +70,6 @@ function UserDropdown({ user, isTeacher, isParent, onSignOut }) {
           border: `1.5px solid ${roleCfg.borderColor}`,
           background: isTeacher
             ? "rgba(40,183,217,0.08)"
-            : isParent
-            ? "rgba(250,167,26,0.07)"
             : "#f7f9fb",
           cursor: "pointer",
           transition: "all 150ms ease",
@@ -106,7 +93,8 @@ function UserDropdown({ user, isTeacher, isParent, onSignOut }) {
             justifyContent: "center",
             fontSize: 12,
             fontWeight: 800,
-            color: isParent ? "#0d2840" : "white",
+            // color: isParent ? "#0d2840" : "white",
+            color: "#0d2840",
             flexShrink: 0,
           }}
         >
@@ -198,60 +186,17 @@ function UserDropdown({ user, isTeacher, isParent, onSignOut }) {
 
           {/* Menu items — role-specific */}
           <div style={{ padding: "6px 0" }}>
-            {/* ── TEACHER ── */}
-            {isTeacher && (
-              <DropdownLink
-                href="/teacher/dashboard"
-                onClick={() => setOpen(false)}
-                icon={<DashboardIcon />}
-              >
-                Teacher Portal
-              </DropdownLink>
-            )}
-
-            {/* ── PARENT ── */}
-            {isParent && (
+          {isTeacher ? (
+            <DropdownLink href="/teacher/dashboard" onClick={() => setOpen(false)} icon={<DashboardIcon />}>
+              Teacher Portal
+            </DropdownLink>
+            ) : (
               <>
-                <DropdownLink
-                  href="/parent/dashboard"
-                  onClick={() => setOpen(false)}
-                  icon={<HomeIcon />}
-                >
-                  Parent Dashboard
+                <DropdownLink href="/dashboard" onClick={() => setOpen(false)} icon={<HomeIcon />}>
+                  Dashboard
                 </DropdownLink>
-                <DropdownLink
-                  href="/parent/schedule"
-                  onClick={() => setOpen(false)}
-                  icon={<CalendarIcon />}
-                >
-                  Class Schedule
-                </DropdownLink>
-                <DropdownLink
-                  href="/parent/progress"
-                  onClick={() => setOpen(false)}
-                  icon={<ProgressIcon />}
-                >
-                  Progress Reports
-                </DropdownLink>
-              </>
-            )}
-
-            {/* ── STUDENT ── */}
-            {!isTeacher && !isParent && (
-              <>
-                <DropdownLink
-                  href="/dashboard"
-                  onClick={() => setOpen(false)}
-                  icon={<HomeIcon />}
-                >
-                  My Dashboard
-                </DropdownLink>
-                <DropdownLink
-                  href="/dashboard?tab=classes"
-                  onClick={() => setOpen(false)}
-                  icon={<CalendarIcon />}
-                >
-                  My Classes
+                <DropdownLink href="/booking/trial" onClick={() => setOpen(false)} icon={<CalendarIcon />}>
+                  Book a Trial
                 </DropdownLink>
               </>
             )}
@@ -461,18 +406,16 @@ export default function Navbar() {
   const { signOut } = useClerk();
   const navRef = useRef(null);
 
-  // ── Role detection — reads Clerk publicMetadata, no API call ──
-  const role = user?.publicMetadata?.role || "STUDENT";
-  const isTeacher = isLoaded && !!user && role === "TEACHER";
-  const isParent = isLoaded && !!user && role === "PARENT";
+  const role       = user?.publicMetadata?.role || "PARENT";
+  const isTeacher  = isLoaded && !!user && role === "TEACHER";
   const isLoggedIn = isLoaded && !!user;
+  // No more isParent branch — parents and students share one dashboard.
 
   // Hide navbar entirely on portal routes
   const hideNavbar =
     pathname?.startsWith("/teacher") ||
-    pathname?.startsWith("/parent") ||
     pathname === "/landing-page" ||
-    pathname?.startsWith("/booking") ||
+    // pathname?.startsWith("/booking") ||
     pathname?.startsWith("/dashboard") ||
     pathname?.startsWith("/register") ||
     pathname?.startsWith("/login");
@@ -558,12 +501,11 @@ export default function Navbar() {
                   <UserDropdown
                     user={user}
                     isTeacher={isTeacher}
-                    isParent={isParent}
                     onSignOut={handleSignOut}
                   />
 
                   {/* Primary CTA — role-specific */}
-                  {isTeacher && (
+                  {isTeacher ? (
                     <Link
                       href="/teacher/dashboard"
                       className="inline-flex items-center gap-[6px] rounded-[6px] bg-brand-cyan px-5 py-2 text-[13px] font-[700] text-white transition hover:-translate-y-[1px] hover:opacity-90"
@@ -571,20 +513,7 @@ export default function Navbar() {
                       <DashboardIcon />
                       Teacher Portal
                     </Link>
-                  )}
-
-                  {isParent && (
-                    <Link
-                      href="/parent/dashboard"
-                      className="inline-flex items-center gap-[6px] rounded-[6px] px-5 py-2 text-[13px] font-[700] text-white transition hover:-translate-y-[1px] hover:opacity-90"
-                      style={{ background: "#faa71a", color: "#0d2840" }}
-                    >
-                      <HomeIcon />
-                      Parent Portal
-                    </Link>
-                  )}
-
-                  {!isTeacher && !isParent && (
+                  ) : (
                     <Link
                       href="/dashboard"
                       className="inline-flex items-center gap-[6px] rounded-[6px] bg-brand-navy px-5 py-2 text-[13px] font-[700] text-white transition hover:-translate-y-[1px] hover:opacity-90"
