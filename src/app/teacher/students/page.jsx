@@ -32,16 +32,17 @@ function AttendanceRing({ pct }) {
 
 function StudentCard({ item }) {
   const { student, enrollment } = item;
-  const profile  = student.profile;
-  const initials = (profile?.childName || student.email)
-    .split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  const profile  = student;
+  // const initials = (profile?.childName || student.email)
+  //   .split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  const initials = student?.name;
   const gradients = [
     'linear-gradient(135deg,#28b7d9,#0e6e8a)',
     'linear-gradient(135deg,#faa71a,#e8920a)',
     'linear-gradient(135deg,#7c3bee,#5b21b6)',
     'linear-gradient(135deg,#22c55e,#15803d)',
   ];
-  const grad = gradients[(profile?.childName || '').charCodeAt(0) % gradients.length];
+  const grad = gradients[(profile?.name || '').charCodeAt(0) % gradients.length];
 
   return (
     <Link
@@ -74,10 +75,10 @@ function StudentCard({ item }) {
             </div>
             <div>
               <div style={{ fontSize: 15, fontWeight: 800, color: '#0f172a' }}>
-                {profile?.childName || student.email.split('@')[0]}
+                {profile?.name || student.email.split('@')[0]}
               </div>
               <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 1 }}>
-                {profile?.childAge ? `${profile.childAge} yrs` : ''}{profile?.country ? ` · ${profile.country}` : ''}
+                {profile?.age ? `${profile.age} yrs` : ''}{profile?.country ? ` · ${profile.country}` : ''}
               </div>
             </div>
           </div>
@@ -155,11 +156,15 @@ export default function StudentsPage() {
     load();
   }, [filter]);
 
+  useEffect(() => {
+    console.log(students)
+  }, [students])
+
   const filtered = students.filter(({ student }) => {
     if (!search) return true;
     const q = search.toLowerCase();
     return (
-      student.profile?.childName?.toLowerCase().includes(q) ||
+      student?.name.toLowerCase().includes(q) ||
       student.profile?.parentName?.toLowerCase().includes(q) ||
       student.email.toLowerCase().includes(q)
     );

@@ -439,7 +439,7 @@ function SessionCard({ session, expanded, onToggle, attendanceRecord, onAttendan
   const isLive    = diffMins >= -30 && diffMins <= 30;
   const isUnmarkedPast = scheduled < new Date(now - 30 * 60 * 1000) && !attendanceRecord;
 
-  const childName   = session.student?.studentProfile?.childName || session.student?.email?.split('@')[0] || 'Student';
+  const childName   = session.student?.name || session.student?.email?.split('@')[0] || 'Student';
   const courseLabel = COURSE_LABELS[session.courseType] || session.courseType;
 
   return (
@@ -592,10 +592,10 @@ function SessionCard({ session, expanded, onToggle, attendanceRecord, onAttendan
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
               {[
                 ['Name',     childName],
-                ['Age',      session.student?.studentProfile?.childAge ? `${session.student.studentProfile.childAge} yrs` : '—'],
-                ['Country',  session.student?.studentProfile?.country  || '—'],
-                ['Timezone', session.student?.studentProfile?.timezone || '—'],
-                ['Parent',   session.student?.studentProfile?.parentName || '—'],
+                ['Age',      session.student?.age ? `${session.student.age} yrs` : '—'],
+                ['Country',  session.student?.country  || '—'],
+                ['Timezone', session.student?.timezone || '—'],
+                ['Parent',   session.student?.parentName || '—'],
               ].map(([label, value]) => (
                 <div key={label}>
                   <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#94a3b8', marginBottom: 2 }}>{label}</div>

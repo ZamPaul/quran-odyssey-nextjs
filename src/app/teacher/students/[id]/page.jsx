@@ -134,8 +134,8 @@ export default function StudentDetailPage() {
   );
 
   const { student, enrollment, sessions, assignments, progressReports, attendance } = data;
-  const profile  = student.profile;
-  const initials = (profile?.childName || student.email).split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const profile  = student;
+  const initials = (profile?.nane || student.email).split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
   const attColor = attendance.percentage >= 80 ? '#22c55e' : attendance.percentage >= 60 ? '#f97316' : '#ef4444';
 
   return (
@@ -156,10 +156,10 @@ export default function StudentDetailPage() {
           </div>
           <div style={{ flex:1 }}>
             <div style={{ fontSize:20, fontWeight:800, color:'#0f172a', letterSpacing:'-0.02em' }}>
-              {profile?.childName || student.email.split('@')[0]}
+              {profile?.name || student.email.split('@')[0]}
             </div>
             <div style={{ display:'flex', flexWrap:'wrap', gap:12, marginTop:6 }}>
-              {profile?.childAge    && <span style={{ fontSize:12, color:'#64748b' }}>👤 {profile.childAge} yrs</span>}
+              {profile?.age    && <span style={{ fontSize:12, color:'#64748b' }}>👤 {profile.age} yrs</span>}
               {/* {profile?.country     && <span style={{ fontSize:12, color:'#64748b' }}>🌍 {profile.country}</span>} */}
               {/* {profile?.timezone    && <span style={{ fontSize:12, color:'#64748b' }}>🕐 {profile.timezone}</span>} */}
               {/* {profile?.parentName  && <span style={{ fontSize:12, color:'#64748b' }}>👨‍👩‍👧 {profile.parentName}</span>} */}

@@ -106,7 +106,7 @@ function ReportForm({ students, editReport, onSaved, onCancel, apiFetch }) {
             <option value="">Select student</option>
             {students.map(({student,enrollment}) => (
               <option key={student.id} value={student.id}>
-                {student.profile?.childName||student.email}
+                {student?.name||student.email}
               </option>
             ))}
           </select>
@@ -178,7 +178,7 @@ function ReportCard({ report, onEdit, onSent, apiFetch }) {
   const [localReport, setLocalReport] = useState(report);
 
   const isSent = localReport.status === 'SENT';
-  const childName = localReport.student?.studentProfile?.childName || localReport.student?.email?.split('@')[0] || 'Student';
+  const childName = localReport.student?.name || localReport.student?.email?.split('@')[0] || 'Student';
 
   const handleSend = async () => {
     setSending(true); setError('');

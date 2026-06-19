@@ -57,7 +57,11 @@ function SessionCard({ session, isToday }) {
   const isLive     = diffMins >= -30 && diffMins <= 30;
   const isPast     = scheduled < now && !isLive;
 
-  const childName  = session.student?.studentProfile?.childName || session.student?.email?.split('@')[0] || 'Student';
+  useEffect(() => {
+    console.log(session);
+  }, [session])
+
+  const childName  = session.student?.name || session.student?.email?.split('@')[0] || 'Student';
   const courseLabel = {
     NOORANI_QAIDA:    'Noorani Qaida',
     QURAN_RECITATION: 'Quran Recitation',

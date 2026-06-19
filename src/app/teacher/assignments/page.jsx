@@ -159,7 +159,7 @@ function CreateForm({
             <option value="">Select student</option>
             {students.map(({ student, enrollment }) => (
               <option key={student.id} value={student.id}>
-                {student.profile?.childName || student.email} —{" "}
+                {student?.name || student.email} —{" "}
                 {enrollment.courseType.replace(/_/g, " ")}
               </option>
             ))}
@@ -404,7 +404,7 @@ function AssignmentCard({
   const due = new Date(assignment.dueDate);
   const isPastDue = due < new Date();
   const childName =
-    assignment.student?.studentProfile?.childName ||
+    assignment.student?.name ||
     assignment.student?.email?.split("@")[0] ||
     "Student";
   const sub = assignment.submission;
