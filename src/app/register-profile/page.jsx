@@ -64,6 +64,7 @@ export default function ProfilePage() {
   const validateStep = () => {
     if (step === 1) {
       if (!form.accountName.trim()) return "Please enter your full name.";
+      if(!form.phone) return "Please enter your phone.";
     }
     if (step === 2) {
       if (!isSelf && !form.learnerName.trim()) return "Please enter the learner's name.";
@@ -169,7 +170,7 @@ export default function ProfilePage() {
                     value={form.accountName} onChange={(v) => set("accountName", v)}
                   />
                   <Field
-                    label="WhatsApp number (optional)" id="phone" type="tel"
+                    label="WhatsApp number" id="phone" type="tel"
                     placeholder="e.g. 447911123456 (no + sign)"
                     value={form.phone} onChange={(v) => set("phone", v)}
                     hint="We'll send booking confirmations here. Include country code."

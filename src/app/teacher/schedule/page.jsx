@@ -25,6 +25,7 @@ function isSameDay(a, b) {
 
 function fmtTime(date) {
   return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  // return new Date(date).toLocaleTimeString();
 }
 
 function fmtDate(date) {
@@ -434,6 +435,7 @@ function AttendancePanel({ session, record, onMarked, onUpdated, apiFetch }) {
 // ─── Session card ─────────────────────────────────────────
 function SessionCard({ session, expanded, onToggle, attendanceRecord, onAttendanceMarked, onAttendanceUpdated, onZoomLinkSaved, apiFetch }) {
   const scheduled = new Date(session.scheduledAt);
+  console.log("scheduled date:", session.scheduledAt);
   const now       = new Date();
   const diffMins  = Math.round((scheduled - now) / 60000);
   const isLive    = diffMins >= -30 && diffMins <= 30;
@@ -707,6 +709,7 @@ export default function SchedulePage() {
       const data = await apiFetch(
         `/api/teacher/sessions?from=${from}&to=${to.toISOString()}`
       );
+      console.log("data loaded for this teacher:", data);
       setSessions(data.sessions || []);
     } catch (err) {
       setError(err.message);
