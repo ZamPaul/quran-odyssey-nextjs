@@ -43,6 +43,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    // console.log(detected);
     setForm((prev) => ({ ...prev, timezone: detected }));
   }, []);
 

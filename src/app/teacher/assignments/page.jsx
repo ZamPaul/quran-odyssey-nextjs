@@ -7,6 +7,7 @@ import FileUpload, {
   FileCard,
   FilePreview,
 } from "../../../components/FileUpload";
+import { useAuth } from "@clerk/nextjs";
 
 // ─── Constants ────────────────────────────────────────────
 const COURSE_TYPES = [
@@ -399,8 +400,10 @@ function AssignmentCard({
   expanded,
   onToggle,
   onUpdated,
+  onDeleted,
   apiFetch,
 }) {
+  const { user } = useUser();     
   const due = new Date(assignment.dueDate);
   const isPastDue = due < new Date();
   const childName =
@@ -409,6 +412,9 @@ function AssignmentCard({
     "Student";
   const sub = assignment.submission;
   const [local, setLocal] = useState(assignment);
+
+  const [editing, setEditing] = useState(false); 
+  const isGraded = local.status === "GRADED" || !!local.submission?.grade;
 
   const handleGraded = (grade, feedback) => {
     const updated = {
@@ -420,6 +426,24 @@ function AssignmentCard({
         feedback,
         gradedAt: new Date().toISOString(),
       },
+    };
+    setLocal(updated);
+    onUpdated(updated);
+  };
+
+  const handleSavedEdit = (updatedAssignment) => {
+    setLocal(updatedAssignment);
+    onUpdated(updatedAssignment);
+    setEditing(false);
+  };
+
+  const handleUnlocked = () => {
+    const updated = {
+      ...local,
+      status: "PENDING",
+      submission: local.submission
+        ? { ...local.submission, grade: null, feedback: null, gradedAt: null }
+        : local.submission,
     };
     setLocal(updated);
     onUpdated(updated);
@@ -646,7 +670,69 @@ function AssignmentCard({
               No submission yet.
             </div>
           )}
+
+          {/* ── ACTIONS BAR ───────────────────────────────── */}
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              flexWrap: "wrap",
+              alignItems: "center",
+              marginTop: 18,
+              paddingTop: 16,
+              borderTop: "1px solid #e2e8f0",
+            }}
+          >
+            {/* Edit — locked once graded */}
+            <button
+              onClick={() => setEditing(true)}
+              disabled={isGraded}
+              title={
+                isGraded
+                  ? 'Graded assignments are locked. Use "Allow resubmission" to reopen.'
+                  : "Edit assignment"
+              }
+              style={{
+                padding: "7px 14px",
+                borderRadius: 7,
+                border: `1px solid ${isGraded ? "#e2e8f0" : "#0d2840"}`,
+                background: "white",
+                color: isGraded ? "#cbd5e1" : "#0d2840",
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: isGraded ? "not-allowed" : "pointer",
+              }}
+            >
+              Edit
+            </button>
+
+            {/* Allow resubmission — only when a submission exists */}
+            {sub && (
+              <UnlockButton
+                assignmentId={local.id}
+                apiFetch={apiFetch}
+                onUnlocked={handleUnlocked}
+              />
+            )}
+
+            {/* Delete (handles force path internally) */}
+            <DeleteButton
+              assignment={local}
+              apiFetch={apiFetch}
+              onDeleted={() => onDeleted(local.id)}
+            />
+          </div>
         </div>
+      )}
+
+      {editing && (
+        <EditAssignmentModal
+          assignment={local}
+          apiFetch={apiFetch}
+          userId={user?.id}
+          onClose={() => setEditing(false)}
+          onSaved={handleSavedEdit}
+        />
       )}
     </div>
   );
@@ -678,6 +764,205 @@ function FilterTabs({ active, onChange, counts }) {
           {counts[t] > 0 && ` (${counts[t]})`}
         </button>
       ))}
+    </div>
+  );
+}
+
+// ─── UnlockButton ("Allow resubmission") ──────────────────
+function UnlockButton({ assignmentId, apiFetch, onUnlocked }) {
+  const [confirming, setConfirming] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+ 
+  const doUnlock = async () => {
+    setBusy(true); setError("");
+    try {
+      await apiFetch(`/api/teacher/assignments/${assignmentId}/unlock`, { method: "POST" });
+      onUnlocked();
+    } catch (err) { setError(err.message); setBusy(false); }
+  };
+ 
+  if (!confirming) {
+    return (
+      <button
+        onClick={() => setConfirming(true)}
+        style={{ padding: "7px 14px", borderRadius: 7, border: "1px solid #28b7d9", background: "white", color: "#0e6e8a", fontSize: 12, fontWeight: 700, cursor: "pointer" }}
+      >
+        Allow resubmission
+      </button>
+    );
+  }
+ 
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+      <span style={{ fontSize: 12, color: "#0e6e8a", fontWeight: 600 }}>Reopen for the student?</span>
+      <button onClick={doUnlock} disabled={busy} style={{ padding: "6px 12px", borderRadius: 7, border: "none", background: busy ? "#e2e8f0" : "#28b7d9", color: busy ? "#94a3b8" : "white", fontSize: 12, fontWeight: 700, cursor: busy ? "wait" : "pointer" }}>
+        {busy ? "Reopening…" : "Yes"}
+      </button>
+      <button onClick={() => setConfirming(false)} disabled={busy} style={{ padding: "6px 10px", borderRadius: 7, border: "1px solid #e2e8f0", background: "white", color: "#64748b", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>No</button>
+      {error && <span style={{ fontSize: 11, color: "#dc2626" }}>⚠️ {error}</span>}
+    </span>
+  );
+}
+
+// ─── DeleteButton (raw fetch to read the 409 requiresForce body) ──
+function DeleteButton({ assignment, apiFetch, onDeleted }) {
+  const { getToken } = useAuth();
+  const [stage, setStage] = useState("idle"); // idle | confirm | forceConfirm
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+ 
+  const attempt = async (force) => {
+    setBusy(true); setError("");
+    try {
+      const token = await getToken();
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/teacher/assignments/${assignment.id}${force ? "?force=true" : ""}`;
+      const res = await fetch(url, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json().catch(() => ({}));
+ 
+      if (res.status === 409 && data.requiresForce) {
+        setStage("forceConfirm");
+        setBusy(false);
+        return;
+      }
+      if (!res.ok) throw new Error(data.error || "Delete failed");
+      onDeleted();
+    } catch (err) { setError(err.message); setBusy(false); }
+  };
+ 
+  if (stage === "idle") {
+    return (
+      <button
+        onClick={() => setStage("confirm")}
+        style={{ padding: "7px 14px", borderRadius: 7, border: "1px solid #fecaca", background: "white", color: "#dc2626", fontSize: 12, fontWeight: 700, cursor: "pointer" }}
+      >
+        Delete
+      </button>
+    );
+  }
+ 
+  if (stage === "confirm") {
+    return (
+      <span style={{ display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+        <span style={{ fontSize: 12, color: "#dc2626", fontWeight: 600 }}>Delete this assignment?</span>
+        <button onClick={() => attempt(false)} disabled={busy} style={{ padding: "6px 12px", borderRadius: 7, border: "none", background: busy ? "#e2e8f0" : "#dc2626", color: busy ? "#94a3b8" : "white", fontSize: 12, fontWeight: 700, cursor: busy ? "wait" : "pointer" }}>
+          {busy ? "…" : "Yes"}
+        </button>
+        <button onClick={() => setStage("idle")} disabled={busy} style={{ padding: "6px 10px", borderRadius: 7, border: "1px solid #e2e8f0", background: "white", color: "#64748b", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>No</button>
+        {error && <span style={{ fontSize: 11, color: "#dc2626" }}>⚠️ {error}</span>}
+      </span>
+    );
+  }
+ 
+  // forceConfirm — the student has a submission
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+      <span style={{ fontSize: 12, color: "#dc2626", fontWeight: 700 }}>
+        Student already submitted. Delete the assignment AND their submission?
+      </span>
+      <button onClick={() => attempt(true)} disabled={busy} style={{ padding: "6px 12px", borderRadius: 7, border: "none", background: busy ? "#e2e8f0" : "#dc2626", color: busy ? "#94a3b8" : "white", fontSize: 12, fontWeight: 700, cursor: busy ? "wait" : "pointer" }}>
+        {busy ? "Deleting…" : "Delete everything"}
+      </button>
+      <button onClick={() => setStage("idle")} disabled={busy} style={{ padding: "6px 10px", borderRadius: 7, border: "1px solid #e2e8f0", background: "white", color: "#64748b", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Cancel</button>
+      {error && <span style={{ fontSize: 11, color: "#dc2626" }}>⚠️ {error}</span>}
+    </span>
+  );
+}
+
+// ─── EditAssignmentModal ──────────────────────────────────
+function EditAssignmentModal({ assignment, apiFetch, userId, onClose, onSaved }) {
+  const [title, setTitle]             = useState(assignment.title || "");
+  const [description, setDescription] = useState(assignment.description || "");
+  const [dueDate, setDueDate]         = useState(assignment.dueDate ? assignment.dueDate.slice(0, 16) : "");
+  const [attachment, setAttachment]   = useState(
+    assignment.attachmentUrl
+      ? { url: assignment.attachmentUrl, fileName: assignment.attachmentName, fileType: assignment.attachmentType, path: assignment.attachmentPath }
+      : null
+  );
+  const [removeAttachment, setRemoveAttachment] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError]   = useState("");
+ 
+  const save = async () => {
+    if (!title.trim()) { setError("Title is required."); return; }
+    setSaving(true); setError("");
+    try {
+      const body = {
+        title: title.trim(),
+        description: description.trim() || undefined,
+      };
+      if (dueDate) body.dueDate = new Date(dueDate).toISOString();
+ 
+      if (attachment?.url && attachment.url !== assignment.attachmentUrl) {
+        body.attachmentUrl  = attachment.url;
+        body.attachmentName = attachment.fileName;
+        body.attachmentType = attachment.fileType;
+        body.attachmentPath = attachment.path;
+      } else if (removeAttachment && !attachment) {
+        body.removeAttachment = true;
+      }
+ 
+      const data = await apiFetch(`/api/teacher/assignments/${assignment.id}`, {
+        method: "PATCH",
+        body: JSON.stringify(body),
+      });
+      onSaved(data.assignment);
+    } catch (err) { setError(err.message); setSaving(false); }
+  };
+ 
+  return (
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(13,40,64,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 20 }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: "white", borderRadius: 16, padding: 28, width: "100%", maxWidth: 520, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
+        <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", marginBottom: 4 }}>Edit Assignment</div>
+ 
+        {assignment.submission && (
+          <div style={{ fontSize: 12, color: "#92400e", background: "#fff7e0", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 8, padding: "8px 12px", margin: "8px 0 4px" }}>
+            ⚠️ This student has already submitted. Editing the task now may not match what they answered.
+          </div>
+        )}
+ 
+        <div style={{ display: "flex", flexDirection: "column", gap: 16, marginTop: 12 }}>
+          <div>
+            <label style={labelStyle}>Title *</label>
+            <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} style={inputStyle} />
+          </div>
+          <div>
+            <label style={labelStyle}>Description</label>
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} maxLength={1000} rows={4} style={{ ...inputStyle, resize: "vertical" }} />
+          </div>
+          <div>
+            <label style={labelStyle}>Due Date</label>
+            <input type="datetime-local" value={dueDate} onChange={(e) => setDueDate(e.target.value)} style={inputStyle} />
+          </div>
+          <div>
+            <label style={labelStyle}>Attachment (optional)</label>
+            {attachment ? (
+              <div>
+                <FilePreview url={attachment.url} fileName={attachment.fileName} fileType={attachment.fileType} label="Current attachment" />
+                <button onClick={() => { setAttachment(null); setRemoveAttachment(true); }} style={{ marginTop: 8, padding: "6px 12px", borderRadius: 7, border: "1px solid #fecaca", background: "white", color: "#dc2626", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                  Remove attachment
+                </button>
+              </div>
+            ) : (
+              <FileUpload role="teacher" userId={userId} label="Replace / add attachment" compact
+                onUploadComplete={(r) => { setAttachment(r); setRemoveAttachment(false); }}
+                onClear={() => setAttachment(null)} />
+            )}
+          </div>
+        </div>
+ 
+        {error && <div style={{ marginTop: 12, fontSize: 13, color: "#dc2626" }}>⚠️ {error}</div>}
+ 
+        <div style={{ display: "flex", gap: 8, marginTop: 20 }}>
+          <button onClick={save} disabled={saving} style={{ padding: "10px 20px", borderRadius: 8, border: "none", background: saving ? "#e2e8f0" : "#0d2840", color: saving ? "#94a3b8" : "white", fontSize: 14, fontWeight: 800, cursor: saving ? "wait" : "pointer" }}>
+            {saving ? "Saving…" : "Save Changes"}
+          </button>
+          <button onClick={onClose} style={{ padding: "10px 16px", borderRadius: 8, border: "1px solid #e2e8f0", background: "white", color: "#64748b", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Cancel</button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -738,6 +1023,11 @@ export default function AssignmentsPage() {
     setAssignments((prev) =>
       prev.map((a) => (a.id === updated.id ? updated : a)),
     );
+  };
+
+  const handleDeleted = (deletedId) => {
+    setAssignments((prev) => prev.filter((a) => a.id !== deletedId));
+    setExpanded(null);
   };
 
   const handleBulkOverdue = async () => {
@@ -890,6 +1180,7 @@ export default function AssignmentsPage() {
               expanded={expanded === a.id}
               onToggle={() => setExpanded(expanded === a.id ? null : a.id)}
               onUpdated={handleUpdated}
+              onDeleted={handleDeleted}    
               apiFetch={apiFetch}
             />
           ))}

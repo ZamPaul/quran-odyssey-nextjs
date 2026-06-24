@@ -29,6 +29,26 @@ const ALLOWED_TYPES = [
   // Video
   'video/mp4', 'video/webm',
 ];
+
+export function pathFromPublicUrl(url) {
+  if (!url) return null;
+  const marker = `/object/public/${BUCKET}/`;
+  const idx = url.indexOf(marker);
+  if (idx === -1) return null;
+  return decodeURIComponent(url.slice(idx + marker.length));
+}
+
+export async function deleteFile({ path, url } = {}) {
+  const target = path || pathFromPublicUrl(url);
+  if (!target) return { success: false, error: 'No path or resolvable URL' };
+ 
+  const { error } = await supabase.storage.from(BUCKET).remove([target]);
+  if (error) {
+    console.error('Supabase delete error:', error);
+    return { success: false, error: error.message };
+  }
+  return { success: true };
+}
  
 export function validateFile(file) {
   if (!file) return 'No file selected';

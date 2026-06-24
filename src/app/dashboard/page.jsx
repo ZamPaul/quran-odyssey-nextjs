@@ -23,6 +23,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import FileUpload, { FileCard, FilePreview } from '../../components/FileUpload';
+import { deleteFile } from '../../lib/uploadFile';
 
 // ─── Constants ────────────────────────────────────────────
 const COURSE_LABELS = {
@@ -555,6 +556,7 @@ function HomeworkTab({ student }) {
               expanded={expanded === a.id}
               onToggle={() => setExpanded(expanded === a.id ? null : a.id)}
               onSubmitSuccess={(submission) => handleSubmitSuccess(a.id, submission)}
+              onSubmissionChanged={load}
             />
           ))}
         </div>
@@ -563,12 +565,76 @@ function HomeworkTab({ student }) {
   );
 }
 
-function AssignmentCard({ assignment, studentId, expanded, onToggle, onSubmitSuccess }) {
+// function AssignmentCard({ assignment, studentId, expanded, onToggle, onSubmitSuccess }) {
+//   const cfg    = ASSIGNMENT_STATUS_CFG[assignment.status] || ASSIGNMENT_STATUS_CFG.PENDING;
+//   const due    = new Date(assignment.dueDate);
+//   const isPast = due < new Date() && assignment.status === 'PENDING';
+//   const sub    = assignment.submission;
+
+//   return (
+//     <div style={{ background: 'white', borderRadius: 12, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+//       <button onClick={onToggle} style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '16px 20px', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
+//         <div style={{ flex: 1, minWidth: 0 }}>
+//           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
+//             <span style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>{assignment.title}</span>
+//             <span style={{ fontSize: 11, fontWeight: 700, color: cfg.color, background: cfg.bg, borderRadius: 4, padding: '2px 7px' }}>{cfg.label}</span>
+//             {assignment.attachmentUrl && <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', background: '#f0f4f8', borderRadius: 4, padding: '2px 7px' }}>📎 Attachment</span>}
+//           </div>
+//           <div style={{ fontSize: 12, color: isPast ? '#ef4444' : '#94a3b8', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+//             <span>👤 {assignment.teacher?.name || 'Teacher'}</span>
+//             <span>📅 Due {due.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+//             {sub?.grade && <span style={{ color: '#22c55e', fontWeight: 700 }}>Grade: {sub.grade}</span>}
+//           </div>
+//         </div>
+//         <span style={{ color: '#94a3b8', transform: expanded ? 'rotate(180deg)' : 'none', transition: '200ms', flexShrink: 0 }}>▾</span>
+//       </button>
+
+//       {expanded && (
+//         <div style={{ borderTop: '1px solid #e2e8f0', padding: '20px', background: '#fafbfc' }}>
+//           {assignment.description && (
+//             <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.7, marginBottom: 16 }}>{assignment.description}</div>
+//           )}
+//           {assignment.attachmentUrl && (
+//             <FilePreview url={assignment.attachmentUrl} fileName={assignment.attachmentName} fileType={assignment.attachmentType} label="Teacher's attachment" />
+//           )}
+
+//           {sub && sub.grade && (
+//             <div style={{ marginTop: 14, padding: '14px 16px', borderRadius: 8, background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)' }}>
+//               <div style={{ fontSize: 13, fontWeight: 800, color: '#15803d', marginBottom: 4 }}>Grade: {sub.grade}</div>
+//               {sub.feedback && <div style={{ fontSize: 13, color: '#15803d', lineHeight: 1.6 }}>{sub.feedback}</div>}
+//             </div>
+//           )}
+
+//           {sub && !sub.grade && (
+//             <div style={{ marginTop: 14 }}>
+//               <div style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(40,183,217,0.08)', border: '1px solid rgba(40,183,217,0.2)', marginBottom: 10 }}>
+//                 <div style={{ fontSize: 13, fontWeight: 700, color: '#0e6e8a' }}>✓ Submitted — awaiting grade</div>
+//                 {sub.content && <div style={{ fontSize: 13, color: '#64748b', marginTop: 6, lineHeight: 1.6 }}>{sub.content}</div>}
+//               </div>
+//               {sub.fileUrl && <FilePreview url={sub.fileUrl} fileName={sub.fileName} fileType={sub.fileType} label="Submitted file" />}
+//             </div>
+//           )}
+
+//           {!sub && assignment.status !== 'GRADED' && (
+//             <div style={{ marginTop: assignment.attachmentUrl ? 16 : 0 }}>
+//               <SubmitForm assignmentId={assignment.id} studentId={studentId} onSuccess={onSubmitSuccess} />
+//             </div>
+//           )}
+//         </div>
+//       )}
+//     </div>
+//   );
+// }
+
+function AssignmentCard({ assignment, studentId, expanded, onToggle, onSubmitSuccess, onSubmissionChanged }) {
   const cfg    = ASSIGNMENT_STATUS_CFG[assignment.status] || ASSIGNMENT_STATUS_CFG.PENDING;
   const due    = new Date(assignment.dueDate);
   const isPast = due < new Date() && assignment.status === 'PENDING';
   const sub    = assignment.submission;
-
+  const isGraded = !!sub?.grade || assignment.status === 'GRADED';
+ 
+  const [editing, setEditing] = useState(false);
+ 
   return (
     <div style={{ background: 'white', borderRadius: 12, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
       <button onClick={onToggle} style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '16px 20px', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
@@ -586,7 +652,7 @@ function AssignmentCard({ assignment, studentId, expanded, onToggle, onSubmitSuc
         </div>
         <span style={{ color: '#94a3b8', transform: expanded ? 'rotate(180deg)' : 'none', transition: '200ms', flexShrink: 0 }}>▾</span>
       </button>
-
+ 
       {expanded && (
         <div style={{ borderTop: '1px solid #e2e8f0', padding: '20px', background: '#fafbfc' }}>
           {assignment.description && (
@@ -595,24 +661,54 @@ function AssignmentCard({ assignment, studentId, expanded, onToggle, onSubmitSuc
           {assignment.attachmentUrl && (
             <FilePreview url={assignment.attachmentUrl} fileName={assignment.attachmentName} fileType={assignment.attachmentType} label="Teacher's attachment" />
           )}
-
-          {sub && sub.grade && (
+ 
+          {/* GRADED — locked, read-only */}
+          {sub && isGraded && (
             <div style={{ marginTop: 14, padding: '14px 16px', borderRadius: 8, background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)' }}>
               <div style={{ fontSize: 13, fontWeight: 800, color: '#15803d', marginBottom: 4 }}>Grade: {sub.grade}</div>
-              {sub.feedback && <div style={{ fontSize: 13, color: '#15803d', lineHeight: 1.6 }}>{sub.feedback}</div>}
+              {sub.feedback && <div style={{ fontSize: 13, color: '#15803d', lineHeight: 1.6, marginBottom: sub.content || sub.fileUrl ? 10 : 0 }}>{sub.feedback}</div>}
+              {sub.content && <div style={{ fontSize: 13, color: '#334155', lineHeight: 1.6, marginTop: 8 }}>{sub.content}</div>}
+              {sub.fileUrl && <div style={{ marginTop: 10 }}><FilePreview url={sub.fileUrl} fileName={sub.fileName} fileType={sub.fileType} label="Your submitted file" /></div>}
             </div>
           )}
-
-          {sub && !sub.grade && (
+ 
+          {/* SUBMITTED, NOT graded — editable */}
+          {sub && !isGraded && !editing && (
             <div style={{ marginTop: 14 }}>
               <div style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(40,183,217,0.08)', border: '1px solid rgba(40,183,217,0.2)', marginBottom: 10 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: '#0e6e8a' }}>✓ Submitted — awaiting grade</div>
                 {sub.content && <div style={{ fontSize: 13, color: '#64748b', marginTop: 6, lineHeight: 1.6 }}>{sub.content}</div>}
               </div>
               {sub.fileUrl && <FilePreview url={sub.fileUrl} fileName={sub.fileName} fileType={sub.fileType} label="Submitted file" />}
+ 
+              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                <button onClick={() => setEditing(true)} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #0d2840', background: 'white', color: '#0d2840', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+                  Edit submission
+                </button>
+                <DeleteSubmissionButton
+                  assignmentId={assignment.id}
+                  studentId={studentId}
+                  onDeleted={() => onSubmissionChanged?.()}
+                />
+              </div>
             </div>
           )}
-
+ 
+          {/* EDIT MODE */}
+          {sub && !isGraded && editing && (
+            <div style={{ marginTop: 14 }}>
+              <SubmitForm
+                assignmentId={assignment.id}
+                studentId={studentId}
+                mode="edit"
+                existing={sub}
+                onSuccess={(updated) => { setEditing(false); onSubmissionChanged?.(updated); }}
+                onCancel={() => setEditing(false)}
+              />
+            </div>
+          )}
+ 
+          {/* NO submission yet — submit form */}
           {!sub && assignment.status !== 'GRADED' && (
             <div style={{ marginTop: assignment.attachmentUrl ? 16 : 0 }}>
               <SubmitForm assignmentId={assignment.id} studentId={studentId} onSuccess={onSubmitSuccess} />
@@ -624,35 +720,168 @@ function AssignmentCard({ assignment, studentId, expanded, onToggle, onSubmitSuc
   );
 }
 
-function SubmitForm({ assignmentId, studentId, onSuccess }) {
+// ─── DeleteSubmissionButton ───────────────────────────────
+function DeleteSubmissionButton({ assignmentId, studentId, onDeleted }) {
+  const { getToken } = useAuth();
+  const [confirming, setConfirming] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+ 
+  const doDelete = async () => {
+    setBusy(true); setError('');
+    try {
+      const token = await getToken();
+      const res = await fetch(`${apiBase()}/api/students/${studentId}/assignments/${assignmentId}/submission`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Delete failed');
+      onDeleted?.();
+    } catch (err) { setError(err.message); setBusy(false); }
+  };
+ 
+  if (!confirming) {
+    return (
+      <button onClick={() => setConfirming(true)} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #fecaca', background: 'white', color: '#dc2626', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+        Delete submission
+      </button>
+    );
+  }
+ 
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+      <span style={{ fontSize: 12, color: '#dc2626', fontWeight: 600 }}>Delete and resubmit later?</span>
+      <button onClick={doDelete} disabled={busy} style={{ padding: '7px 14px', borderRadius: 7, border: 'none', background: busy ? '#e2e8f0' : '#dc2626', color: busy ? '#94a3b8' : 'white', fontSize: 12, fontWeight: 700, cursor: busy ? 'wait' : 'pointer' }}>
+        {busy ? 'Deleting…' : 'Yes, delete'}
+      </button>
+      <button onClick={() => setConfirming(false)} disabled={busy} style={{ padding: '7px 12px', borderRadius: 7, border: '1px solid #e2e8f0', background: 'white', color: '#64748b', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+        Cancel
+      </button>
+      {error && <span style={{ fontSize: 12, color: '#dc2626' }}>⚠️ {error}</span>}
+    </div>
+  );
+}
+
+// function SubmitForm({ assignmentId, studentId, onSuccess }) {
+//   const { getToken, userId } = useAuth();
+//   const [content,    setContent]    = useState('');
+//   const [fileData,   setFileData]   = useState(null);
+//   const [submitting, setSubmitting] = useState(false);
+//   const [error,      setError]      = useState('');
+
+//   const handleSubmit = async () => {
+//     if (!content.trim() && !fileData) { setError('Add an answer or upload a file before submitting.'); return; }
+//     setSubmitting(true); setError('');
+//     try {
+//       const token = await getToken();
+//       const res = await fetch(`${apiBase()}/api/students/${studentId}/assignments/${assignmentId}/submit`, {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+//         body: JSON.stringify({
+//           content:  content.trim() || undefined,
+//           fileUrl:  fileData?.url       || undefined,
+//           fileName: fileData?.fileName  || undefined,
+//           fileType: fileData?.fileType  || undefined,
+//         }),
+//       });
+//       const data = await res.json();
+//       if (!res.ok) throw new Error(data.error || 'Submission failed');
+//       onSuccess(data.submission);
+//     } catch (err) { setError(err.message); }
+//     finally { setSubmitting(false); }
+//   };
+
+//   return (
+//     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+//       <div>
+//         <label style={{ fontSize: 12, fontWeight: 700, color: '#64748b', display: 'block', marginBottom: 6 }}>Answer</label>
+//         <textarea value={content} onChange={e => setContent(e.target.value)} placeholder="Write the answer here…" maxLength={3000} rows={4}
+//           style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 13, fontFamily: 'inherit', outline: 'none', resize: 'vertical', boxSizing: 'border-box', color: '#0f172a' }} />
+//         <div style={{ fontSize: 11, color: '#94a3b8', textAlign: 'right', marginTop: 2 }}>{content.length}/3000</div>
+//       </div>
+//       <div>
+//         <label style={{ fontSize: 12, fontWeight: 700, color: '#64748b', display: 'block', marginBottom: 6 }}>
+//           File Upload <span style={{ fontWeight: 400, color: '#94a3b8' }}>(optional — image, PDF, audio recording)</span>
+//         </label>
+//         <FileUpload role="student" userId={userId} label="Upload a file with this submission" compact
+//           onUploadComplete={(r) => { setFileData(r); setError(''); }} onClear={() => setFileData(null)}
+//           existingFile={fileData ? { url: fileData.url, fileName: fileData.fileName, fileType: fileData.fileType } : null} />
+//       </div>
+//       {error && <div style={{ fontSize: 12, color: '#ef4444', fontWeight: 600 }}>⚠️ {error}</div>}
+//       <button onClick={handleSubmit} disabled={submitting}
+//         style={{ padding: '10px 20px', borderRadius: 8, border: 'none', background: submitting ? '#e2e8f0' : '#0d2840', color: submitting ? '#94a3b8' : 'white', fontSize: 13, fontWeight: 700, cursor: submitting ? 'wait' : 'pointer', alignSelf: 'flex-start' }}>
+//         {submitting ? 'Submitting…' : 'Submit Assignment'}
+//       </button>
+//     </div>
+//   );
+// }
+
+
+// ═══════════════════════════════════════════════════════════
+// PROFILE & SETTINGS TAB
+// Edit the selected learner + the account holder's own info.
+// ═══════════════════════════════════════════════════════════
+
+// ─── SubmitForm (REPLACE — now supports submit AND edit) ──
+
+function SubmitForm({ assignmentId, studentId, onSuccess, onCancel, mode = 'create', existing = null }) {
   const { getToken, userId } = useAuth();
-  const [content,    setContent]    = useState('');
-  const [fileData,   setFileData]   = useState(null);
+  const [content,    setContent]    = useState(existing?.content || '');
+  const [fileData,   setFileData]   = useState(
+    existing?.fileUrl ? { url: existing.fileUrl, fileName: existing.fileName, fileType: existing.fileType, path: existing.filePath } : null
+  );
+  const [removeFile, setRemoveFile] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error,      setError]      = useState('');
-
+ 
+  const isEdit = mode === 'edit';
+ 
   const handleSubmit = async () => {
     if (!content.trim() && !fileData) { setError('Add an answer or upload a file before submitting.'); return; }
     setSubmitting(true); setError('');
     try {
       const token = await getToken();
-      const res = await fetch(`${apiBase()}/api/students/${studentId}/assignments/${assignmentId}/submit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({
-          content:  content.trim() || undefined,
-          fileUrl:  fileData?.url       || undefined,
-          fileName: fileData?.fileName  || undefined,
-          fileType: fileData?.fileType  || undefined,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Submission failed');
-      onSuccess(data.submission);
+      const base  = `${apiBase()}/api/students/${studentId}/assignments/${assignmentId}/submission`;
+ 
+      if (isEdit) {
+        // PATCH the existing submission
+        const res = await fetch(base, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            content:  content.trim() || undefined,
+            fileUrl:  fileData?.url       || undefined,
+            fileName: fileData?.fileName  || undefined,
+            fileType: fileData?.fileType  || undefined,
+            filePath: fileData?.path      || undefined,
+            removeFile: removeFile && !fileData ? true : undefined,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Update failed');
+        onSuccess(data.submission);
+      } else {
+        // POST a new submission (existing /submit route)
+        const res = await fetch(`${apiBase()}/api/students/${studentId}/assignments/${assignmentId}/submit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            content:  content.trim() || undefined,
+            fileUrl:  fileData?.url       || undefined,
+            fileName: fileData?.fileName  || undefined,
+            fileType: fileData?.fileType  || undefined,
+            filePath: fileData?.path      || undefined,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Submission failed');
+        onSuccess(data.submission);
+      }
     } catch (err) { setError(err.message); }
     finally { setSubmitting(false); }
   };
-
+ 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div>
@@ -665,23 +894,29 @@ function SubmitForm({ assignmentId, studentId, onSuccess }) {
         <label style={{ fontSize: 12, fontWeight: 700, color: '#64748b', display: 'block', marginBottom: 6 }}>
           File Upload <span style={{ fontWeight: 400, color: '#94a3b8' }}>(optional — image, PDF, audio recording)</span>
         </label>
-        <FileUpload role="student" userId={userId} label="Upload a file with this submission" compact
-          onUploadComplete={(r) => { setFileData(r); setError(''); }} onClear={() => setFileData(null)}
-          existingFile={fileData ? { url: fileData.url, fileName: fileData.fileName, fileType: fileData.fileType } : null} />
+        <FileUpload
+          role="student" userId={userId} label="Upload a file with this submission" compact
+          onUploadComplete={(r) => { setFileData(r); setRemoveFile(false); setError(''); }}
+          onClear={() => { setFileData(null); if (isEdit && existing?.fileUrl) setRemoveFile(true); }}
+          existingFile={fileData ? { url: fileData.url, fileName: fileData.fileName, fileType: fileData.fileType } : null}
+        />
       </div>
       {error && <div style={{ fontSize: 12, color: '#ef4444', fontWeight: 600 }}>⚠️ {error}</div>}
-      <button onClick={handleSubmit} disabled={submitting}
-        style={{ padding: '10px 20px', borderRadius: 8, border: 'none', background: submitting ? '#e2e8f0' : '#0d2840', color: submitting ? '#94a3b8' : 'white', fontSize: 13, fontWeight: 700, cursor: submitting ? 'wait' : 'pointer', alignSelf: 'flex-start' }}>
-        {submitting ? 'Submitting…' : 'Submit Assignment'}
-      </button>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button onClick={handleSubmit} disabled={submitting}
+          style={{ padding: '10px 20px', borderRadius: 8, border: 'none', background: submitting ? '#e2e8f0' : '#0d2840', color: submitting ? '#94a3b8' : 'white', fontSize: 13, fontWeight: 700, cursor: submitting ? 'wait' : 'pointer' }}>
+          {submitting ? 'Saving…' : isEdit ? 'Save Changes' : 'Submit Assignment'}
+        </button>
+        {isEdit && onCancel && (
+          <button onClick={onCancel} disabled={submitting} style={{ padding: '10px 16px', borderRadius: 8, border: '1px solid #e2e8f0', background: 'white', color: '#64748b', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+            Cancel
+          </button>
+        )}
+      </div>
     </div>
   );
 }
 
-// ═══════════════════════════════════════════════════════════
-// PROFILE & SETTINGS TAB
-// Edit the selected learner + the account holder's own info.
-// ═══════════════════════════════════════════════════════════
 function ProfileTab({ account, student, onStudentUpdated, onAccountUpdated, onAddChild }) {
   const { getToken } = useAuth();
 
