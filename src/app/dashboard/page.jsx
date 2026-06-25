@@ -24,6 +24,7 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import FileUpload, { FileCard, FilePreview } from '../../components/FileUpload';
 import { deleteFile } from '../../lib/uploadFile';
+import { ageFromDob, dobInputValue, isBirthdayToday } from '@/lib/age';
 
 // ─── Constants ────────────────────────────────────────────
 const COURSE_LABELS = {
@@ -92,6 +93,7 @@ function apiBase() { return process.env.NEXT_PUBLIC_API_URL; }
 function Skeleton() {
   return <div style={{ height: 72, borderRadius: 12, background: '#f0f4f8', animation: 'shimmer 1.5s ease infinite' }} />;
 }
+
 function EmptyState({ icon, title, sub, action }) {
   return (
     <div style={{ textAlign: 'center', padding: '40px 20px', background: 'white', borderRadius: 12, border: '1px solid #e2e8f0' }}>
@@ -106,8 +108,32 @@ function EmptyState({ icon, title, sub, action }) {
     </div>
   );
 }
+
 function ErrorBox({ msg }) {
   return <div style={{ padding: '14px 18px', borderRadius: 10, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#dc2626', fontSize: 14 }}>⚠️ {msg}</div>;
+}
+
+function BirthdayBanner({ student }) {
+  if (!student?.dateOfBirth || !isBirthdayToday(student.dateOfBirth)) return null;
+  const age = ageFromDob(student.dateOfBirth);
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 12,
+      background: 'linear-gradient(135deg, rgba(250,167,26,0.14), rgba(40,183,217,0.12))',
+      border: '1px solid rgba(250,167,26,0.35)', borderRadius: 14,
+      padding: '14px 18px', marginBottom: 20,
+    }}>
+      <span style={{ fontSize: 26 }}>🎉</span>
+      <div>
+        <div style={{ fontSize: 15, fontWeight: 800, color: '#0d2840' }}>
+          Happy Birthday, {student.name}!
+        </div>
+        <div style={{ fontSize: 13, color: '#64748b' }}>
+          {age != null ? `Turning ${age} today — ` : ''}wishing you a wonderful year ahead. 🌟
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -921,7 +947,7 @@ function ProfileTab({ account, student, onStudentUpdated, onAccountUpdated, onAd
   const { getToken } = useAuth();
 
   // Learner form
-  const [learner, setLearner] = useState({ name: '', age: '', country: '', timezone: '', gender: '' });
+  const [learner, setLearner] = useState({ name: '', age: '', country: '', timezone: '', gender: '', dateOfBirth: '' });
   // Account form
   const [acct, setAcct] = useState({ name: '', phone: '' });
 
@@ -932,7 +958,7 @@ function ProfileTab({ account, student, onStudentUpdated, onAccountUpdated, onAd
   useEffect(() => {
     if (student) setLearner({
       name: student.name || '', age: student.age || '', country: student.country || '',
-      timezone: student.timezone || '', gender: student.gender || '',
+      timezone: student.timezone || '', gender: student.gender || '', dateOfBirth: dobInputValue(student.dateOfBirth),
     });
   }, [student?.id]);
 
@@ -950,7 +976,15 @@ function ProfileTab({ account, student, onStudentUpdated, onAccountUpdated, onAd
       const res = await fetch(`${apiBase()}/api/students/${student.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(learner),
+        // body: JSON.stringify(learner),
+        body: JSON.stringify({
+          name: learner.name,
+          country: learner.country,
+          timezone: learner.timezone,
+          gender: learner.gender,
+          dateOfBirth: learner.dateOfBirth || '',   // '' clears it
+          // omit age — backend derives it from dateOfBirth (option c)
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Update failed');
@@ -1016,9 +1050,31 @@ function ProfileTab({ account, student, onStudentUpdated, onAccountUpdated, onAd
                 <label style={labelStyle}>Name</label>
                 <input value={learner.name} onChange={e => setLearner(p => ({ ...p, name: e.target.value }))} style={inputStyle} />
               </div>
-              <div>
+              {/* <div>
                 <label style={labelStyle}>Age</label>
                 <input type="number" value={learner.age} onChange={e => setLearner(p => ({ ...p, age: e.target.value }))} style={inputStyle} />
+              </div> */}
+              {!learner.dateOfBirth && (
+                <div>
+                  <label style={labelStyle}>Age</label>
+                  <input type="number" value={learner.age}
+                    onChange={e => setLearner(p => ({ ...p, age: e.target.value }))} style={inputStyle} />
+                </div>
+              )}
+              <div>
+                <label style={labelStyle}>Date of Birth</label>
+                <input
+                  type="date"
+                  value={learner.dateOfBirth}
+                  max={new Date().toISOString().slice(0, 10)}   /* no future dates */
+                  onChange={e => setLearner(p => ({ ...p, dateOfBirth: e.target.value }))}
+                  style={inputStyle}
+                />
+                {learner.dateOfBirth && (
+                  <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>
+                    Age: <strong>{ageFromDob(learner.dateOfBirth) ?? '—'}</strong> (calculated)
+                  </div>
+                )}
               </div>
               <div>
                 <label style={labelStyle}>Gender</label>
@@ -1252,6 +1308,7 @@ export default function DashboardPage() {
           ) : (
             <>
               <ChildSelector students={students} activeId={activeId} onSelect={setActiveId} />
+              <BirthdayBanner student={activeStudent} />
 
               {activeTab === 'overview' && <OverviewTab account={account} student={activeStudent} />}
               {activeTab === 'classes'  && <ClassesTab  student={activeStudent} />}

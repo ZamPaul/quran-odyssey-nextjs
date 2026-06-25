@@ -256,6 +256,78 @@ function SkeletonCard({ height = 72 }) {
   );
 }
 
+function UpcomingBirthdaysWidget({ birthdays, loading }) {
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+        <span style={{ fontSize: 16 }}>🎂</span>
+        <div style={{ fontSize: 15, fontWeight: 800, color: '#0f172a' }}>
+          Upcoming Birthdays
+        </div>
+      </div>
+
+      {loading ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <SkeletonCard height={56} />
+          <SkeletonCard height={56} />
+        </div>
+      ) : !birthdays?.length ? (
+        <EmptyState
+          icon="🎈"
+          title="No birthdays soon"
+          sub="No student birthdays in the next 30 days."
+        />
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {birthdays.map(b => {
+            const isToday = b.days === 0;
+            const when = isToday
+              ? 'Today! 🎉'
+              : b.days === 1
+                ? 'Tomorrow'
+                : `In ${b.days} days`;
+            const dateLabel = new Date(b.date).toLocaleDateString('en-GB', {
+              day: 'numeric', month: 'short',
+            });
+            return (
+              <div key={b.id} style={{
+                display: 'flex', alignItems: 'center', gap: 12,
+                background: isToday ? 'linear-gradient(135deg, rgba(250,167,26,0.12), rgba(40,183,217,0.10))' : 'white',
+                border: `1px solid ${isToday ? 'rgba(250,167,26,0.4)' : '#e2e8f0'}`,
+                borderRadius: 12, padding: '12px 16px',
+              }}>
+                <div style={{
+                  width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+                  background: isToday ? 'linear-gradient(135deg, #faa71a, #e8920a)' : '#f0f4f8',
+                  color: isToday ? '#0d2840' : '#64748b',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 14, fontWeight: 800,
+                }}>
+                  {(b.name || 'S').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>
+                    {b.name}{b.turning != null ? ` turns ${b.turning}` : ''}
+                  </div>
+                  <div style={{ fontSize: 12, color: '#94a3b8' }}>{dateLabel}</div>
+                </div>
+                <span style={{
+                  fontSize: 12, fontWeight: 700, flexShrink: 0,
+                  color: isToday ? '#b45309' : '#0e6e8a',
+                  background: isToday ? 'rgba(250,167,26,0.18)' : 'rgba(40,183,217,0.10)',
+                  borderRadius: 6, padding: '4px 10px',
+                }}>
+                  {when}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────
 export default function TeacherDashboardPage() {
   const { getToken } = useAuth();
@@ -480,6 +552,11 @@ export default function TeacherDashboardPage() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Upcoming birthdays */}
+      <div style={{ marginTop: 32 }}>
+        <UpcomingBirthdaysWidget birthdays={data?.upcomingBirthdays} loading={loading} />
       </div>
 
       {/* Quick actions */}
