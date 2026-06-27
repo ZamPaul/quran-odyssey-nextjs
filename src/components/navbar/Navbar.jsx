@@ -418,7 +418,7 @@ export default function Navbar() {
     // pathname?.startsWith("/booking") ||
     pathname?.startsWith("/dashboard") ||
     pathname?.startsWith("/register") ||
-    pathname?.startsWith("/admin");
+    pathname?.startsWith("/admin") ||
     pathname?.startsWith("/login");
 
   // Active link detection
