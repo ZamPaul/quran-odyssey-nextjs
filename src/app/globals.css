@@ -811,3 +811,20 @@ body {
 .cl-footerItem{
   display: none !important;
 }
+
+.admin-sidebar::-webkit-scrollbar{
+  /* width: 5px; */
+  /* height: 5px; */
+  /* display: none; */
+  /* background-color: transparent; */
+  /* color: var(--bg-cyan-tint); */
+}
+
+.admin-sidebar::-webkit-scrollbar-track {
+  /* background-color: transparent; */
+  /* border-radius: 20px; */
+}
+
+.admin-sidebar{
+  scrollbar-width: thin;
+}

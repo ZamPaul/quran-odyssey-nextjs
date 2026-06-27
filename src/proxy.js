@@ -7,6 +7,7 @@ const isProtectedRoute = createRouteMatcher([
   '/register/profile(.*)',
   '/parent(.*)',     
   '/teacher(.*)',          // ADD THIS
+  '/admin(.*)',  
   '/auth/callback(.*)',    // ADD THIS
 ]);
 
