@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "../components/navbar/Navbar";
 import { ClerkProvider } from "@clerk/nextjs";
 
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -17,6 +18,7 @@ export const metadata = {
   title: "Quran Odyssey — Online Quran Classes for Children",
   description:
     "Live Quran classes with verified teachers. Structured learning for children aged 5–18 across the UK, USA, and Canada. Book a free 30-minute trial class today.",
+  // icons
 };
 
 export default function RootLayout({ children }) {
