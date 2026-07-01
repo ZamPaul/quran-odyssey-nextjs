@@ -454,7 +454,7 @@ export default function Navbar() {
     <>
       <nav
         ref={navRef}
-        className="fixed top-0 left-0 right-0 z-50 border-b=none shadow-sm border-line-light bg-white transition-all duration-300"
+        className="fixed top-0 left-0 right-0 z-50 border-b-none shadow-sm border-line-light bg-white transition-all duration-300"
         style={{ height: 68 }}
       >
         <div
