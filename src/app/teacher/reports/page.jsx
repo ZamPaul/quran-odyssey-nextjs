@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth, useUser } from '@clerk/nextjs';
+import FileUpload from '@/components/FileUpload';
 
 const COURSE_TYPES = [
   { value:'NOORANI_QAIDA',label:'Noorani Qaida'}, { value:'QURAN_RECITATION',label:'Quran Recitation'},
@@ -11,6 +12,23 @@ const COURSE_TYPES = [
 
 const inputStyle = { width:'100%', padding:'9px 12px', borderRadius:8, border:'1px solid #e2e8f0', fontSize:13, fontFamily:'inherit', outline:'none', color:'#0f172a', boxSizing:'border-box' };
 const labelStyle = { fontSize:12, fontWeight:700, color:'#64748b', marginBottom:4, display:'block' };
+
+// Authenticated PDF download — window.open can't send the Bearer token,
+// and apiFetch forces JSON parsing, so we fetch the blob directly here.
+async function downloadReportPdf(getToken, reportId, period) {
+  const token = await getToken();
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/teacher/reports/${reportId}/pdf`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) { alert('Failed to generate PDF. Please try again.'); return; }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `report-${(period || 'report').replace(/\s+/g, '_')}.pdf`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 // ── Star rating ───────────────────────────────────────────
 function StarRating({ value, onChange }) {
@@ -30,6 +48,9 @@ function StarRating({ value, onChange }) {
 // ── Report form (create / edit) ───────────────────────────
 function ReportForm({ students, editReport, onSaved, onCancel, apiFetch }) {
   const isEdit = !!editReport;
+  const { user } = useUser();
+  const wasSent = editReport?.status === 'SENT';
+
   const [form, setForm] = useState({
     studentId:       editReport?.studentId || '',
     period:          editReport?.period || '',
@@ -42,6 +63,15 @@ function ReportForm({ students, editReport, onSaved, onCancel, apiFetch }) {
     teacherMessage:  editReport?.teacherMessage  || '',
     nextSteps:       editReport?.nextSteps       || '',
   });
+
+  // Attachment state — pre-loads the existing attachment when editing.
+  const [attachment, setAttachment] = useState(
+    editReport?.attachmentUrl
+      ? { url: editReport.attachmentUrl, fileName: editReport.attachmentName, fileType: editReport.attachmentType, path: editReport.attachmentPath }
+      : null
+  );
+  const [removeAttachment, setRemoveAttachment] = useState(false);
+
   const [saving,   setSaving]   = useState(false);
   const [sending,  setSending]  = useState(false);
   const [error,    setError]    = useState('');
@@ -49,12 +79,22 @@ function ReportForm({ students, editReport, onSaved, onCancel, apiFetch }) {
   const set = (k,v) => setForm(p => ({ ...p, [k]:v }));
   const isValid = form.studentId && form.period && form.courseType;
 
-  // Auto-set courseType when student selected
+  // Auto-set courseType when student selected (only on create)
   useEffect(() => {
     if (!form.studentId || isEdit) return;
     const match = students.find(s => s.student.id === form.studentId);
     if (match) set('courseType', match.enrollment.courseType);
   }, [form.studentId]);
+
+  const buildBody = () => ({
+    ...form,
+    overallRating: form.overallRating || undefined,
+    attachmentUrl:  attachment?.url      || undefined,
+    attachmentName: attachment?.fileName || undefined,
+    attachmentType: attachment?.fileType || undefined,
+    attachmentPath: attachment?.path     || undefined,
+    ...(removeAttachment ? { removeAttachment: true } : {}),
+  });
 
   const save = async (andSend = false) => {
     if (!isValid) { setError('Student, period, and course are required'); return; }
@@ -64,18 +104,20 @@ function ReportForm({ students, editReport, onSaved, onCancel, apiFetch }) {
       let report;
       if (isEdit) {
         const data = await apiFetch(`/api/teacher/reports/${editReport.id}`, {
-          method:'PATCH', body: JSON.stringify(form),
+          method:'PATCH', body: JSON.stringify(buildBody()),
         });
         report = data.report;
       } else {
         const data = await apiFetch('/api/teacher/reports', {
-          method:'POST',
-          body: JSON.stringify({ ...form, overallRating: form.overallRating||undefined }),
+          method:'POST', body: JSON.stringify(buildBody()),
         });
         report = data.report;
       }
       if (andSend) {
-        const sendData = await apiFetch(`/api/teacher/reports/${report.id}/send`, { method:'POST' });
+        // A brand-new/DRAFT report uses /send; an already-SENT report being
+        // edited uses /resend so the parent gets the corrected version.
+        const endpoint = wasSent ? 'resend' : 'send';
+        const sendData = await apiFetch(`/api/teacher/reports/${report.id}/${endpoint}`, { method:'POST' });
         report = sendData.report;
       }
       onSaved(report, isEdit);
@@ -97,6 +139,13 @@ function ReportForm({ students, editReport, onSaved, onCancel, apiFetch }) {
       <div style={{ fontSize:15, fontWeight:800, color:'#0f172a', marginBottom:18 }}>
         {isEdit ? `Edit Report — ${editReport.period}` : 'New Progress Report'}
       </div>
+
+      {wasSent && (
+        <div style={{ marginBottom:16, padding:'10px 14px', borderRadius:8, background:'rgba(250,167,26,0.12)', border:'1px solid rgba(250,167,26,0.3)', fontSize:12.5, color:'#92400e', lineHeight:1.6 }}>
+          This report has already been sent to the parent. Saving keeps your edits;
+          use <strong>Save &amp; Re-send</strong> to email the parent the updated version.
+        </div>
+      )}
 
       {/* Top row */}
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:14, marginBottom:14 }}>
@@ -147,6 +196,20 @@ function ReportForm({ students, editReport, onSaved, onCancel, apiFetch }) {
         ))}
       </div>
 
+      {/* Attachment */}
+      <div style={{ marginBottom:18 }}>
+        <label style={labelStyle}>Attachment <span style={{ fontWeight:400, color:'#94a3b8' }}>(optional — audio, PDF, image…)</span></label>
+        <FileUpload
+          role="teacher"
+          bucket="reports"
+          userId={user?.id}
+          label="Attach a file to this report"
+          existingFile={attachment ? { url: attachment.url, fileName: attachment.fileName, fileType: attachment.fileType } : null}
+          onUploadComplete={(result) => { setAttachment(result); setRemoveAttachment(false); }}
+          onClear={() => { setAttachment(null); setRemoveAttachment(true); }}
+        />
+      </div>
+
       {error && <div style={{ marginBottom:12, fontSize:12, color:'#ef4444', fontWeight:700 }}>{error}</div>}
 
       <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
@@ -154,13 +217,13 @@ function ReportForm({ students, editReport, onSaved, onCancel, apiFetch }) {
           padding:'9px 18px', borderRadius:8, border:'none', fontSize:13, fontWeight:700, cursor: saving||!isValid?'not-allowed':'pointer',
           background: saving||!isValid?'#e2e8f0':'#0d2840', color: saving||!isValid?'#94a3b8':'white',
         }}>
-          {saving ? 'Saving…' : 'Save Draft'}
+          {saving ? 'Saving…' : (wasSent ? 'Save changes' : 'Save Draft')}
         </button>
         <button onClick={() => save(true)} disabled={saving||sending||!isValid} style={{
           padding:'9px 18px', borderRadius:8, border:'none', fontSize:13, fontWeight:700, cursor: sending||!isValid?'not-allowed':'pointer',
           background: sending||!isValid?'#e2e8f0':'#faa71a', color: sending||!isValid?'#94a3b8':'#0d2840',
         }}>
-          {sending ? 'Sending…' : '📧 Save & Send to Parent'}
+          {sending ? 'Sending…' : (wasSent ? '📧 Save & Re-send' : '📧 Save & Send to Parent')}
         </button>
         <button onClick={onCancel} style={{ padding:'9px 14px', borderRadius:8, border:'1px solid #e2e8f0', background:'white', color:'#64748b', fontSize:13, cursor:'pointer' }}>
           Cancel
@@ -171,11 +234,17 @@ function ReportForm({ students, editReport, onSaved, onCancel, apiFetch }) {
 }
 
 // ── Report card ───────────────────────────────────────────
-function ReportCard({ report, onEdit, onSent, apiFetch }) {
+function ReportCard({ report, onEdit, onSent, onDeleted, apiFetch }) {
+  const { getToken } = useAuth();
   const [expanded, setExpanded]     = useState(false);
   const [sending,  setSending]      = useState(false);
   const [error,    setError]        = useState('');
   const [localReport, setLocalReport] = useState(report);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  // keep local in sync if the parent replaces the report (e.g. after edit)
+  useEffect(() => { setLocalReport(report); }, [report]);
 
   const isSent = localReport.status === 'SENT';
   const childName = localReport.student?.name || localReport.student?.email?.split('@')[0] || 'Student';
@@ -190,6 +259,25 @@ function ReportCard({ report, onEdit, onSent, apiFetch }) {
     finally { setSending(false); }
   };
 
+  const handleResend = async () => {
+    // if (!confirm('Re-send the updated report to the parent?')) return;
+    setSending(true); setError('');
+    try {
+      const data = await apiFetch(`/api/teacher/reports/${localReport.id}/resend`, { method:'POST' });
+      setLocalReport(data.report);
+      onSent(data.report);
+    } catch (err) { setError(err.message); }
+    finally { setSending(false); }
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true); setError('');
+    try {
+      await apiFetch(`/api/teacher/reports/${localReport.id}`, { method:'DELETE' });
+      onDeleted(localReport.id);
+    } catch (err) { setError(err.message); setDeleting(false); setConfirmingDelete(false); }
+  };
+
   const contentFields = [
     ['Tajweed Progress',      localReport.tajweedProgress],
     ['Recitation',            localReport.recitationNotes],
@@ -198,6 +286,10 @@ function ReportCard({ report, onEdit, onSent, apiFetch }) {
     ['Message to Parent',     localReport.teacherMessage],
     ['Next Steps',            localReport.nextSteps],
   ].filter(([, v]) => v);
+
+  const ghostBtn  = { padding:'8px 14px', borderRadius:8, border:'1px solid #e2e8f0', background:'white', color:'#0d2840', fontSize:13, fontWeight:700, cursor:'pointer' };
+  const amberBtn  = (busy) => ({ padding:'8px 14px', borderRadius:8, border:'none', fontSize:13, fontWeight:700, cursor:busy?'wait':'pointer', background:busy?'#e2e8f0':'#faa71a', color:busy?'#94a3b8':'#0d2840' });
+  const dangerBtn = { padding:'8px 14px', borderRadius:8, border:'1px solid #fecaca', background:'white', color:'#dc2626', fontSize:13, fontWeight:700, cursor:'pointer' };
 
   return (
     <div style={{ background:'white', borderRadius:12, border:`1px solid ${isSent?'#e2e8f0':'#fed7aa'}`, overflow:'hidden' }}>
@@ -220,10 +312,18 @@ function ReportCard({ report, onEdit, onSent, apiFetch }) {
             }}>
               {isSent ? '✓ Sent' : '✎ Draft'}
             </span>
+            {isSent && localReport.updatedSinceSent && (
+              <span style={{ fontSize:11, fontWeight:700, color:'#92400e', background:'rgba(250,167,26,0.14)', borderRadius:5, padding:'2px 8px' }}>
+                Edited — not re-sent
+              </span>
+            )}
+            {localReport.attachmentUrl && (
+              <span style={{ fontSize:11, fontWeight:600, color:'#94a3b8', background:'#f0f4f8', borderRadius:5, padding:'2px 7px' }}>📎 Attachment</span>
+            )}
           </div>
           <div style={{ fontSize:12, color:'#94a3b8', marginTop:3 }}>
             👤 {childName} · {localReport.courseType?.replace(/_/g,' ')}
-            {isSent && localReport.sentAt && ` · Sent ${new Date(localReport.sentAt).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}`}
+            {isSent && (localReport.lastSentAt || localReport.sentAt) && ` · Sent ${new Date(localReport.lastSentAt || localReport.sentAt).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}`}
           </div>
         </div>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ flexShrink:0, color:'#94a3b8', transform:expanded?'rotate(180deg)':'rotate(0deg)', transition:'200ms ease' }}>
@@ -250,19 +350,59 @@ function ReportCard({ report, onEdit, onSent, apiFetch }) {
             </div>
           )}
 
+          {/* Attachment link */}
+          {localReport.attachmentUrl && (
+            <div style={{ marginBottom:16 }}>
+              <div style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.05em', color:'#94a3b8', marginBottom:6 }}>Attachment</div>
+              <a href={localReport.attachmentUrl} target="_blank" rel="noreferrer"
+                style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'9px 14px', background:'rgba(40,183,217,0.08)', border:'1px solid rgba(40,183,217,0.25)', borderRadius:8, fontSize:13, fontWeight:700, color:'#0e6e8a', textDecoration:'none' }}>
+                📎 {localReport.attachmentName || 'View attachment'}
+              </a>
+            </div>
+          )}
+
           {error && <div style={{ fontSize:12, color:'#ef4444', marginBottom:10 }}>{error}</div>}
 
-          {!isSent && (
+          {/* Actions */}
+          {!isSent ? (
             <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
-              <button onClick={() => onEdit(localReport)} style={{ padding:'8px 14px', borderRadius:8, border:'1px solid #e2e8f0', background:'white', color:'#0d2840', fontSize:13, fontWeight:700, cursor:'pointer' }}>
-                ✎ Edit
-              </button>
-              <button onClick={handleSend} disabled={sending} style={{
-                padding:'8px 14px', borderRadius:8, border:'none', fontSize:13, fontWeight:700, cursor:sending?'wait':'pointer',
-                background:sending?'#e2e8f0':'#faa71a', color:sending?'#94a3b8':'#0d2840',
-              }}>
+              <button onClick={() => onEdit(localReport)} style={ghostBtn}>✎ Edit</button>
+              <button onClick={handleSend} disabled={sending} style={amberBtn(sending)}>
                 {sending ? 'Sending…' : '📧 Send to Parent'}
               </button>
+              <button onClick={() => downloadReportPdf(getToken, localReport.id, localReport.period)} style={ghostBtn}>⬇ Download PDF</button>
+              {!confirmingDelete ? (
+                <button onClick={() => setConfirmingDelete(true)} style={dangerBtn}>Delete</button>
+              ) : (
+                <span style={{ display:'inline-flex', alignItems:'center', gap:8 }}>
+                  <span style={{ fontSize:12, color:'#dc2626', fontWeight:600 }}>Delete this draft?</span>
+                  <button onClick={handleDelete} disabled={deleting} style={{ ...dangerBtn, background: deleting?'#e2e8f0':'#dc2626', color: deleting?'#94a3b8':'white', border:'none' }}>
+                    {deleting ? 'Deleting…' : 'Yes, delete'}
+                  </button>
+                  <button onClick={() => setConfirmingDelete(false)} style={ghostBtn}>Cancel</button>
+                </span>
+              )}
+            </div>
+          ) : (
+            <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+              <button onClick={() => onEdit(localReport)} style={ghostBtn}>✎ Edit</button>
+              {localReport.updatedSinceSent && (
+                <button onClick={handleResend} disabled={sending} style={amberBtn(sending)}>
+                  {sending ? 'Re-sending…' : '📧 Re-send updated'}
+                </button>
+              )}
+              <button onClick={() => downloadReportPdf(getToken, localReport.id, localReport.period)} style={ghostBtn}>⬇ Download PDF</button>
+              {!confirmingDelete ? (
+                <button onClick={() => setConfirmingDelete(true)} style={dangerBtn}>Delete</button>
+              ) : (
+                <span style={{ display:'inline-flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
+                  <span style={{ fontSize:12, color:'#dc2626', fontWeight:600 }}>Delete this SENT report? The parent already received it by email; this only removes it here.</span>
+                  <button onClick={handleDelete} disabled={deleting} style={{ ...dangerBtn, background: deleting?'#e2e8f0':'#dc2626', color: deleting?'#94a3b8':'white', border:'none' }}>
+                    {deleting ? 'Deleting…' : 'Yes, delete'}
+                  </button>
+                  <button onClick={() => setConfirmingDelete(false)} style={ghostBtn}>Cancel</button>
+                </span>
+              )}
             </div>
           )}
         </div>
@@ -324,11 +464,16 @@ export default function ReportsPage() {
   const handleEdit = (report) => {
     setEditReport(report);
     setShowForm(true);
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSent = (updatedReport) => {
     setReports(prev => prev.map(r => r.id===updatedReport.id ? updatedReport : r));
     setTab('SENT');
+  };
+
+  const handleDeleted = (reportId) => {
+    setReports(prev => prev.filter(r => r.id !== reportId));
   };
 
   return (
@@ -409,6 +554,7 @@ export default function ReportsPage() {
               report={r}
               onEdit={handleEdit}
               onSent={handleSent}
+              onDeleted={handleDeleted}
               apiFetch={apiFetch}
             />
           ))}

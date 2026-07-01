@@ -27,6 +27,7 @@ export default function FileUpload({
   onClear,
   role = 'student',
   userId,
+  bucket = 'assignments', 
   existingFile = null,
   accept = DEFAULT_ACCEPT,
   label = 'Attach a file',
@@ -55,7 +56,7 @@ export default function FileUpload({
     }, 200);
 
     try {
-      const result = await uploadFile(selectedFile, { role, userId });
+      const result = await uploadFile(selectedFile, { role, userId, bucket: bucket });
       clearInterval(interval);
       setProgress(100);
       setPreview({ url: result.url, fileName: result.fileName, fileType: result.fileType, size: result.size });
@@ -67,7 +68,7 @@ export default function FileUpload({
     } finally {
       setUploading(false);
     }
-  }, [role, userId, onUploadComplete]);
+  }, [role, userId, bucket, onUploadComplete]);
 
   const handleFileChange = (e) => {
     const selected = e.target.files?.[0];

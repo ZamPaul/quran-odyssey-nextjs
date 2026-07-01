@@ -48,6 +48,7 @@ const inputStyle = {
   boxSizing: "border-box",
   background: "white",
 };
+
 const btnPrimary = (disabled) => ({
   padding: "9px 18px",
   borderRadius: 8,

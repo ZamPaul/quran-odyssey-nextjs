@@ -11,7 +11,7 @@
  
 import { supabase } from './supabaseClient';
  
-const BUCKET = 'assignments';
+const DEFAULT_BUCKET = 'assignments';
  
 // 10 MB limit
 const MAX_SIZE_BYTES = 10 * 1024 * 1024;
@@ -30,19 +30,19 @@ const ALLOWED_TYPES = [
   'video/mp4', 'video/webm',
 ];
 
-export function pathFromPublicUrl(url) {
+export function pathFromPublicUrl(url, bucket = DEFAULT_BUCKET) {
   if (!url) return null;
-  const marker = `/object/public/${BUCKET}/`;
+  const marker = `/object/public/${bucket}/`;
   const idx = url.indexOf(marker);
   if (idx === -1) return null;
   return decodeURIComponent(url.slice(idx + marker.length));
 }
 
-export async function deleteFile({ path, url } = {}) {
-  const target = path || pathFromPublicUrl(url);
+export async function deleteFile({ path, url, bucket = DEFAULT_BUCKET } = {}) {
+  const target = path || pathFromPublicUrl(url, bucket);
   if (!target) return { success: false, error: 'No path or resolvable URL' };
  
-  const { error } = await supabase.storage.from(BUCKET).remove([target]);
+  const { error } = await supabase.storage.from(bucket).remove([target]);
   if (error) {
     console.error('Supabase delete error:', error);
     return { success: false, error: error.message };
@@ -59,7 +59,7 @@ export function validateFile(file) {
   return null; // valid
 }
  
-export async function uploadFile(file, { role = 'student', userId }) {
+export async function uploadFile(file, { role = 'student', userId, bucket = DEFAULT_BUCKET }) {
   const validationError = validateFile(file);
   if (validationError) throw new Error(validationError);
  
@@ -70,7 +70,7 @@ export async function uploadFile(file, { role = 'student', userId }) {
   const path       = `${folder}/${userId}/${timestamp}_${safeName}`;
  
   const { data, error } = await supabase.storage
-    .from(BUCKET)
+    .from(bucket)
     .upload(path, file, {
       cacheControl: '3600',
       upsert:       false,
@@ -83,7 +83,7 @@ export async function uploadFile(file, { role = 'student', userId }) {
  
   // Get the public URL
   const { data: urlData } = supabase.storage
-    .from(BUCKET)
+    .from(bucket)
     .getPublicUrl(data.path);
  
   return {

@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useProfileGate } from '@/hooks/useProfileGate';
 import Link from "next/link";
 
 const COURSE_OPTIONS = [
@@ -77,7 +78,7 @@ function StepLearner({ students, value, setValue, lockedId, onNext, loading }) {
         <p style={{ fontSize: 14, color: "#64748b", marginBottom: 24 }}>
           You need to add a learner before enrolling in a course.
         </p>
-        <Link href="/register/profile" style={{ display: "inline-flex", background: "#0d2840", color: "white", padding: "12px 24px", borderRadius: 8, fontSize: 14, fontWeight: 800, textDecoration: "none" }}>
+        <Link href="/register-profile" style={{ display: "inline-flex", background: "#0d2840", color: "white", padding: "12px 24px", borderRadius: 8, fontSize: 14, fontWeight: 800, textDecoration: "none" }}>
           Add a learner →
         </Link>
       </div>
@@ -558,6 +559,50 @@ function EnrollFallback() {
 }
 
 export default function EnrollPage() {
+  const { checking, complete } = useProfileGate();
+  // ... existing hooks ...
+
+  if (checking) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#f7f9fb",
+          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 14,
+          }}
+        >
+          <div
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: "50%",
+              border: "4px solid #e2e8f0",
+              borderTopColor: "#28b7d9",
+              animation: "spin 0.8s linear infinite",
+            }}
+          />
+          <p style={{ fontSize: 14, color: "#94a3b8", fontWeight: 600 }}>
+            Checking your profile...
+          </p>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!complete) return null; // redirect already in flight
+
   return (
     <Suspense fallback={<EnrollFallback />}>
       <EnrollContent />

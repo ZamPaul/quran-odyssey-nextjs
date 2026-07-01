@@ -4,7 +4,8 @@
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useAuth, useUser }  from '@clerk/nextjs';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Link                  from 'next/link';
+import { useProfileGate } from '@/hooks/useProfileGate';
+import Link from 'next/link';
 
 const COURSE_OPTIONS = [
   { value: 'NOORANI_QAIDA',    label: 'Noorani Qaida',      desc: 'Arabic alphabet & basic reading · Ages 5–10' },
@@ -97,6 +98,7 @@ const labelStyle = { fontSize: 12, fontWeight: 700, textTransform: 'uppercase', 
 
 // ── Page (inner — needs Suspense for useSearchParams) ─────
 function BookTrialContent() {
+  const { checking, complete } = useProfileGate();
   const { getToken }       = useAuth();
   const { user, isLoaded } = useUser();
   const router             = useRouter();
@@ -278,6 +280,47 @@ function BookTrialContent() {
   const activeLearner = students.find(s => s.id === studentId) || null;
 
   if (!isLoaded) return null;
+
+  if (checking) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#f7f9fb",
+          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 14,
+          }}
+        >
+          <div
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: "50%",
+              border: "4px solid #e2e8f0",
+              borderTopColor: "#28b7d9",
+              animation: "spin 0.8s linear infinite",
+            }}
+          />
+          <p style={{ fontSize: 14, color: "#94a3b8", fontWeight: 600 }}>
+            Checking your profile...
+          </p>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      </div>
+    );
+  }
+
+  if (!complete) return null; // redirect already in flight
 
   return (
     <div style={{ minHeight: '100vh', background: '#f7f9fb', paddingTop: 100, paddingBottom: 60, fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
