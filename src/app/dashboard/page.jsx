@@ -27,6 +27,11 @@ import { deleteFile } from '../../lib/uploadFile';
 import { ageFromDob, dobInputValue, isBirthdayToday } from '@/lib/age';
 import { useProfileGate } from '@/hooks/useProfileGate';
 
+import CountrySelect from '@/components/form/CountrySelect';
+import DateOfBirthField from '@/components/form/DateOfBirthField';
+import { detectTimezone } from '@/lib/timezone';
+// ageFromDob is already imported in this file.
+
 // ─── Constants ────────────────────────────────────────────
 const COURSE_LABELS = {
   NOORANI_QAIDA:    'Noorani Qaida',
@@ -1045,8 +1050,19 @@ function AddChildModal({ onClose, onCreated }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
+  // Auto-detect timezone once (parent never types it)
+  useEffect(() => {
+    setForm(p => ({ ...p, timezone: detectTimezone() }));
+  }, []);
+
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
-  const valid = form.name && form.age && form.country && form.timezone && form.courseInterest;
+
+  // Valid = name + DOB (valid age) + country + course. Timezone is auto, not user-entered.
+  const dobAge = form.dateOfBirth ? ageFromDob(form.dateOfBirth) : null;
+  const valid = form.name && form.dateOfBirth && dobAge != null && dobAge >= 1 && dobAge <= 99
+                && form.country && form.courseInterest;
+
+  // const valid = form.name && form.age && form.country && form.timezone && form.courseInterest;
 
   const handleSubmit = async () => {
     setSaving(true); setError('');
@@ -1055,7 +1071,15 @@ function AddChildModal({ onClose, onCreated }) {
       const res = await fetch(`${apiBase()}/api/students`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          name:           form.name,
+          dateOfBirth:    form.dateOfBirth,     // ← primary
+          age:            dobAge,               // ← satisfies POST's required-field check
+          country:        form.country,
+          timezone:       form.timezone,        // ← auto-detected, not typed
+          courseInterest: form.courseInterest,
+          gender:         form.gender,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to add child');
@@ -1078,9 +1102,24 @@ function AddChildModal({ onClose, onCreated }) {
             <label style={labelStyle}>Child's Name *</label>
             <input value={form.name} onChange={e => set('name', e.target.value)} placeholder="e.g. Ahmed" style={inputStyle} />
           </div>
-          <div>
+          {/* <div>
             <label style={labelStyle}>Age *</label>
             <input type="number" value={form.age} onChange={e => set('age', e.target.value)} placeholder="e.g. 9" style={inputStyle} />
+          </div> */}
+          <div style={{ gridColumn: '1 / -1' }}>
+            <label style={labelStyle}>Date of Birth *</label>
+            <input
+              type="date"
+              value={form.dateOfBirth || ""}
+              max={new Date().toISOString().slice(0, 10)}
+              onChange={e => set('dateOfBirth', e.target.value)}
+              style={inputStyle}
+            />
+            {form.dateOfBirth && (
+              <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>
+                Age: <strong>{dobAge ?? '—'}</strong> (calculated)
+              </div>
+            )}
           </div>
           <div>
             <label style={labelStyle}>Gender</label>
@@ -1090,13 +1129,22 @@ function AddChildModal({ onClose, onCreated }) {
               <option value="FEMALE">Female</option>
             </select>
           </div>
-          <div>
+          {/* <div>
             <label style={labelStyle}>Country *</label>
             <input value={form.country} onChange={e => set('country', e.target.value)} placeholder="e.g. United Kingdom" style={inputStyle} />
+          </div> */}
+          <div style={{ gridColumn: '1 / -1' }}>
+            <label style={labelStyle}>Country *</label>
+            <CountrySelect value={form.country} onChange={(c) => set('country', c)} />
           </div>
-          <div>
+          {/* <div>
             <label style={labelStyle}>Timezone *</label>
             <input value={form.timezone} onChange={e => set('timezone', e.target.value)} placeholder="Europe/London" style={inputStyle} />
+          </div> */}
+          <div style={{ gridColumn: '1 / -1' }}>
+            <div style={{ fontSize: 12, color: '#94a3b8' }}>
+              Timezone detected: <strong style={{ color: '#0f172a' }}>{form.timezone || '—'}</strong>
+            </div>
           </div>
           <div style={{ gridColumn: '1 / -1' }}>
             <label style={labelStyle}>Course Interest *</label>

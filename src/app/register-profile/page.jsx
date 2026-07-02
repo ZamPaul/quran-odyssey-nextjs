@@ -8,6 +8,11 @@ import Link from "next/link";
 import OnboardingHeader from "@/components/OnBoardingHeader";
 import LoadingSkeletion from "@/components/LoadingSkeletion";
 
+import CountrySelect from '@/components/form/CountrySelect';
+import DateOfBirthField from '@/components/form/DateOfBirthField';
+import { ageFromDob } from '@/lib/age';
+import { detectTimezone } from '@/lib/timezone';
+
 const COURSES = [
   { value: "NOORANI_QAIDA",    label: "Noorani Qaida",     desc: "Arabic alphabet & basic reading · Ages 5–10" },
   { value: "QURAN_RECITATION", label: "Quran Recitation",  desc: "Fluent recitation with Tajweed · All ages" },
@@ -130,15 +135,16 @@ function ProfileForm() {
     phone: "",
     // first learner
     learnerName: "",
-    learnerAge: "",
+    // learnerAge: "",
+    learnerDob: "",
     country: "",
     timezone: "",
     courseInterest: "",
   });
 
   useEffect(() => {
-    const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    setForm((prev) => ({ ...prev, timezone: detected }));
+    // const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    setForm((prev) => ({ ...prev, timezone: detectTimezone() }));
   }, []);
 
   const set = (field, value) => {
@@ -164,8 +170,13 @@ function ProfileForm() {
       if (form.phone.replace(/\D/g, '').length < 7) return "Please enter a valid number with country code.";
     }
     if (step === 2) {
+      // if (!isSelf && !form.learnerName.trim()) return "Please enter the learner's name.";
+      // if (!form.learnerAge) return "Please enter an age.";
+      // if (!form.country) return "Please select a country.";
       if (!isSelf && !form.learnerName.trim()) return "Please enter the learner's name.";
-      if (!form.learnerAge) return "Please enter an age.";
+      if (!form.learnerDob) return "Please enter the date of birth.";
+      const age = ageFromDob(form.learnerDob);
+      if (age == null || age < 1 || age > 99) return "Please enter a valid date of birth (age 4–99).";
       if (!form.country) return "Please select a country.";
     }
     if (step === 3) {
@@ -206,7 +217,9 @@ function ProfileForm() {
         body: JSON.stringify({
           // learner
           name:           (isSelf ? form.accountName : form.learnerName).trim(),
-          age:            parseInt(form.learnerAge, 10),
+          // age:            parseInt(form.learnerAge, 10),
+          dateOfBirth:    form.learnerDob,                 // ← primary
+          age:            ageFromDob(form.learnerDob),      // ← satisfies POST's required-field check
           country:        form.country,
           timezone:       form.timezone,
           courseInterest: form.courseInterest,
@@ -319,7 +332,7 @@ function ProfileForm() {
                       value={form.learnerName} onChange={(v) => set("learnerName", v)}
                     />
                   )}
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* <div className="grid grid-cols-2 gap-4">
                     <Field
                       label={isSelf ? "Your age *" : "Child's age *"} id="learnerAge" type="number"
                       placeholder="e.g. 10"
@@ -334,6 +347,20 @@ function ProfileForm() {
                         <option value="">Select country</option>
                         {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
                       </select>
+                    </div>
+                  </div> */}
+                  {/* <div className="text-[12px] text-content-muted">
+                    Timezone detected: <span className="font-[700] text-content-primary">{form.timezone || "—"}</span>
+                  </div> */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <DateOfBirthField
+                      value={form.learnerDob}
+                      onChange={(v) => set("learnerDob", v)}
+                      label={isSelf ? "Your date of birth *" : "Child's date of birth *"}
+                    />
+                    <div className="flex flex-col gap-2">
+                      <label htmlFor="country" className="text-[13px] font-[700] text-content-primary">Country *</label>
+                      <CountrySelect value={form.country} onChange={(c) => set("country", c)} />
                     </div>
                   </div>
                   <div className="text-[12px] text-content-muted">
