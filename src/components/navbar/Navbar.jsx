@@ -18,7 +18,7 @@ const NAV_LINKS = [
 const NAV_SCROLL_CLASSES = ["scrolled", "backdrop-blur-xl", "bg-white/75"];
 
 // ─── User avatar + dropdown ───────────────────────────────
-function UserDropdown({ user, isTeacher, onSignOut }) {
+function UserDropdown({ user, isTeacher, isAdmin, onSignOut }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -38,9 +38,19 @@ function UserDropdown({ user, isTeacher, onSignOut }) {
     "?";
 
   // ── Per-role visual config ─────────────────────────────
-  const roleCfg = isTeacher
+
+  const roleCfg = isAdmin
+  ? {
+      borderColor: "rgba(13,40,64,0.35)",
+      avatarBg:    "linear-gradient(135deg, #0d2840, #142f4a)",
+      badgeBg:     "rgba(13,40,64,0.10)",
+      badgeColor:  "#0d2840",
+      badgeLabel:  "🛡️ Administrator",
+    }
+  : isTeacher
   ? {
       borderColor: "rgba(40,183,217,0.35)",
+      // avatarBg:    "linear-gradient(135deg, #28b7d9, #0e6e8a)",
       avatarBg:    "linear-gradient(135deg, #28b7d9, #0e6e8a)",
       badgeBg:     "rgba(40,183,217,0.10)",
       badgeColor:  "#0e6e8a",
@@ -68,9 +78,7 @@ function UserDropdown({ user, isTeacher, onSignOut }) {
           padding: "6px 12px 6px 6px",
           borderRadius: 8,
           border: `1.5px solid ${roleCfg.borderColor}`,
-          background: isTeacher
-            ? "rgba(40,183,217,0.08)"
-            : "#f7f9fb",
+          // background: roleCfg.avatarBg,
           cursor: "pointer",
           transition: "all 150ms ease",
         }}
@@ -94,7 +102,8 @@ function UserDropdown({ user, isTeacher, onSignOut }) {
             fontSize: 12,
             fontWeight: 800,
             // color: isParent ? "#0d2840" : "white",
-            color: "#0d2840",
+            // color: "#0d2840",
+            color: "white",
             flexShrink: 0,
           }}
         >
@@ -186,10 +195,14 @@ function UserDropdown({ user, isTeacher, onSignOut }) {
 
           {/* Menu items — role-specific */}
           <div style={{ padding: "6px 0" }}>
-          {isTeacher ? (
-            <DropdownLink href="/teacher/dashboard" onClick={() => setOpen(false)} icon={<DashboardIcon />}>
-              Teacher Portal
-            </DropdownLink>
+            {isAdmin ? (
+              <DropdownLink href="/admin" onClick={() => setOpen(false)} icon={<DashboardIcon />}>
+                Admin Panel
+              </DropdownLink>
+            ) : isTeacher ? (
+              <DropdownLink href="/teacher/dashboard" onClick={() => setOpen(false)} icon={<DashboardIcon />}>
+                Teacher Portal
+              </DropdownLink>
             ) : (
               <>
                 <DropdownLink href="/dashboard" onClick={() => setOpen(false)} icon={<HomeIcon />}>
@@ -197,6 +210,9 @@ function UserDropdown({ user, isTeacher, onSignOut }) {
                 </DropdownLink>
                 <DropdownLink href="/booking/trial" onClick={() => setOpen(false)} icon={<CalendarIcon />}>
                   Book a Trial
+                </DropdownLink>
+                <DropdownLink href="/enroll" onClick={() => setOpen(false)} icon={<div>👤</div>}>
+                  Enroll a Child
                 </DropdownLink>
               </>
             )}
@@ -408,6 +424,7 @@ export default function Navbar() {
 
   const role       = user?.publicMetadata?.role || "PARENT";
   const isTeacher  = isLoaded && !!user && role === "TEACHER";
+  const isAdmin    = isLoaded && !!user && role === "ADMIN"; 
   const isLoggedIn = isLoaded && !!user;
   // No more isParent branch — parents and students share one dashboard.
 
@@ -502,11 +519,38 @@ export default function Navbar() {
                   <UserDropdown
                     user={user}
                     isTeacher={isTeacher}
+                    isAdmin={isAdmin}
                     onSignOut={handleSignOut}
                   />
 
                   {/* Primary CTA — role-specific */}
-                  {isTeacher ? (
+                  {/* {isTeacher ? (
+                    <Link
+                      href="/teacher/dashboard"
+                      className="inline-flex items-center gap-[6px] rounded-[6px] bg-brand-cyan px-5 py-2 text-[13px] font-[700] text-white transition hover:-translate-y-[1px] hover:opacity-90"
+                    >
+                      <DashboardIcon />
+                      Teacher Portal
+                    </Link>
+                  ) : (
+                    <Link
+                      href="/dashboard"
+                      className="inline-flex items-center gap-[6px] rounded-[6px] bg-brand-navy px-5 py-2 text-[13px] font-[700] text-white transition hover:-translate-y-[1px] hover:opacity-90"
+                    >
+                      <HomeIcon />
+                      Dashboard
+                    </Link>
+                  )} */}
+
+                  {isAdmin ? (
+                    <Link
+                      href="/admin"
+                      className="inline-flex items-center gap-[6px] rounded-[6px] bg-brand-navy px-5 py-2 text-[13px] font-[700] text-white transition hover:-translate-y-[1px] hover:opacity-90"
+                    >
+                      <DashboardIcon />
+                      Admin Panel
+                    </Link>
+                  ) : isTeacher ? (
                     <Link
                       href="/teacher/dashboard"
                       className="inline-flex items-center gap-[6px] rounded-[6px] bg-brand-cyan px-5 py-2 text-[13px] font-[700] text-white transition hover:-translate-y-[1px] hover:opacity-90"
@@ -523,6 +567,7 @@ export default function Navbar() {
                       Dashboard
                     </Link>
                   )}
+
                 </>
               )}
 

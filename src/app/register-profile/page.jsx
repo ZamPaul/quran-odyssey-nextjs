@@ -3,9 +3,10 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import OnboardingHeader from "@/components/OnBoardingHeader";
+import LoadingSkeletion from "@/components/LoadingSkeletion";
 
 const COURSES = [
   { value: "NOORANI_QAIDA",    label: "Noorani Qaida",     desc: "Arabic alphabet & basic reading · Ages 5–10" },
@@ -20,6 +21,53 @@ const COUNTRIES = [
   "United Kingdom", "United States", "Canada", "Australia",
   "Ireland", "South Africa", "New Zealand", "Other",
 ];
+
+// Put this inside the page component, before the form logic:
+function useRegisterProfileGuard() {
+  const { getToken, isLoaded, isSignedIn } = useAuth();
+  const { user } = useUser();
+  const router = useRouter();
+  const params = useSearchParams();
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (!isSignedIn) { router.replace('/login'); return; }
+
+    const role = user?.publicMetadata?.role || 'PARENT';
+
+    // Non-family roles don't belong here → send to their home.
+    if (role === 'TEACHER') { router.replace('/teacher/dashboard'); return; }
+    if (role === 'ADMIN')   { router.replace('/admin'); return; }
+
+    // Family role: if ALREADY complete, don't let them re-onboard.
+    let cancelled = false;
+    (async () => {
+      try {
+        const token = await getToken();
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/students`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (cancelled) return;
+        if (res.ok) {
+          const data = await res.json();
+          if (data.accountComplete) {
+            // Respect ?next= if present, else dashboard.
+            const next = params.get('next');
+            router.replace(next && next !== '/register-profile' ? next : '/dashboard');
+            return;
+          }
+        }
+        setChecking(false); // incomplete → allow the form
+      } catch {
+        if (!cancelled) setChecking(false); // network error → allow the form
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isLoaded, isSignedIn, user?.id]);
+
+  return { checking };
+}
 
 // ─────────────────────────────────────────────────────────────
 // Default export: ONLY owns the Suspense boundary.
@@ -71,6 +119,8 @@ function ProfileForm() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const params = useSearchParams();
+
+  const { checking } = useRegisterProfileGuard();
 
   const nextParam = params.get('next');
 
@@ -180,6 +230,11 @@ function ProfileForm() {
   const stepLabel =
     step === 1 ? "Your details" : step === 2 ? (isSelf ? "Learner details" : "Child's details") : "Choose a course";
 
+
+  if (checking) {
+    return <LoadingSkeletion title="Loading..."/>
+  }
+  
   return (
     <div className="min-h-screen bg-surface-off-white flex flex-col">
       {/* <div className="relative h-[100px] flex items-center justify-center py-8" /> */}

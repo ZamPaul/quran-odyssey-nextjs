@@ -12,6 +12,8 @@ import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
+// const useRedirect 
+
 export default function AuthCallbackPage() {
   const { user, isLoaded } = useUser();
   const router             = useRouter();
