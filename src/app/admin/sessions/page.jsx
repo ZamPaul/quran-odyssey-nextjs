@@ -11,6 +11,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import BulkAddSessionsModal from './BulkAddSessionsModal';
+import { zonedInputToUtcISO } from '@/lib/timezone';
 
 function apiBase() { return process.env.NEXT_PUBLIC_API_URL; }
 
@@ -51,6 +52,16 @@ export default function SessionsPage() {
 
   const [showCreate, setShowCreate] = useState(false);
   const [selected, setSelected] = useState(null);
+
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+
+  const toggleSelect = (id) => setSelectedIds(prev => {
+    const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n;
+  });
+
+  const clearSelection = () => { setSelectedIds(new Set()); setSelectMode(false); };
+  const selectAllVisible = () => setSelectedIds(new Set(sessions.map(s => s.id)));
 
   const load = useCallback(async () => {
     setLoading(true); setError('');
@@ -98,8 +109,11 @@ export default function SessionsPage() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6, flexWrap: 'wrap', gap: "10px" }}>
         <h1 style={{ fontSize: 22, fontWeight: 800, color: '#0f172a' }}>Class Sessions</h1>
         <div className='flex items-center justify-center gap-3'>
-          <button onClick={() => setShowCreate(true)} style={primaryBtn}>+ New session</button>
-          <button onClick={() => setShowBulk(true)} style={ghostBtn}>Bulk add</button>
+          <button onClick={() => setShowCreate(true)} style={primaryBtn}>+ Create single session</button>
+          <button onClick={() => setShowBulk(true)} style={ghostBtn}>Bulk add sessions</button>
+          <button onClick={() => { setSelectMode(m => !m); setSelectedIds(new Set()); }} style={ghostBtn}>
+            {selectMode ? 'Cancel select' : 'Select'}
+          </button>
         </div>
       </div>
       <p style={{ fontSize: 14, color: '#94a3b8', marginBottom: 20 }}>Platform-wide schedule across all teachers.</p>
@@ -151,6 +165,16 @@ export default function SessionsPage() {
         </select>
       </div>
 
+      {selectMode && selectedIds.size > 0 && (
+        <BulkActionBar
+          count={selectedIds.size}
+          ids={[...selectedIds]}
+          teachers={teachers}
+          onSelectAll={selectAllVisible}
+          onDone={() => { clearSelection(); load(); }}
+        />
+      )}
+
       {error && <div style={errBox}>⚠️ {error}</div>}
 
       {loading ? <div style={emptyStyle}>Loading…</div>
@@ -162,14 +186,27 @@ export default function SessionsPage() {
                 <div style={{ fontSize: 13, fontWeight: 800, color: '#0d2840', marginBottom: 10 }}>{dayLabel(day)}</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {groups[day].map(s => (
-                    <div key={s.id} onClick={() => setSelected(s)} style={{ ...card, display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer', padding: '14px 18px' }}
+                    <div key={s.id} onClick={() => { if (selectMode) { toggleSelect(s.id); } else { setSelected(s); } }} style={{ ...card, display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer', padding: '14px 18px' }}
                       onMouseEnter={e => e.currentTarget.style.borderColor = '#28b7d9'}
-                      onMouseLeave={e => e.currentTarget.style.borderColor = '#e2e8f0'}>
+                      onMouseLeave={e => e.currentTarget.style.borderColor = '#e2e8f0'}
+                    >
+                      {selectMode && (
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(s.id)}
+                          onChange={(e) => { e.stopPropagation(); toggleSelect(s.id); }}
+                          onClick={(e) => e.stopPropagation()}
+                          style={{ width: 16, height: 16, cursor: 'pointer', flexShrink: 0 }}
+                        />
+                      )}
                       <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a', width: 56, flexShrink: 0 }}>{fmtTime(s.scheduledAt)}</div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>{s.student?.name} <span style={{ fontWeight: 500, color: '#94a3b8' }}>· {COURSE_LABELS[s.courseType] || s.courseType}</span></div>
                         <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>👩‍🏫 {s.teacher?.name}{s.zoomLink ? ' · 📹 link' : ''}{s.attendance ? ` · ✓ ${s.attendance.status}` : ''}</div>
                       </div>
+                      {!s.calEventId && s.status === 'SCHEDULED' && (
+                        <span style={{ fontSize: 11, color: '#b45309' }}> · ⚠ not synced</span>
+                      )}
                       <span style={pill(s.status)}>{s.status}</span>
                       <span style={{ color: '#cbd5e1', fontSize: 16 }}>›</span>
                     </div>
@@ -193,6 +230,11 @@ function CreateSessionModal({ teachers, onClose, onCreated }) {
   const [query, setQuery] = useState('');
   const [students, setStudents] = useState([]);
   const [student, setStudent] = useState(null);
+  // student.timezone is used below
+  const tz = student?.timezone || 'UTC';
+
+  const [conflicts, setConflicts] = useState(null); // 409 payload
+
   const [form, setForm] = useState({ teacherId: '', courseType: '', scheduledAt: '', durationMins: '30', zoomLink: '', enrollmentId: '' });
   const [saving, setSaving] = useState(false); const [error, setError] = useState('');
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
@@ -214,11 +256,38 @@ function CreateSessionModal({ teachers, onClose, onCreated }) {
   };
 
   const valid = student && form.teacherId && form.courseType && form.scheduledAt;
-  const submit = async () => {
+
+  // const submit = async () => {
+  //   setSaving(true); setError('');
+  //   try { const token = await getToken();
+  //     const res = await fetch(`${apiBase()}/api/admin/sessions`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ ...form, studentId: student.id, scheduledAt: new Date(form.scheduledAt).toISOString() }) });
+  //     const d = await res.json(); if (!res.ok) throw new Error(d.error || 'Failed'); onCreated();
+  //   } catch (err) { setError(err.message); setSaving(false); }
+  // };
+
+  const submit = async (confirmOverride = false) => {
     setSaving(true); setError('');
-    try { const token = await getToken();
-      const res = await fetch(`${apiBase()}/api/admin/sessions`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ ...form, studentId: student.id, scheduledAt: new Date(form.scheduledAt).toISOString() }) });
-      const d = await res.json(); if (!res.ok) throw new Error(d.error || 'Failed'); onCreated();
+    try {
+      const token = await getToken();
+      const scheduledAtUtc = zonedInputToUtcISO(form.scheduledAt, tz);
+      const res = await fetch(`${apiBase()}/api/admin/sessions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          ...form,
+          studentId: student.id,
+          scheduledAt: scheduledAtUtc,   // UTC, computed from student-local input
+          confirmOverride,
+        }),
+      });
+      const d = await res.json();
+      if (res.status === 409 && d.error === 'CONFLICT') {
+        setConflicts(d.conflicts || []);   // show the override prompt
+        setSaving(false);
+        return;
+      }
+      if (!res.ok) throw new Error(d.error || 'Failed');
+      onCreated();
     } catch (err) { setError(err.message); setSaving(false); }
   };
 
@@ -263,12 +332,37 @@ function CreateSessionModal({ teachers, onClose, onCreated }) {
             </select>
           </div>
           <div><label style={lbl}>Duration (min)</label><input type="number" value={form.durationMins} onChange={e => set('durationMins', e.target.value)} style={inp} /></div>
-          <div><label style={lbl}>Date & time *</label><input type="datetime-local" value={form.scheduledAt} onChange={e => set('scheduledAt', e.target.value)} style={inp} /></div>
+          {/* <div><label style={lbl}>Date & time *</label><input type="datetime-local" value={form.scheduledAt} onChange={e => set('scheduledAt', e.target.value)} style={inp} /></div> */}
+          <div>
+            <label style={lbl}>Date &amp; time * <span style={{ fontWeight: 400, color: '#94a3b8' }}>(in {tz})</span></label>
+            <input type="datetime-local" disabled={!student} value={form.scheduledAt} onChange={e => set('scheduledAt', e.target.value)} style={inp} />
+            {form.scheduledAt && (
+              <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>
+                Student local time — {tz}
+              </div>
+            )}
+          </div>
           <div><label style={lbl}>Zoom link</label><input value={form.zoomLink} onChange={e => set('zoomLink', e.target.value)} placeholder="optional" style={inp} /></div>
         </div>
         {error && <div style={{ marginTop: 12, fontSize: 13, color: '#dc2626' }}>⚠️ {error}</div>}
+        {conflicts && (
+          <div style={{ marginTop: 12, padding: '12px 14px', borderRadius: 8, background: 'rgba(250,167,26,0.10)', border: '1px solid rgba(250,167,26,0.35)' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#92400e', marginBottom: 6 }}>
+              ⚠️ This overlaps {conflicts.length} existing session{conflicts.length > 1 ? 's' : ''}:
+            </div>
+            {conflicts.map((c, i) => (
+              <div key={i} style={{ fontSize: 12, color: '#b45309' }}>
+                • {c.who === 'student' ? 'Student' : 'Teacher'} busy — {new Date(c.scheduledAt).toLocaleString('en-GB', { timeZone: tz, weekday: 'short', hour: '2-digit', minute: '2-digit' })}
+              </div>
+            ))}
+            <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+              <button onClick={() => submit(true)} disabled={saving} style={{ ...primaryBtn, background: '#f59e0b' }}>Create anyway</button>
+              <button onClick={() => setConflicts(null)} style={ghostBtn}>Cancel</button>
+            </div>
+          </div>
+        )}
         <div style={{ display: 'flex', gap: 8, marginTop: 20 }}>
-          <button onClick={submit} disabled={saving || !valid} style={{ ...primaryBtn, opacity: (saving || !valid) ? 0.5 : 1, cursor: (saving || !valid) ? 'not-allowed' : 'pointer' }}>{saving ? 'Creating…' : 'Create session'}</button>
+          <button onClick={() => {submit(false)}} disabled={saving || !valid} style={{ ...primaryBtn, opacity: (saving || !valid) ? 0.5 : 1, cursor: (saving || !valid) ? 'not-allowed' : 'pointer' }}>{saving ? 'Creating…' : 'Create session'}</button>
           <button onClick={onClose} style={ghostBtn}>Cancel</button>
         </div>
       </div>
@@ -307,6 +401,7 @@ function SessionPanel({ session, teachers, onClose, onChanged }) {
           <DRow k="When" v={new Date(session.scheduledAt).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} />
           <DRow k="Duration" v={`${session.durationMins} min`} />
           {session.attendance && <DRow k="Attendance" v={session.attendance.status} />}
+          <DRow k="Calendar" v={session.calEventId ? '✓ Synced' : '✗ Not synced'} />
         </div>
 
         {!cancelled && (
@@ -323,6 +418,30 @@ function SessionPanel({ session, teachers, onClose, onChanged }) {
                 <button onClick={() => call('', { scheduledAt: new Date(slotStart).toISOString() }, 'PATCH')} disabled={busy} style={ghostBtn}>Update</button>
               </div>
             </div>
+            {!cancelled && !session.calEventId && (
+              <div style={{ marginBottom: 14 }}>
+                <label style={lbl}>Google Calendar</label>
+                <button
+                  onClick={async () => {
+                    setBusy(true); setError('');
+                    try {
+                      const token = await getToken();
+                      const res = await fetch(`${apiBase()}/api/admin/sessions/sync-calendar`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                        body: JSON.stringify({ sessionIds: [session.id] }),
+                      });
+                      const d = await res.json();
+                      if (!res.ok) throw new Error(d.error || 'Sync failed');
+                      onChanged();
+                    } catch (err) { setError(err.message); setBusy(false); }
+                  }}
+                  disabled={busy}
+                  style={{ ...ghostBtn, borderColor: '#28b7d9', color: '#0e6e8a' }}
+                >
+                  📅 Sync to Google Calendar
+                </button>
+              </div>
+            )}
             <div style={{ marginBottom: 16 }}><label style={lbl}>Reassign teacher</label>
               <div style={{ display: 'flex', gap: 8 }}>
                 <select value={reTeacher} onChange={e => setReTeacher(e.target.value)} style={{ ...inp, cursor: 'pointer' }}>
@@ -339,12 +458,169 @@ function SessionPanel({ session, teachers, onClose, onChanged }) {
         {error && <div style={{ fontSize: 13, color: '#dc2626', marginBottom: 12 }}>⚠️ {error}</div>}
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {!cancelled && <button onClick={() => call('/cancel', {})} disabled={busy} style={{ ...ghostBtn, color: '#dc2626', borderColor: '#fecaca' }}>Cancel session</button>}
+          {!cancelled && (
+            <DeleteSessionButton
+              session={session}
+              getToken={getToken}
+              onDeleted={onChanged}
+            />
+          )}
           <button onClick={onClose} style={ghostBtn}>Close</button>
         </div>
       </div>
     </div>
   );
 }
+
+function BulkActionBar({ count, ids, teachers, onSelectAll, onDone }) {
+  const { getToken } = useAuth();
+  const [action, setAction] = useState('');
+  const [toTeacherId, setToTeacherId] = useState('');
+  const [status, setStatus] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const run = async (body) => {
+    setBusy(true); setResult(null);
+    try {
+      const token = await getToken();
+      const res = await fetch(`${apiBase()}/api/admin/sessions/bulk-action`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ sessionIds: ids, ...body }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || 'Failed');
+      setResult(d);
+    } catch (err) { setResult({ error: err.message }); }
+    finally { setBusy(false); }
+  };
+
+  const runSync = async () => {
+    setBusy(true); setResult(null);
+    try {
+      const token = await getToken();
+      const res = await fetch(`${apiBase()}/api/admin/sessions/sync-calendar`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ sessionIds: ids }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || 'Sync failed');
+      setResult({ synced: d.synced, failed: d.failed });
+    } catch (err) { setResult({ error: err.message }); }
+    finally { setBusy(false); }
+  };
+
+  return (
+    <div style={{ position: 'sticky', top: 8, zIndex: 30, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
+      background: '#0d2840', color: 'white', borderRadius: 12, padding: '12px 16px', marginBottom: 16 }}>
+      <span style={{ fontSize: 13, fontWeight: 800 }}>{count} selected</span>
+      <button onClick={onSelectAll} style={{ ...miniGhost }}>Select all visible</button>
+
+      <select value={action} onChange={e => { setAction(e.target.value); setResult(null); setConfirmDelete(false); }} style={miniSel}>
+        <option value="">Choose action…</option>
+        <option value="sync">Sync to Google Calendar</option>
+        <option value="reassign">Reassign teacher</option>
+        <option value="status">Change status</option>
+        <option value="delete">Delete</option>
+      </select>
+
+      {action === 'reassign' && (
+        <>
+          <select value={toTeacherId} onChange={e => setToTeacherId(e.target.value)} style={miniSel}>
+            <option value="">To teacher…</option>
+            {teachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+          </select>
+          <button disabled={busy || !toTeacherId} onClick={() => run({ action: 'reassign', toTeacherId })} style={miniPrimary}>{busy ? "Applying..." : "Apply"}</button>
+        </>
+      )}
+
+      {action === 'status' && (
+        <>
+          <select value={status} onChange={e => setStatus(e.target.value)} style={miniSel}>
+            <option value="">Set status…</option>
+            <option value="SCHEDULED">Scheduled</option>
+            <option value="CANCELLED">Cancelled</option>
+            <option value="MISSED">Missed</option>
+            {/* COMPLETED intentionally not available in bulk */}
+          </select>
+          <button disabled={busy || !status} onClick={() => run({ action: 'status', status })} style={miniPrimary}>{busy ? "Applying..." : "Apply"}</button>
+        </>
+      )}
+
+      {action === 'sync' && (
+        <button disabled={busy} onClick={runSync} style={miniPrimary}>{busy ? 'Syncing…' : 'Sync now'}</button>
+      )}
+
+      {action === 'delete' && (
+        !confirmDelete ? (
+          <button onClick={() => setConfirmDelete(true)} style={{ ...miniPrimary, background: '#dc2626' }}>Delete {count}…</button>
+        ) : (
+          <>
+            <span style={{ fontSize: 12 }}>Completed / attended sessions are kept.</span>
+            <button disabled={busy} onClick={() => run({ action: 'delete' })} style={{ ...miniPrimary, background: '#dc2626' }}>Confirm delete</button>
+            <button onClick={() => setConfirmDelete(false)} style={miniGhost}>Cancel</button>
+          </>
+        )
+      )}
+
+      {result && (
+        <span style={{ fontSize: 12, marginLeft: 4 }}>
+          {result.error ? `⚠️ ${result.error}`
+            : result.synced != null ? `Synced ${result.synced}${result.failed ? `, ${result.failed} failed` : ''}`
+            : `Done ${result.done}${result.skipped?.length ? `, ${result.skipped.length} skipped` : ''}`}
+          {' '}<button onClick={onDone} style={{ ...miniGhost, marginLeft: 6 }}>Refresh</button>
+        </span>
+      )}
+    </div>
+  );
+}
+
+function DeleteSessionButton({ session, getToken, onDeleted }) {
+  const [confirming, setConfirming] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+
+  // Client-side hint: these are cancel-only. The server enforces this too.
+  const blocked = session.status === 'COMPLETED' || !!session.attendance;
+
+  const doDelete = async () => {
+    setBusy(true); setErr('');
+    try {
+      const token = await getToken();
+      const res = await fetch(`${apiBase()}/api/admin/sessions/${session.id}`, {
+        method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || 'Delete failed');
+      onDeleted();
+    } catch (e) { setErr(e.message); setBusy(false); }
+  };
+
+  if (blocked) {
+    return (
+      <span style={{ fontSize: 11, color: '#94a3b8', alignSelf: 'center' }}>
+        Completed/attended — cancel only
+      </span>
+    );
+  }
+
+  return !confirming ? (
+    <button onClick={() => setConfirming(true)} style={{ ...ghostBtn, color: '#dc2626', borderColor: '#fecaca' }}>Delete</button>
+  ) : (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+      <button onClick={doDelete} disabled={busy} style={{ padding: '9px 14px', borderRadius: 8, border: 'none', background: '#dc2626', color: 'white', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+        {busy ? 'Deleting…' : 'Confirm delete'}
+      </button>
+      <button onClick={() => setConfirming(false)} style={ghostBtn}>Cancel</button>
+      {err && <span style={{ fontSize: 12, color: '#dc2626' }}>⚠️ {err}</span>}
+    </span>
+  );
+}
+
+const miniSel = { padding: '6px 10px', borderRadius: 7, border: 'none', fontSize: 12, color: '#0f172a', background: 'white', cursor: 'pointer' };
+const miniPrimary = { padding: '6px 12px', borderRadius: 7, border: 'none', fontSize: 12, fontWeight: 700, background: '#28b7d9', color: 'white', cursor: 'pointer' };
+const miniGhost = { padding: '6px 10px', borderRadius: 7, border: '1px solid rgba(255,255,255,0.3)', fontSize: 12, background: 'transparent', color: 'white', cursor: 'pointer' };
 
 function DRow({ k, v }) { return <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', gap: 12 }}><span style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>{k}</span><span style={{ fontSize: 13, color: '#0f172a', fontWeight: 600 }}>{v}</span></div>; }
 
