@@ -10,6 +10,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@clerk/nextjs';
+import BulkAddSessionsModal from './BulkAddSessionsModal';
 
 function apiBase() { return process.env.NEXT_PUBLIC_API_URL; }
 
@@ -36,6 +37,7 @@ export default function SessionsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [teachers, setTeachers] = useState([]);
+  const [showBulk, setShowBulk] = useState(false);
 
   const today = new Date();
   const weekAhead = new Date(); weekAhead.setDate(today.getDate() + 7);
@@ -43,6 +45,10 @@ export default function SessionsPage() {
   const [to, setTo] = useState(isoDate(weekAhead));
   const [teacherId, setTeacherId] = useState('');
   const [status, setStatus] = useState('');
+  const [studentId, setStudentId] = useState('');
+  const [studentQuery, setStudentQuery] = useState('');
+  const [studentOptions, setStudentOptions] = useState([]);
+
   const [showCreate, setShowCreate] = useState(false);
   const [selected, setSelected] = useState(null);
 
@@ -53,13 +59,14 @@ export default function SessionsPage() {
       const params = new URLSearchParams({ from, to });
       if (teacherId) params.set('teacherId', teacherId);
       if (status) params.set('status', status);
+      if (studentId) params.set('studentId', studentId);
       const res = await fetch(`${apiBase()}/api/admin/sessions?${params}`, { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) throw new Error('Failed to load sessions');
       const d = await res.json();
       setSessions(d.sessions || []);
     } catch (err) { setError(err.message); }
     finally { setLoading(false); }
-  }, [from, to, teacherId, status]);
+  }, [from, to, teacherId, status, studentId]);
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => {
@@ -69,6 +76,18 @@ export default function SessionsPage() {
     } catch {} })();
   }, []);
 
+  useEffect(() => {
+    const t = setTimeout(async () => {
+      if (!studentQuery.trim()) { setStudentOptions([]); return; }
+      try {
+        const token = await getToken();
+        const res = await fetch(`${apiBase()}/api/admin/sessions/meta/students?q=${encodeURIComponent(studentQuery)}`, { headers: { Authorization: `Bearer ${token}` } });
+        if (res.ok) { const d = await res.json(); setStudentOptions(d.students || []); }
+      } catch {}
+    }, 300);
+    return () => clearTimeout(t);
+  }, [studentQuery]);
+
   // group by day
   const groups = {};
   for (const s of sessions) { const k = isoDate(s.scheduledAt); (groups[k] ||= []).push(s); }
@@ -76,9 +95,12 @@ export default function SessionsPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6, flexWrap: 'wrap', gap: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6, flexWrap: 'wrap', gap: "10px" }}>
         <h1 style={{ fontSize: 22, fontWeight: 800, color: '#0f172a' }}>Class Sessions</h1>
-        <button onClick={() => setShowCreate(true)} style={primaryBtn}>+ New session</button>
+        <div className='flex items-center justify-center gap-3'>
+          <button onClick={() => setShowCreate(true)} style={primaryBtn}>+ New session</button>
+          <button onClick={() => setShowBulk(true)} style={ghostBtn}>Bulk add</button>
+        </div>
       </div>
       <p style={{ fontSize: 14, color: '#94a3b8', marginBottom: 20 }}>Platform-wide schedule across all teachers.</p>
 
@@ -93,6 +115,33 @@ export default function SessionsPage() {
           <option value="">All teachers</option>
           {teachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
         </select>
+        {/* Student filter */}
+        {studentId ? (
+          <div style={{ display:'flex', alignItems:'center', gap:6, padding:'6px 10px', borderRadius:8, border:'1px solid #28b7d9', background:'rgba(40,183,217,0.06)' }}>
+            <span style={{ fontSize:13, color:'#0f172a', fontWeight:600 }}>
+              {studentOptions.find(s => s.id === studentId)?.name || 'Student'}
+            </span>
+            <button onClick={() => { setStudentId(''); setStudentQuery(''); }} style={{ border:'none', background:'none', cursor:'pointer', color:'#64748b', fontSize:14 }}>✕</button>
+          </div>
+        ) : (
+          <div style={{ position:'relative' }}>
+            <input
+              value={studentQuery}
+              onChange={e => setStudentQuery(e.target.value)}
+              placeholder="Filter by student…"
+              style={selStyle}
+            />
+            {studentOptions.length > 0 && (
+              <div style={{ position:'absolute', top:'calc(100% + 4px)', left:0, right:0, zIndex:40, background:'white', border:'1px solid #e2e8f0', borderRadius:8, maxHeight:180, overflowY:'auto', boxShadow:'0 8px 24px rgba(13,40,64,0.12)' }}>
+                {studentOptions.map(s => (
+                  <div key={s.id} onClick={() => { setStudentId(s.id); setStudentOptions([]); }} style={{ padding:'8px 12px', fontSize:13, cursor:'pointer', color:'#0f172a' }}>
+                    {s.name} <span style={{ color:'#94a3b8' }}>· {s.account?.email}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
         <select value={status} onChange={e => setStatus(e.target.value)} style={selStyle}>
           <option value="">All statuses</option>
           <option value="SCHEDULED">Scheduled</option>
@@ -131,6 +180,7 @@ export default function SessionsPage() {
           </div>
         )}
 
+      {showBulk && <BulkAddSessionsModal onClose={() => setShowBulk(false)} onDone={load} />}
       {showCreate && <CreateSessionModal teachers={teachers} onClose={() => setShowCreate(false)} onCreated={() => { setShowCreate(false); load(); }} />}
       {selected && <SessionPanel session={selected} teachers={teachers} onClose={() => setSelected(null)} onChanged={() => { setSelected(null); load(); }} />}
     </div>
