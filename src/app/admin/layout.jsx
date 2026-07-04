@@ -44,9 +44,10 @@ const NAV = [
   {
     section: "Records",
     items: [
-      { label: "Attendance", href: "/admin/attendance", icon: "✓" },
-      { label: "Assignments", href: "/admin/assignments", icon: "📋" },
-      { label: "Progress Reports", href: "/admin/reports", icon: "📊" },
+      // { label: "Attendance", href: "/admin/attendance", icon: "✓" },
+      // { label: "Assignments", href: "/admin/assignments", icon: "📋" },
+      // { label: "Progress Reports", href: "/admin/reports", icon: "📊" },
+      { label: "Oversight", href: "/admin/oversight", icon: "📊" },
     ],
   },
   {
@@ -64,6 +65,9 @@ const NAV = [
       { label: "Settings", href: "/admin/settings", icon: "⚙️" },
     ],
   },
+  // {
+  //   se
+  // }
 ];
 
 function apiBase() {
