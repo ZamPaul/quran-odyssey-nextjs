@@ -84,6 +84,8 @@ export default function AdminLayout({ children }) {
   const [state, setState] = useState("checking"); // checking | allowed | denied
   const [admin, setAdmin] = useState(null);
 
+  const [failedCount, setFailedCount] = useState(0);
+
   // ── Admin guard ──────────────────────────────────────────
   useEffect(() => {
     if (!isLoaded) return;
@@ -115,6 +117,20 @@ export default function AdminLayout({ children }) {
       cancelled = true;
     };
   }, [isLoaded, isSignedIn]);
+
+  useEffect(() => {
+    let alive = true;
+    const poll = async () => {
+      try {
+        const token = await getToken();
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/communications/failure-count`, { headers: { Authorization: `Bearer ${token}` } });
+        if (res.ok && alive) { const d = await res.json(); setFailedCount(d.failed || 0); }
+      } catch {}
+    };
+    poll();
+    const t = setInterval(poll, 60000); // refresh every minute
+    return () => { alive = false; clearInterval(t); };
+  }, []);
 
   const handleSignOut = () => signOut(() => router.push("/"));
 
@@ -274,6 +290,7 @@ export default function AdminLayout({ children }) {
           borderRight: "1px solid rgba(255,255,255,0.06)",
         }}
       >
+        {/* sidebar header */}
         <div
           style={{
             padding: "22px 20px 18px",
@@ -325,6 +342,7 @@ export default function AdminLayout({ children }) {
           </div>
         </div>
 
+        {/* main nav */}
         <nav
           className="admin-sidebar"
           style={{
@@ -382,6 +400,15 @@ export default function AdminLayout({ children }) {
                       {item.icon}
                     </span>
                     {item.label}
+
+                    {item.href === '/admin/communications' && failedCount > 0 && (
+                      <span style={{
+                        marginLeft: 'auto', background: '#dc2626', color: 'white', fontSize: 11,
+                        fontWeight: 800, borderRadius: 999, padding: '1px 7px', minWidth: 18, textAlign: 'center',
+                      }}>
+                        {failedCount}
+                      </span>
+                    )}
                   </Link>
                 );
               })}
@@ -389,6 +416,7 @@ export default function AdminLayout({ children }) {
           ))}
         </nav>
 
+        {/* bottom */}
         <div
           style={{
             padding: "14px 16px",
