@@ -262,6 +262,7 @@ function Row({ left, mid, right, pill, pc }) {
         <div style={{ fontSize: 12, color: '#94a3b8' }}>{mid}</div>
       </div>
       <div style={{ fontSize: 12, color: '#64748b' }}>{right}</div>
+      {/* hkpfkpew */}
       {pill && <span style={badge(pc, '#f7f9fb')}>{pill}</span>}
     </div>
   );
