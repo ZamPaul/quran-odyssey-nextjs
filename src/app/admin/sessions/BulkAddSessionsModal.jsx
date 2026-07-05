@@ -217,7 +217,7 @@ export default function BulkAddSessionsModal({ onClose, onDone }) {
         {/* STEP 2 — weekdays + per-day time */}
         {step === 2 && (
           <div>
-            <label style={lbl}>Which days, and what time each? (student's local time)</label>
+            <label style={lbl}>Which days, and what time each? (student's local time) - {student?.timezone}</label>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 8 }}>
               {WEEKDAYS.map(d => {
                 const on = dayCfg[d.wd]?.on;

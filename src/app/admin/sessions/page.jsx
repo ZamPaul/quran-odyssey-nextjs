@@ -11,7 +11,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import BulkAddSessionsModal from './BulkAddSessionsModal';
-import { zonedInputToUtcISO } from '@/lib/timezone';
+// import { zonedInputToUtcISO } from '@/lib/timezone';
+import { zonedInputToUtcISO, utcToZonedInput, formatInZone } from '@/lib/clientTime';
 
 function apiBase() { return process.env.NEXT_PUBLIC_API_URL; }
 
@@ -352,7 +353,7 @@ function CreateSessionModal({ teachers, onClose, onCreated }) {
             </div>
             {conflicts.map((c, i) => (
               <div key={i} style={{ fontSize: 12, color: '#b45309' }}>
-                • {c.who === 'student' ? 'Student' : 'Teacher'} busy — {new Date(c.scheduledAt).toLocaleString('en-GB', { timeZone: tz, weekday: 'short', hour: '2-digit', minute: '2-digit' })}
+                • {c.who === 'student' ? 'Student' : 'Teacher'} busy — {formatInZone(c.scheduledAt, tz, { weekday: 'short', hour: '2-digit', minute: '2-digit' })}
               </div>
             ))}
             <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
@@ -374,9 +375,14 @@ function CreateSessionModal({ teachers, onClose, onCreated }) {
 function SessionPanel({ session, teachers, onClose, onChanged }) {
   const { getToken } = useAuth();
   const [zoomLink, setZoomLink] = useState(session.zoomLink || '');
-  const [slotStart, setSlotStart] = useState(new Date(session.scheduledAt).toISOString().slice(0, 16));
+
+  const tz = session.student?.timezone || 'UTC';   // ← the student's zone
+  // seed the input with the STUDENT's local wall-clock, not the admin's:
+  const [slotStart, setSlotStart] = useState(utcToZonedInput(session.scheduledAt, tz));
+  // const [slotStart, setSlotStart] = useState(new Date(session.scheduledAt).toISOString().slice(0, 16));
   const [reTeacher, setReTeacher] = useState('');
-  const [busy, setBusy] = useState(false); const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false); 
+  const [error, setError] = useState('');
 
   const call = async (path, body, method = 'POST') => {
     setBusy(true); setError('');
@@ -398,7 +404,8 @@ function SessionPanel({ session, teachers, onClose, onChanged }) {
         <div style={{ background: '#f7f9fb', border: '1px solid #e2e8f0', borderRadius: 10, padding: 16, marginBottom: 16 }}>
           <DRow k="Course" v={COURSE_LABELS[session.courseType] || session.courseType} />
           <DRow k="Teacher" v={session.teacher?.name} />
-          <DRow k="When" v={new Date(session.scheduledAt).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} />
+          {/* <DRow k="When" v={new Date(session.scheduledAt).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} /> */}
+          <DRow k="When" v={`${formatInZone(session.scheduledAt, tz)}  ·  ${tz}`} />
           <DRow k="Duration" v={`${session.durationMins} min`} />
           {session.attendance && <DRow k="Attendance" v={session.attendance.status} />}
           <DRow k="Calendar" v={session.calEventId ? '✓ Synced' : '✗ Not synced'} />
@@ -412,11 +419,23 @@ function SessionPanel({ session, teachers, onClose, onChanged }) {
                 <button onClick={() => call('', { zoomLink }, 'PATCH')} disabled={busy} style={ghostBtn}>Save</button>
               </div>
             </div>
-            <div style={{ marginBottom: 14 }}><label style={lbl}>Reschedule</label>
+            {/* <div style={{ marginBottom: 14 }}><label style={lbl}>Reschedule</label>
               <div style={{ display: 'flex', gap: 8 }}>
                 <input type="datetime-local" value={slotStart} onChange={e => setSlotStart(e.target.value)} style={inp} />
                 <button onClick={() => call('', { scheduledAt: new Date(slotStart).toISOString() }, 'PATCH')} disabled={busy} style={ghostBtn}>Update</button>
               </div>
+            </div> */}
+            <div style={{ marginBottom: 14 }}>
+              <label style={lbl}>Reschedule <span style={{ fontWeight: 400, color: '#94a3b8' }}>(in {tz})</span></label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <input type="datetime-local" value={slotStart} onChange={e => setSlotStart(e.target.value)} style={inp} />
+                <button
+                  onClick={() => call('', { scheduledAt: zonedInputToUtcISO(slotStart, tz) }, 'PATCH')}
+                  disabled={busy}
+                  style={ghostBtn}
+                >Update</button>
+              </div>
+              <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>Student local time — {tz}</div>
             </div>
             {!cancelled && !session.calEventId && (
               <div style={{ marginBottom: 14 }}>
