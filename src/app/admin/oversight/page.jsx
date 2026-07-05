@@ -176,8 +176,10 @@ function TeacherRow({ t, onRemind, onDrill }) {
         <div style={{ flex: 1, minWidth: 200 }}>
           <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>{t.name}</div>
           <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+            {/* {chip('Unmarked sessions', t.unmarkedSessions, ['#dc2626', 'rgba(239,68,68,0.10)'],
+              () => onDrill({ type: 'attendance', filters: { teacherId: t.teacherId }, title: `${t.name} — attendance` }))} */}
             {chip('Unmarked sessions', t.unmarkedSessions, ['#dc2626', 'rgba(239,68,68,0.10)'],
-              () => onDrill({ type: 'attendance', filters: { teacherId: t.teacherId }, title: `${t.name} — attendance` }))}
+              () => onDrill({ type: 'unmarked-sessions', filters: { teacherId: t.teacherId }, title: `${t.name} — unmarked sessions` }))}
             {chip('Ungraded', t.ungradedSubmissions, ['#b45309', 'rgba(250,167,26,0.14)'],
               () => onDrill({ type: 'assignments', filters: { teacherId: t.teacherId, status: 'SUBMITTED' }, title: `${t.name} — ungraded` }))}
             {chip('Overdue reports', t.overdueReports, ['#dc2626', 'rgba(239,68,68,0.10)'],
@@ -209,7 +211,7 @@ function DrillModal({ drill, onClose }) {
         const res = await fetch(`${apiBase()}/api/admin/oversight/${drill.type}?${qs}`, { headers: { Authorization: `Bearer ${token}` } });
         if (!res.ok) throw new Error('Failed to load');
         const d = await res.json();
-        setRows(d.records || d.assignments || d.reports || d.overdueEnrollments || []);
+        setRows(d.records || d.assignments || d.reports || d.overdueEnrollments || d.sessions || []);
       } catch (err) { setError(err.message); }
     })();
   }, [drill]);
@@ -236,6 +238,16 @@ function DrillTable({ type, rows }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       {rows.map((r, i) => {
+        if (type === 'unmarked-sessions') return (
+          <Row
+            key={i}
+            left={r.student?.name}
+            mid={`${COURSE_LABELS[r.courseType] || r.courseType || ''} · ${r.teacher?.name || ''}`}
+            right={fmt(r.scheduledAt)}
+            pill="UNMARKED"
+            pc="#dc2626"
+          />
+        );
         if (type === 'attendance') return (
           <Row key={i} left={r.student?.name} mid={`${COURSE_LABELS[r.session?.courseType] || r.session?.courseType || ''} · ${r.teacher?.name || ''}`} right={fmt(r.session?.scheduledAt)} pill={r.status} pc={statusColor[r.status]} />
         );
