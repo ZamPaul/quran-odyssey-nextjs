@@ -96,6 +96,10 @@ export default function AdminDashboardPage() {
   const { kpis, totals, charts, activity } = data;
 
   const kpiCards = [
+    // ...(kpis.failedComms > 0 ? [{
+    //   label: 'Failed Emails', value: kpis.failedComms,
+    //   href: '/admin/communications', accent: '#dc2626', icon: '⚠️',
+    // }] : []),
     { label: 'Pending Requests', value: kpis.pendingEnrollmentRequests, href: '/admin/enrollment-requests', accent: '#faa71a', icon: '📝' },
     { label: 'Unassigned Trials', value: kpis.unassignedTrials, href: '/admin/trials', accent: '#28b7d9', icon: '📅' },
     { label: "Today's Classes", value: kpis.todaySessions, href: '/admin/sessions', accent: '#0e6e8a', icon: '🗓️' },
@@ -114,6 +118,29 @@ export default function AdminDashboardPage() {
     <div>
       <h1 style={{ fontSize: 22, fontWeight: 800, color: '#0f172a', marginBottom: 4 }}>Dashboard</h1>
       <p style={{ fontSize: 14, color: '#94a3b8', marginBottom: 24 }}>A snapshot of what needs attention and how the platform is doing.</p>
+
+      {/* Failed-comms attention banner — only when there's something wrong */}
+      {kpis.failedComms > 0 && (
+        <Link href="/admin/communications" style={{ textDecoration: 'none' }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20,
+            padding: '16px 20px', borderRadius: 14,
+            background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.25)',
+            borderLeft: '3px solid #dc2626', cursor: 'pointer',
+          }}>
+            <div style={{ fontSize: 24, lineHeight: 1 }}>⚠️</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 14, fontWeight: 800, color: '#dc2626' }}>
+                {kpis.failedComms} failed email{kpis.failedComms !== 1 ? 's' : ''} need attention
+              </div>
+              <div style={{ fontSize: 12.5, color: '#94a3b8', marginTop: 2 }}>
+                One or more emails didn’t send. Retry or resend them from Communications.
+              </div>
+            </div>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#dc2626' }}>Review →</span>
+          </div>
+        </Link>
+      )}
 
       {/* Attention KPIs */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 28 }}>

@@ -695,11 +695,33 @@ export default function SchedulePage() {
   }, [getToken]);
 
   // Fetch sessions for the selected week
+  // const fetchSessions = useCallback(async (weekMonday) => {
+  //   setLoading(true);
+  //   setError(null);
+  //   setExpandedId(null);
+  //   setAttendanceMap({});
+
+  //   const from = weekMonday.toISOString();
+  //   const to   = addDays(weekMonday, 6);
+  //   to.setHours(23, 59, 59, 999);
+
+  //   try {
+  //     const data = await apiFetch(
+  //       `/api/teacher/sessions?from=${from}&to=${to.toISOString()}`
+  //     );
+  //     console.log("data loaded for this teacher:", data);
+  //     setSessions(data.sessions || []);
+  //   } catch (err) {
+  //     setError(err.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }, [apiFetch]);
+
   const fetchSessions = useCallback(async (weekMonday) => {
     setLoading(true);
     setError(null);
     setExpandedId(null);
-    setAttendanceMap({});
 
     const from = weekMonday.toISOString();
     const to   = addDays(weekMonday, 6);
@@ -709,8 +731,17 @@ export default function SchedulePage() {
       const data = await apiFetch(
         `/api/teacher/sessions?from=${from}&to=${to.toISOString()}`
       );
-      console.log("data loaded for this teacher:", data);
-      setSessions(data.sessions || []);
+      const list = data.sessions || [];
+      setSessions(list);
+
+      // Seed attendance from the list response — each session already carries
+      // its attendance record (or null). This makes collapsed cards correct on
+      // first paint; no per-card fetch needed.
+      const seeded = {};
+      for (const s of list) {
+        seeded[s.id] = s.attendance ?? null;   // record | null (null = genuinely unmarked)
+      }
+      setAttendanceMap(seeded);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -723,25 +754,30 @@ export default function SchedulePage() {
   }, [monday]);
 
   // Fetch attendance when expanding a session
-  const handleToggle = async (sessionId) => {
-    if (expandedId === sessionId) {
-      setExpandedId(null);
-      return;
-    }
-    setExpandedId(sessionId);
+  // const handleToggle = async (sessionId) => {
+  //   if (expandedId === sessionId) {
+  //     setExpandedId(null);
+  //     return;
+  //   }
+  //   setExpandedId(sessionId);
 
-    // Only fetch if we don't already have it
-    if (attendanceMap[sessionId] !== undefined) return;
+  //   // Only fetch if we don't already have it
+  //   if (attendanceMap[sessionId] !== undefined) return;
 
-    setLoadingAttMap(prev => ({ ...prev, [sessionId]: true }));
-    try {
-      const data = await apiFetch(`/api/teacher/attendance/session/${sessionId}`);
-      setAttendanceMap(prev => ({ ...prev, [sessionId]: data.attendance }));
-    } catch {
-      setAttendanceMap(prev => ({ ...prev, [sessionId]: null }));
-    } finally {
-      setLoadingAttMap(prev => ({ ...prev, [sessionId]: false }));
-    }
+  //   setLoadingAttMap(prev => ({ ...prev, [sessionId]: true }));
+  //   try {
+  //     const data = await apiFetch(`/api/teacher/attendance/session/${sessionId}`);
+  //     setAttendanceMap(prev => ({ ...prev, [sessionId]: data.attendance }));
+  //   } catch {
+  //     setAttendanceMap(prev => ({ ...prev, [sessionId]: null }));
+  //   } finally {
+  //     setLoadingAttMap(prev => ({ ...prev, [sessionId]: false }));
+  //   }
+  // };
+
+  // Expand / collapse. Attendance is already seeded from the list — no fetch.
+  const handleToggle = (sessionId) => {
+    setExpandedId(prev => (prev === sessionId ? null : sessionId));
   };
 
   // Update sessions state when zoom link saved
@@ -1007,11 +1043,12 @@ export default function SchedulePage() {
               session={session}
               expanded={expandedId === session.id}
               onToggle={() => handleToggle(session.id)}
-              attendanceRecord={
-                loadingAttMap[session.id]
-                  ? undefined
-                  : attendanceMap[session.id]
-              }
+              // attendanceRecord={
+              //   loadingAttMap[session.id]
+              //     ? undefined
+              //     : attendanceMap[session.id]
+              // }
+              attendanceRecord={attendanceMap[session.id] ?? null}
               onAttendanceMarked={(record) => handleAttendanceMarked(session.id, record)}
               onAttendanceUpdated={(record) => handleAttendanceMarked(session.id, record)}
               onZoomLinkSaved={(newLink) => handleZoomLinkSaved(session.id, newLink)}
