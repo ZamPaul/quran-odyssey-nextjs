@@ -331,7 +331,7 @@ export default function BulkAddSessionsModal({ onClose, onDone }) {
               )}
             </div>
 
-            {!syncResult ? (
+            {/* {!syncResult ? (
               <div style={{ background: '#f7f9fb', border: '1px solid #e2e8f0', borderRadius: 10, padding: 16, textAlign: 'center' }}>
                 <div style={{ fontSize: 13, color: '#334155', marginBottom: 12 }}>Add these to the teacher's Google Calendar now?</div>
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
@@ -345,7 +345,7 @@ export default function BulkAddSessionsModal({ onClose, onDone }) {
                 {syncResult.failed > 0 && <div style={{ fontSize: 12, color: '#dc2626', marginTop: 4 }}>Some events failed — you can retry from the session list.</div>}
                 <button onClick={() => { onDone?.(); onClose(); }} style={{ ...primaryBtn, marginTop: 12 }}>Done</button>
               </div>
-            )}
+            )} */}
           </div>
         )}
       </div>

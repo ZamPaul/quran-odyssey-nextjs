@@ -111,8 +111,8 @@ export default function TeacherProfilePage() {
           <InfoRow k="Email" v={teacher.email} />
           <InfoRow k="Gender" v={teacher.gender} />
           <InfoRow k="Timezone" v={teacher.timezone} />
-          <InfoRow k="Rating" v={`${teacher.rating?.toFixed(1) ?? '0.0'} / 5`} />
-          <InfoRow k="Calendar ID" v={<span style={{ fontFamily: 'monospace', fontSize: 12, wordBreak: 'break-all' }}>{teacher.calendarId}</span>} />
+          {/* <InfoRow k="Rating" v={`${teacher.rating?.toFixed(1) ?? '0.0'} / 5`} /> */}
+          {/* <InfoRow k="Calendar ID" v={<span style={{ fontFamily: 'monospace', fontSize: 12, wordBreak: 'break-all' }}>{teacher.calendarId}</span>} /> */}
           <InfoRow k="Specialties" v={(teacher.specialty || []).map(s => SPECIALTY_LABELS[s] || s).join(', ') || '—'} />
           {teacher.bio && <div style={{ marginTop: 12, fontSize: 13, color: '#64748b', lineHeight: 1.6 }}>{teacher.bio}</div>}
         </div>
@@ -200,8 +200,8 @@ function EditModal({ teacher, onClose, onSaved }) {
         <div style={{ gridColumn: '1 / -1' }}><label style={lbl}>Name</label><input value={form.name} onChange={e => set('name', e.target.value)} style={inp} /></div>
         <div><label style={lbl}>Gender</label><select value={form.gender} onChange={e => set('gender', e.target.value)} style={{ ...inp, cursor: 'pointer' }}><option value="MALE">Male</option><option value="FEMALE">Female</option></select></div>
         <div><label style={lbl}>Timezone</label><input value={form.timezone} onChange={e => set('timezone', e.target.value)} style={inp} /></div>
-        <div><label style={lbl}>Rating (0–5)</label><input type="number" min="0" max="5" step="0.1" value={form.rating} onChange={e => set('rating', e.target.value)} style={inp} /></div>
-        <div><label style={lbl}>Calendar ID</label><input value={form.calendarId} onChange={e => set('calendarId', e.target.value)} style={inp} /></div>
+        {/* <div><label style={lbl}>Rating (0–5)</label><input type="number" min="0" max="5" step="0.1" value={form.rating} onChange={e => set('rating', e.target.value)} style={inp} /></div> */}
+        {/* <div><label style={lbl}>Calendar ID</label><input value={form.calendarId} onChange={e => set('calendarId', e.target.value)} style={inp} /></div> */}
         <div style={{ gridColumn: '1 / -1' }}>
           <label style={lbl}>Specialties</label>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>

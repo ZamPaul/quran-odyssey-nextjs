@@ -11,6 +11,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
+import CountrySelect from '@/components/form/CountrySelect';
 
 function apiBase() { return process.env.NEXT_PUBLIC_API_URL; }
 
@@ -223,7 +224,11 @@ function CreateStudentModal({ onClose, onCreated }) {
               <option value="">—</option><option value="MALE">Male</option><option value="FEMALE">Female</option>
             </select>
           </div>
-          <div><label style={lbl}>Country *</label><input value={form.country} onChange={e => set('country', e.target.value)} style={inp} /></div>
+          {/* <div><label style={lbl}>Country *</label><input value={form.country} onChange={e => set('country', e.target.value)} style={inp} /></div> */}
+          <div className="flex flex-col gap-0">
+            <label style={lbl}>Country *</label>
+            <CountrySelect value={form.country} onChange={(c) => set("country", c)} />
+          </div>
           <div><label style={lbl}>Timezone *</label><input value={form.timezone} onChange={e => set('timezone', e.target.value)} placeholder="Europe/London" style={inp} /></div>
           <div><label style={lbl}>Date of birth</label><input type="date" value={form.dateOfBirth} max={new Date().toISOString().slice(0,10)} onChange={e => set('dateOfBirth', e.target.value)} style={inp} /></div>
           <div><label style={lbl}>Course *</label>

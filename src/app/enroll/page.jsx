@@ -7,7 +7,7 @@ import { useProfileGate } from '@/hooks/useProfileGate';
 import Link from "next/link";
 
 const COURSE_OPTIONS = [
-  { value: "NOORANI_QAIDA",    label: "Noorani Qaida",     desc: "Arabic alphabet & basic reading · Ages 5–10" },
+  { value: "NOORANI_QAIDA",    label: "Noorani Qaida",     desc: "Arabic alphabet & basic reading · Ages 3+" },
   { value: "QURAN_RECITATION", label: "Quran Recitation",  desc: "Fluent recitation with Tajweed · All ages" },
   { value: "TAJWEED",          label: "Tajweed Rules",     desc: "Science of correct recitation · Ages 8+" },
   { value: "HIFZ",             label: "Hifz Programme",    desc: "Full Quran memorisation · Ages 7+" },

@@ -286,7 +286,7 @@ function OverviewTab({ account, student }) {
 
       {/* Enrollment application status */}
       <div style={{ background: 'white', borderRadius: 12, border: '1px solid #e2e8f0', padding: 20, marginBottom: 16 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#94a3b8', marginBottom: 10 }}>Enrollment</div>
+        <div style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#94a3b8', marginBottom: 10 }}>Enrollment Applications</div>
         {loading ? (
           <div style={{ fontSize: 13, color: '#94a3b8' }}>Loading…</div>
         ) : activeApplication ? (
@@ -298,7 +298,7 @@ function OverviewTab({ account, student }) {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
             <div style={{ fontSize: 13, color: '#64748b' }}>No active enrollment application for {childName}.</div>
             <Link href={`/enroll?studentId=${student?.id}`} style={{ display: 'inline-flex', background: '#0d2840', color: 'white', padding: '9px 18px', borderRadius: 8, fontSize: 13, fontWeight: 700, textDecoration: 'none' }}>
-              Enroll {childName} →
+              New Enrollment application for {childName} →
             </Link>
           </div>
         )}
@@ -1004,9 +1004,13 @@ function ProfileTab({ account, student, onStudentUpdated, onAccountUpdated, onAd
                   <option value="FEMALE">Female</option>
                 </select>
               </div>
-              <div>
+              {/* <div>
                 <label style={labelStyle}>Country</label>
                 <input value={learner.country} onChange={e => setLearner(p => ({ ...p, country: e.target.value }))} style={inputStyle} />
+              </div> */}
+              <div className="flex flex-col gap-0">
+                <label style={labelStyle}>Country</label>
+                <CountrySelect value={learner.country} onChange={e => setLearner(p => ({ ...p, country: e }))} />
               </div>
               <div style={{ gridColumn: '1 / -1' }}>
                 <label style={labelStyle}>Timezone</label>

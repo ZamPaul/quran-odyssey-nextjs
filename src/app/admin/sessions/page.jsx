@@ -205,9 +205,9 @@ export default function SessionsPage() {
                         <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>{s.student?.name} <span style={{ fontWeight: 500, color: '#94a3b8' }}>· {COURSE_LABELS[s.courseType] || s.courseType}</span></div>
                         <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>👩‍🏫 {s.teacher?.name}{s.zoomLink ? ' · 📹 link' : ''}{s.attendance ? ` · ✓ ${s.attendance.status}` : ''}</div>
                       </div>
-                      {!s.calEventId && s.status === 'SCHEDULED' && (
+                      {/* {!s.calEventId && s.status === 'SCHEDULED' && (
                         <span style={{ fontSize: 11, color: '#b45309' }}> · ⚠ not synced</span>
-                      )}
+                      )} */}
                       <span style={pill(s.status)}>{s.status}</span>
                       <span style={{ color: '#cbd5e1', fontSize: 16 }}>›</span>
                     </div>
@@ -437,7 +437,7 @@ function SessionPanel({ session, teachers, onClose, onChanged }) {
               </div>
               <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>Student local time — {tz}</div>
             </div>
-            {!cancelled && !session.calEventId && (
+            {/* {!cancelled && !session.calEventId && (
               <div style={{ marginBottom: 14 }}>
                 <label style={lbl}>Google Calendar</label>
                 <button
@@ -460,7 +460,7 @@ function SessionPanel({ session, teachers, onClose, onChanged }) {
                   📅 Sync to Google Calendar
                 </button>
               </div>
-            )}
+            )} */}
             <div style={{ marginBottom: 16 }}><label style={lbl}>Reassign teacher</label>
               <div style={{ display: 'flex', gap: 8 }}>
                 <select value={reTeacher} onChange={e => setReTeacher(e.target.value)} style={{ ...inp, cursor: 'pointer' }}>
@@ -538,7 +538,7 @@ function BulkActionBar({ count, ids, teachers, onSelectAll, onDone }) {
 
       <select value={action} onChange={e => { setAction(e.target.value); setResult(null); setConfirmDelete(false); }} style={miniSel}>
         <option value="">Choose action…</option>
-        <option value="sync">Sync to Google Calendar</option>
+        {/* <option value="sync">Sync to Google Calendar</option> */}
         <option value="reassign">Reassign teacher</option>
         <option value="status">Change status</option>
         <option value="delete">Delete</option>

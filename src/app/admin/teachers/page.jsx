@@ -115,7 +115,7 @@ export default function TeachersPage() {
 // ─── Onboard modal ────────────────────────────────────────
 function OnboardModal({ onClose, onDone }) {
   const { getToken } = useAuth();
-  const [form, setForm] = useState({ email: '', name: '', specialty: [], timezone: '', gender: '', calendarId: '', bio: '' });
+  const [form, setForm] = useState({ email: '', name: '', specialty: [], timezone: '', gender: '', calendarId: '00000000', bio: '' });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
@@ -150,11 +150,11 @@ function OnboardModal({ onClose, onDone }) {
               <div style={{ gridColumn: '1 / -1' }}><label style={lbl}>Email *</label><input type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="teacher@example.com" style={inp} /></div>
               <div><label style={lbl}>Gender *</label><select value={form.gender} onChange={e => set('gender', e.target.value)} style={{ ...inp, cursor: 'pointer' }}><option value="">Select…</option><option value="MALE">Male</option><option value="FEMALE">Female</option></select></div>
               <div><label style={lbl}>Timezone *</label><input value={form.timezone} onChange={e => set('timezone', e.target.value)} placeholder="Europe/London" style={inp} /></div>
-              <div style={{ gridColumn: '1 / -1' }}>
+              {/* <div style={{ gridColumn: '1 / -1' }}>
                 <label style={lbl}>Calendar ID *</label>
                 <input value={form.calendarId} onChange={e => set('calendarId', e.target.value)} placeholder="teacher's Google Calendar ID" style={inp} />
                 <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>The teacher's Google Calendar ID (often their Google email). Must be unique.</div>
-              </div>
+              </div> */}
               <div style={{ gridColumn: '1 / -1' }}>
                 <label style={lbl}>Specialties</label>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
