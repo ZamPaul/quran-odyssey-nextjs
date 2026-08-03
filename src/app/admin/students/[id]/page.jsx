@@ -14,6 +14,7 @@ import { useAuth } from '@clerk/nextjs';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import CountrySelect from '@/components/form/CountrySelect';
+import TimezoneSelect from '@/components/form/TimezoneSelect';
 
 function apiBase() { return process.env.NEXT_PUBLIC_API_URL; }
 
@@ -275,12 +276,24 @@ function EditModal({ student, onClose, onSaved }) {
         <div><label style={lbl}>Date of birth</label><input type="date" value={form.dateOfBirth} max={new Date().toISOString().slice(0,10)} onChange={e => set('dateOfBirth', e.target.value)} style={inp} /></div>
         <div><label style={lbl}>Age {form.dateOfBirth && <span style={{ textTransform: 'none', color: '#cbd5e1' }}>(from DOB)</span>}</label><input type="number" value={form.dateOfBirth ? (ageFromDob(form.dateOfBirth) ?? '') : form.age} disabled={!!form.dateOfBirth} onChange={e => set('age', e.target.value)} style={{ ...inp, background: form.dateOfBirth ? '#f7f9fb' : 'white' }} /></div>
         <div><label style={lbl}>Gender</label><select value={form.gender} onChange={e => set('gender', e.target.value)} style={{ ...inp, cursor: 'pointer' }}><option value="">—</option><option value="MALE">Male</option><option value="FEMALE">Female</option></select></div>
-        {/* <div><label style={lbl}>Country</label><input value={form.country} onChange={e => set('country', e.target.value)} style={inp} /></div> */}
-        <div className="flex flex-col gap-0">
+        {/* <div><label style={lbl}>Country</label><input value={form.country} onChange={e => set('country', e.target.value)} style={inp} /></div>
+        <div><label style={lbl}>Timezone</label><input value={form.timezone} onChange={e => set('timezone', e.target.value)} style={inp} /></div> */}
+        <div style={{ gridColumn: '1 / -1' }}>
+          <label style={lbl}>Country</label>
+          <CountrySelect value={form.country} onChange={(c) => set('country', c)} />
+        </div>
+        <div style={{ gridColumn: '1 / -1' }}>
+          <label style={lbl}>Timezone</label>
+          <TimezoneSelect
+            country={form.country}
+            value={form.timezone}
+            onChange={(tz) => set('timezone', tz)}
+          />
+        </div>
+        {/* <div className="flex flex-col gap-0">
             <label style={lbl}>Country *</label>
             <CountrySelect value={form.country} onChange={(c) => set("country", c)} />
-          </div>
-        <div><label style={lbl}>Timezone</label><input value={form.timezone} onChange={e => set('timezone', e.target.value)} style={inp} /></div>
+          </div> */}
         <div><label style={lbl}>Course</label><select value={form.courseInterest} onChange={e => set('courseInterest', e.target.value)} style={{ ...inp, cursor: 'pointer' }}>{COURSES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}</select></div>
       </div>
       {error && <div style={{ marginTop: 12, fontSize: 13, color: '#dc2626' }}>⚠️ {error}</div>}

@@ -11,6 +11,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
+import CountrySelect from '@/components/form/CountrySelect';
+import TimezoneSelect from '@/components/form/TimezoneSelect';
 
 function apiBase() { return process.env.NEXT_PUBLIC_API_URL; }
 
@@ -115,7 +117,8 @@ export default function TeachersPage() {
 // ─── Onboard modal ────────────────────────────────────────
 function OnboardModal({ onClose, onDone }) {
   const { getToken } = useAuth();
-  const [form, setForm] = useState({ email: '', name: '', specialty: [], timezone: '', gender: '', calendarId: '00000000', bio: '' });
+  // const [form, setForm] = useState({ email: '', name: '', specialty: [], timezone: '', gender: '', calendarId: '00000000', bio: '' });
+  const [form, setForm] = useState({ email: '', name: '', specialty: [], timezone: '', gender: '', calendarId: '00000000', bio: '', country: '' });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
@@ -149,7 +152,19 @@ function OnboardModal({ onClose, onDone }) {
               <div style={{ gridColumn: '1 / -1' }}><label style={lbl}>Full name *</label><input value={form.name} onChange={e => set('name', e.target.value)} style={inp} /></div>
               <div style={{ gridColumn: '1 / -1' }}><label style={lbl}>Email *</label><input type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="teacher@example.com" style={inp} /></div>
               <div><label style={lbl}>Gender *</label><select value={form.gender} onChange={e => set('gender', e.target.value)} style={{ ...inp, cursor: 'pointer' }}><option value="">Select…</option><option value="MALE">Male</option><option value="FEMALE">Female</option></select></div>
-              <div><label style={lbl}>Timezone *</label><input value={form.timezone} onChange={e => set('timezone', e.target.value)} placeholder="Europe/London" style={inp} /></div>
+              {/* <div><label style={lbl}>Timezone *</label><input value={form.timezone} onChange={e => set('timezone', e.target.value)} placeholder="Europe/London" style={inp} /></div> */}
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={lbl}>Country</label>
+                <CountrySelect value={form.country} onChange={(c) => set('country', c)} />
+              </div>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={lbl}>Timezone *</label>
+                <TimezoneSelect
+                  country={form.country}
+                  value={form.timezone}
+                  onChange={(tz) => set('timezone', tz)}
+                />
+              </div>
               {/* <div style={{ gridColumn: '1 / -1' }}>
                 <label style={lbl}>Calendar ID *</label>
                 <input value={form.calendarId} onChange={e => set('calendarId', e.target.value)} placeholder="teacher's Google Calendar ID" style={inp} />

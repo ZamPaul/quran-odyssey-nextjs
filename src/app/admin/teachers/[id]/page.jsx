@@ -13,6 +13,8 @@ import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import CountrySelect from '@/components/form/CountrySelect';
+import TimezoneSelect from '@/components/form/TimezoneSelect';
 
 function apiBase() { return process.env.NEXT_PUBLIC_API_URL; }
 
@@ -173,10 +175,15 @@ export default function TeacherProfilePage() {
 // ─── Edit modal ───────────────────────────────────────────
 function EditModal({ teacher, onClose, onSaved }) {
   const { getToken } = useAuth();
+  // const [form, setForm] = useState({
+  //   name: teacher.name || '', timezone: teacher.timezone || '', gender: teacher.gender || '',
+  //   bio: teacher.bio || '', rating: teacher.rating ?? 0, calendarId: teacher.calendarId || '',
+  //   specialty: teacher.specialty || [],
+  // });
   const [form, setForm] = useState({
     name: teacher.name || '', timezone: teacher.timezone || '', gender: teacher.gender || '',
     bio: teacher.bio || '', rating: teacher.rating ?? 0, calendarId: teacher.calendarId || '',
-    specialty: teacher.specialty || [],
+    specialty: teacher.specialty || [], country: teacher.country || '',
   });
   const [saving, setSaving] = useState(false); const [error, setError] = useState('');
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
@@ -199,7 +206,19 @@ function EditModal({ teacher, onClose, onSaved }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
         <div style={{ gridColumn: '1 / -1' }}><label style={lbl}>Name</label><input value={form.name} onChange={e => set('name', e.target.value)} style={inp} /></div>
         <div><label style={lbl}>Gender</label><select value={form.gender} onChange={e => set('gender', e.target.value)} style={{ ...inp, cursor: 'pointer' }}><option value="MALE">Male</option><option value="FEMALE">Female</option></select></div>
-        <div><label style={lbl}>Timezone</label><input value={form.timezone} onChange={e => set('timezone', e.target.value)} style={inp} /></div>
+        {/* <div><label style={lbl}>Timezone</label><input value={form.timezone} onChange={e => set('timezone', e.target.value)} style={inp} /></div> */}
+        <div style={{ gridColumn: '1 / -1' }}>
+          <label style={lbl}>Country</label>
+          <CountrySelect value={form.country} onChange={(c) => set('country', c)} />
+        </div>
+        <div style={{ gridColumn: '1 / -1' }}>
+          <label style={lbl}>Timezone</label>
+          <TimezoneSelect
+            country={form.country}
+            value={form.timezone}
+            onChange={(tz) => set('timezone', tz)}
+          />
+        </div>
         {/* <div><label style={lbl}>Rating (0–5)</label><input type="number" min="0" max="5" step="0.1" value={form.rating} onChange={e => set('rating', e.target.value)} style={inp} /></div> */}
         {/* <div><label style={lbl}>Calendar ID</label><input value={form.calendarId} onChange={e => set('calendarId', e.target.value)} style={inp} /></div> */}
         <div style={{ gridColumn: '1 / -1' }}>
