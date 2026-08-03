@@ -10,10 +10,12 @@
 //   5. Optional: sync created sessions to Google Calendar
 //
 // Import into sessions/page.jsx and render when `showBulk` is true.
-// Times are entered in the STUDENT'S timezone (shown in the preview).
+// Times are entered in the ADMIN'S local timezone. The preview shows both the
+// admin time and the student's local time for every occurrence.
 
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@clerk/nextjs';
+import { getAdminTimezone, zoneAbbr, formatInZone } from '@/lib/clientTime';
 
 function apiBase() { return process.env.NEXT_PUBLIC_API_URL; }
 
@@ -26,6 +28,8 @@ const COURSE_LABELS = { NOORANI_QAIDA: 'Noorani Qaida', QURAN_RECITATION: 'Quran
 export default function BulkAddSessionsModal({ onClose, onDone }) {
   const { getToken } = useAuth();
   const [step, setStep] = useState(1);
+
+  const adminTz = getAdminTimezone();
 
   // Step 1
   const [query, setQuery] = useState('');
@@ -49,6 +53,8 @@ export default function BulkAddSessionsModal({ onClose, onDone }) {
   const [error, setError] = useState('');
   const [committed, setCommitted] = useState(null); // { createdIds, ... }
   const [syncResult, setSyncResult] = useState(null);
+
+  const studentTz = student?.timezone || null;
 
   // ── Student search ──
   useEffect(() => {
@@ -83,6 +89,7 @@ export default function BulkAddSessionsModal({ onClose, onDone }) {
     ...p,
     [wd]: p[wd]?.on ? { ...p[wd], on: false } : { on: true, startTime: p[wd]?.startTime || '16:00', durationMins: p[wd]?.durationMins || 30 },
   }));
+
   const setDayField = (wd, k, v) => setDayCfg(p => ({ ...p, [wd]: { ...p[wd], [k]: v } }));
 
   const activeDays = WEEKDAYS.filter(d => dayCfg[d.wd]?.on);
@@ -105,7 +112,8 @@ export default function BulkAddSessionsModal({ onClose, onDone }) {
       const token = await getToken();
       const res = await fetch(`${apiBase()}/api/admin/sessions/bulk/preview`, {
         method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ enrollmentId, days: daysPayload(), startDate, endDate, blackout }),
+        // body: JSON.stringify({ enrollmentId, days: daysPayload(), startDate, endDate, blackout }),
+        body: JSON.stringify({ enrollmentId, days: daysPayload(), startDate, endDate, blackout, timeZone: adminTz }),
       });
       const d = await res.json();
       if (!res.ok) throw new Error(d.error || 'Preview failed');
@@ -121,7 +129,8 @@ export default function BulkAddSessionsModal({ onClose, onDone }) {
       const token = await getToken();
       const res = await fetch(`${apiBase()}/api/admin/sessions/bulk/commit`, {
         method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ enrollmentId, days: daysPayload(), startDate, endDate, blackout }),
+        // body: JSON.stringify({ enrollmentId, days: daysPayload(), startDate, endDate, blackout }),
+        body: JSON.stringify({ enrollmentId, days: daysPayload(), startDate, endDate, blackout, timeZone: adminTz }),
       });
       const d = await res.json();
       if (!res.ok) throw new Error(d.error || 'Create failed');
@@ -217,7 +226,12 @@ export default function BulkAddSessionsModal({ onClose, onDone }) {
         {/* STEP 2 — weekdays + per-day time */}
         {step === 2 && (
           <div>
-            <label style={lbl}>Which days, and what time each? (student's local time) - {student?.timezone}</label>
+            {/* <label style={lbl}>Which days, and what time each? (student's local time) - {student?.timezone}</label> */}
+            <label style={lbl}>Which days, and what time each?</label>
+            <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 10 }}>
+              Times are in <strong style={{ color: '#0f172a' }}>your local time</strong> — {adminTz} ({zoneAbbr(adminTz)})
+              {studentTz && studentTz !== adminTz && <> · student is in {studentTz}</>}
+            </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 8 }}>
               {WEEKDAYS.map(d => {
                 const on = dayCfg[d.wd]?.on;
@@ -293,16 +307,32 @@ export default function BulkAddSessionsModal({ onClose, onDone }) {
             {preview.warning && (
               <div style={{ fontSize: 12, color: '#92400e', background: 'rgba(250,167,26,0.12)', border: '1px solid rgba(250,167,26,0.3)', borderRadius: 8, padding: '8px 12px', marginBottom: 12 }}>{preview.warning}</div>
             )}
-            <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 8 }}>
+            {/* <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 8 }}>
               {preview.student.name} · {preview.teacher.name} · times shown in {preview.timeZone}
+            </div> */}
+            <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 8 }}>
+              {preview.student.name} · {preview.teacher.name} · times in {preview.timeZone} (your time)
+              {preview.studentTimeZone && preview.studentTimeZone !== preview.timeZone
+                && <> · student column in {preview.studentTimeZone}</>}
             </div>
+            {preview.dstWarning && (
+              <div style={{ fontSize: 12, color: '#92400e', background: 'rgba(250,167,26,0.12)', border: '1px solid rgba(250,167,26,0.35)', borderRadius: 8, padding: '8px 12px', marginBottom: 12 }}>
+                ⚠️ {preview.dstWarning}
+              </div>
+            )}
             <div style={{ border: '1px solid #e2e8f0', borderRadius: 10, maxHeight: 260, overflowY: 'auto' }}>
               {preview.plan.map((p, i) => {
                 const cfg = p.status === 'ok' ? ['#15803d', 'rgba(34,197,94,0.08)', '✓'] : p.status === 'conflict' ? ['#dc2626', 'rgba(239,68,68,0.06)', '✕'] : ['#b45309', 'rgba(250,167,26,0.10)', '—'];
                 return (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderBottom: '1px solid #f4f8fb', fontSize: 13 }}>
                     <span style={{ color: cfg[0], fontWeight: 800, width: 16 }}>{cfg[2]}</span>
+                    {/* <span style={{ flex: 1, color: '#0f172a' }}>{fmt(p.startUtc, preview.timeZone)}</span> */}
                     <span style={{ flex: 1, color: '#0f172a' }}>{fmt(p.startUtc, preview.timeZone)}</span>
+                    {preview.studentTimeZone && preview.studentTimeZone !== preview.timeZone && (
+                      <span style={{ flex: 1, color: '#0e6e8a', fontSize: 12 }}>
+                        student: {fmt(p.startUtc, preview.studentTimeZone)}
+                      </span>
+                    )}
                     <span style={{ fontSize: 12, color: '#94a3b8' }}>{p.durationMins}m</span>
                     {p.reason && <span style={{ fontSize: 11, color: cfg[0], background: cfg[1], borderRadius: 5, padding: '2px 7px' }}>{p.reason}</span>}
                   </div>

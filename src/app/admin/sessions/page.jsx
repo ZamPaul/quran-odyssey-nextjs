@@ -12,7 +12,11 @@ import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import BulkAddSessionsModal from './BulkAddSessionsModal';
 // import { zonedInputToUtcISO } from '@/lib/timezone';
-import { zonedInputToUtcISO, utcToZonedInput, formatInZone } from '@/lib/clientTime';
+import {
+  zonedInputToUtcISO, utcToZonedInput, formatInZone,
+  getAdminTimezone, zoneAbbr, zonedDateKey, dayLabelFromKey,
+} from '@/lib/clientTime';
+// import { zonedInputToUtcISO, utcToZonedInput, formatInZone } from '@/lib/clientTime';
 
 function apiBase() { return process.env.NEXT_PUBLIC_API_URL; }
 
@@ -21,17 +25,30 @@ const COURSES = Object.entries(COURSE_LABELS).map(([value, label]) => ({ value, 
 const STATUS_CFG = { SCHEDULED: ['#0e6e8a', 'rgba(40,183,217,0.10)'], COMPLETED: ['#15803d', 'rgba(34,197,94,0.10)'], CANCELLED: ['#64748b', '#f0f4f8'], MISSED: ['#dc2626', 'rgba(239,68,68,0.08)'] };
 function pill(s) { const [c, b] = STATUS_CFG[s] || ['#64748b', '#f0f4f8']; return { fontSize: 11, fontWeight: 700, color: c, background: b, borderRadius: 5, padding: '3px 9px' }; }
 
-function isoDate(d) { return new Date(d).toISOString().slice(0, 10); }
-function fmtTime(iso) { return new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); }
-function dayLabel(iso) {
-  const d = new Date(iso); const today = new Date(); today.setHours(0,0,0,0);
-  const diff = Math.round((new Date(isoDate(d)) - today) / 86400000);
-  const base = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
-  if (diff === 0) return `Today · ${base}`;
-  if (diff === 1) return `Tomorrow · ${base}`;
-  if (diff === -1) return `Yesterday · ${base}`;
-  return base;
+// function isoDate(d) { return new Date(d).toISOString().slice(0, 10); }
+// function fmtTime(iso) { return new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); }
+
+const ADMIN_TZ = getAdminTimezone();
+
+// Calendar day AS SEEN BY THE ADMIN (not UTC) — used for grouping + date filters.
+function isoDate(d) { return zonedDateKey(d, ADMIN_TZ); }
+function fmtTime(iso) {
+  return new Date(iso).toLocaleTimeString('en-GB', {
+    timeZone: ADMIN_TZ, hour12: false, hour: '2-digit', minute: '2-digit',
+  });
 }
+
+// function dayLabel(iso) {
+//   const d = new Date(iso); const today = new Date(); today.setHours(0,0,0,0);
+//   const diff = Math.round((new Date(isoDate(d)) - today) / 86400000);
+//   const base = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
+//   if (diff === 0) return `Today · ${base}`;
+//   if (diff === 1) return `Tomorrow · ${base}`;
+//   if (diff === -1) return `Yesterday · ${base}`;
+//   return base;
+// }
+
+function dayLabel(dateKey) { return dayLabelFromKey(dateKey, ADMIN_TZ); }
 
 export default function SessionsPage() {
   const { getToken } = useAuth();
@@ -109,6 +126,9 @@ export default function SessionsPage() {
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6, flexWrap: 'wrap', gap: "10px" }}>
         <h1 style={{ fontSize: 22, fontWeight: 800, color: '#0f172a' }}>Class Sessions</h1>
+        <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>
+          All times shown in your local time — {ADMIN_TZ} ({zoneAbbr(ADMIN_TZ)})
+        </div>
         <div className='flex items-center justify-center gap-3'>
           <button onClick={() => setShowCreate(true)} style={primaryBtn}>+ Create single session</button>
           <button onClick={() => setShowBulk(true)} style={ghostBtn}>Bulk add sessions</button>
@@ -230,9 +250,16 @@ function CreateSessionModal({ teachers, onClose, onCreated }) {
   const { getToken } = useAuth();
   const [query, setQuery] = useState('');
   const [students, setStudents] = useState([]);
+
+  // const [student, setStudent] = useState(null);
+  // const tz = student?.timezone || 'UTC';
+
   const [student, setStudent] = useState(null);
-  // student.timezone is used below
-  const tz = student?.timezone || 'UTC';
+  // Inputs + displays are in the ADMIN's zone; the student's zone is kept for
+  // the "Student sees …" readout so we never schedule blind for the family.
+  const adminTz   = getAdminTimezone();
+  const studentTz = student?.timezone || null;
+  const tz        = adminTz;   // ← every existing `tz` use below now means admin-local
 
   const [conflicts, setConflicts] = useState(null); // 409 payload
 
@@ -337,9 +364,21 @@ function CreateSessionModal({ teachers, onClose, onCreated }) {
           <div>
             <label style={lbl}>Date &amp; time * <span style={{ fontWeight: 400, color: '#94a3b8' }}>(in {tz})</span></label>
             <input type="datetime-local" disabled={!student} value={form.scheduledAt} onChange={e => set('scheduledAt', e.target.value)} style={inp} />
-            {form.scheduledAt && (
+            {/* {form.scheduledAt && (
               <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>
                 Student local time — {tz}
+              </div>
+            )} */}
+            {form.scheduledAt && (
+              <div style={{ fontSize: 11, marginTop: 4, lineHeight: 1.6 }}>
+                <div style={{ color: '#94a3b8' }}>
+                  Your local time — {adminTz} ({zoneAbbr(adminTz)})
+                </div>
+                {studentTz && studentTz !== adminTz && (
+                  <div style={{ color: '#0e6e8a', fontWeight: 700 }}>
+                    Student sees: {formatInZone(zonedInputToUtcISO(form.scheduledAt, adminTz), studentTz)} · {studentTz}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -376,7 +415,11 @@ function SessionPanel({ session, teachers, onClose, onChanged }) {
   const { getToken } = useAuth();
   const [zoomLink, setZoomLink] = useState(session.zoomLink || '');
 
-  const tz = session.student?.timezone || 'UTC';   // ← the student's zone
+  // const tz = session.student?.timezone || 'UTC';   // ← the student's zone
+  const adminTz   = getAdminTimezone();
+  const studentTz = session.student?.timezone || null;
+  const tz        = adminTz;   // ← inputs/displays are now admin-local
+
   // seed the input with the STUDENT's local wall-clock, not the admin's:
   const [slotStart, setSlotStart] = useState(utcToZonedInput(session.scheduledAt, tz));
   // const [slotStart, setSlotStart] = useState(new Date(session.scheduledAt).toISOString().slice(0, 16));
@@ -405,7 +448,11 @@ function SessionPanel({ session, teachers, onClose, onChanged }) {
           <DRow k="Course" v={COURSE_LABELS[session.courseType] || session.courseType} />
           <DRow k="Teacher" v={session.teacher?.name} />
           {/* <DRow k="When" v={new Date(session.scheduledAt).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} /> */}
-          <DRow k="When" v={`${formatInZone(session.scheduledAt, tz)}  ·  ${tz}`} />
+          {/* <DRow k="When" v={`${formatInZone(session.scheduledAt, tz)}  ·  ${tz}`} /> */}
+          <DRow k="When" v={`${formatInZone(session.scheduledAt, adminTz)}  ·  ${zoneAbbr(adminTz)} (your time)`} />
+          {studentTz && studentTz !== adminTz && (
+            <DRow k="Student sees" v={`${formatInZone(session.scheduledAt, studentTz)}  ·  ${studentTz}`} />
+          )}
           <DRow k="Duration" v={`${session.durationMins} min`} />
           {session.attendance && <DRow k="Attendance" v={session.attendance.status} />}
           <DRow k="Calendar" v={session.calEventId ? '✓ Synced' : '✗ Not synced'} />
@@ -435,7 +482,15 @@ function SessionPanel({ session, teachers, onClose, onChanged }) {
                   style={ghostBtn}
                 >Update</button>
               </div>
-              <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>Student local time — {tz}</div>
+              {/* <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>Student local time — {tz}</div> */}
+              <div style={{ fontSize: 11, marginTop: 4, lineHeight: 1.6 }}>
+                <div style={{ color: '#94a3b8' }}>Your local time — {adminTz} ({zoneAbbr(adminTz)})</div>
+                {studentTz && studentTz !== adminTz && slotStart && (
+                  <div style={{ color: '#0e6e8a', fontWeight: 700 }}>
+                    Student will see: {formatInZone(zonedInputToUtcISO(slotStart, adminTz), studentTz)} · {studentTz}
+                  </div>
+                )}
+              </div>
             </div>
             {/* {!cancelled && !session.calEventId && (
               <div style={{ marginBottom: 14 }}>
