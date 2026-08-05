@@ -50,6 +50,12 @@ const NAV = [
       { label: "Oversight", href: "/admin/oversight", icon: "📊" },
     ],
   },
+  { section: 'ACADEMICS', 
+    items: [
+    { label: 'Progress Reports', href: '/admin/reports',     icon: '📄' },
+    { label: 'Assignments',      href: '/admin/assignments', icon: '📚' },
+  ] 
+  },
   {
     section: "Growth",
     items: [
