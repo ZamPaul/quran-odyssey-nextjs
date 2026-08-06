@@ -11,6 +11,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { useParams, useRouter } from 'next/navigation';
+import DeleteImpactModal from '@/components/admin/DeleteImpactModal';
 import Link from 'next/link';
 
 function apiBase() { return process.env.NEXT_PUBLIC_API_URL; }
@@ -70,18 +71,18 @@ export default function AccountDetailPage() {
     finally { setBusy(false); }
   };
 
-  const doDelete = async () => {
-    setBusy(true); setActionMsg('');
-    try {
-      const token = await getToken();
-      const res = await fetch(`${apiBase()}/api/admin/accounts/${id}?confirm=true`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Failed'); }
-      router.push('/admin/accounts');
-    } catch (err) { setActionMsg('⚠️ ' + err.message); setBusy(false); }
-  };
+  // const doDelete = async () => {
+  //   setBusy(true); setActionMsg('');
+  //   try {
+  //     const token = await getToken();
+  //     const res = await fetch(`${apiBase()}/api/admin/accounts/${id}?confirm=true`, {
+  //       method: 'DELETE',
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
+  //     if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Failed'); }
+  //     router.push('/admin/accounts');
+  //   } catch (err) { setActionMsg('⚠️ ' + err.message); setBusy(false); }
+  // };
 
   if (loading) return <div style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>Loading…</div>;
   if (error)   return (
@@ -197,13 +198,23 @@ export default function AccountDetailPage() {
         <EditAccountModal account={account} onClose={() => setEditing(false)} onSaved={() => { setEditing(false); load(); }} />
       )}
 
-      {confirmDelete && (
+      {/* {confirmDelete && (
         <DeleteConfirmModal
           account={account}
           studentCount={account.managedStudents.length}
           busy={busy}
           onConfirm={doDelete}
           onClose={() => setConfirmDelete(false)}
+        />
+      )} */}
+
+      {confirmDelete && (
+        <DeleteImpactModal
+          kind="account"
+          id={account.id}
+          label={account.email}
+          onClose={() => setConfirmDelete(false)}
+          onDeleted={() => router.push('/admin/accounts')}
         />
       )}
     </div>
@@ -265,32 +276,33 @@ function EditAccountModal({ account, onClose, onSaved }) {
 }
 
 // ─── Delete confirm ───────────────────────────────────────
-function DeleteConfirmModal({ account, studentCount, busy, onConfirm, onClose }) {
-  const [typed, setTyped] = useState('');
-  const target = account.email;
-  return (
-    <div onClick={onClose} style={modalOverlay}>
-      <div onClick={e => e.stopPropagation()} style={modalCard}>
-        <div style={{ fontSize: 18, fontWeight: 800, color: '#dc2626', marginBottom: 8 }}>Delete this account?</div>
-        <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.7, marginBottom: 16 }}>
-          This permanently deletes <strong>{account.email}</strong>
-          {studentCount > 0 && <> and <strong>{studentCount} learner{studentCount !== 1 ? 's' : ''}</strong> with all their enrolments, sessions, assignments, attendance, and reports</>}.
-          This cannot be undone.
-        </div>
-        <label style={lbl}>Type the email to confirm</label>
-        <input value={typed} onChange={e => setTyped(e.target.value)} placeholder={target}
-          style={{ ...inp, marginBottom: 18, borderColor: typed && typed !== target ? '#fecaca' : '#e2e8f0' }} />
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={onConfirm} disabled={busy || typed !== target}
-            style={{ padding: '10px 20px', borderRadius: 8, border: 'none', background: (busy || typed !== target) ? '#e2e8f0' : '#dc2626', color: (busy || typed !== target) ? '#94a3b8' : 'white', fontSize: 14, fontWeight: 800, cursor: (busy || typed !== target) ? 'not-allowed' : 'pointer' }}>
-            {busy ? 'Deleting…' : 'Permanently delete'}
-          </button>
-          <button onClick={onClose} disabled={busy} style={ghostBtn}>Cancel</button>
-        </div>
-      </div>
-    </div>
-  );
-}
+
+// function DeleteConfirmModal({ account, studentCount, busy, onConfirm, onClose }) {
+//   const [typed, setTyped] = useState('');
+//   const target = account.email;
+//   return (
+//     <div onClick={onClose} style={modalOverlay}>
+//       <div onClick={e => e.stopPropagation()} style={modalCard}>
+//         <div style={{ fontSize: 18, fontWeight: 800, color: '#dc2626', marginBottom: 8 }}>Delete this account?</div>
+//         <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.7, marginBottom: 16 }}>
+//           This permanently deletes <strong>{account.email}</strong>
+//           {studentCount > 0 && <> and <strong>{studentCount} learner{studentCount !== 1 ? 's' : ''}</strong> with all their enrolments, sessions, assignments, attendance, and reports</>}.
+//           This cannot be undone.
+//         </div>
+//         <label style={lbl}>Type the email to confirm</label>
+//         <input value={typed} onChange={e => setTyped(e.target.value)} placeholder={target}
+//           style={{ ...inp, marginBottom: 18, borderColor: typed && typed !== target ? '#fecaca' : '#e2e8f0' }} />
+//         <div style={{ display: 'flex', gap: 8 }}>
+//           <button onClick={onConfirm} disabled={busy || typed !== target}
+//             style={{ padding: '10px 20px', borderRadius: 8, border: 'none', background: (busy || typed !== target) ? '#e2e8f0' : '#dc2626', color: (busy || typed !== target) ? '#94a3b8' : 'white', fontSize: 14, fontWeight: 800, cursor: (busy || typed !== target) ? 'not-allowed' : 'pointer' }}>
+//             {busy ? 'Deleting…' : 'Permanently delete'}
+//           </button>
+//           <button onClick={onClose} disabled={busy} style={ghostBtn}>Cancel</button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
 
 // ─── bits ─────────────────────────────────────────────────
 function InfoRow({ k, v }) {

@@ -15,6 +15,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import CountrySelect from '@/components/form/CountrySelect';
 import TimezoneSelect from '@/components/form/TimezoneSelect';
+import DeleteImpactModal from '@/components/admin/DeleteImpactModal';
 
 function apiBase() { return process.env.NEXT_PUBLIC_API_URL; }
 
@@ -162,7 +163,16 @@ export default function StudentProfilePage() {
       {modal === 'edit' && <EditModal student={student} onClose={() => setModal(null)} onSaved={() => { setModal(null); setMsg('Student updated'); load(); }} />}
       {modal === 'move' && <MoveModal student={student} onClose={() => setModal(null)} onMoved={() => { setModal(null); setMsg('Student moved'); load(); }} />}
       {modal === 'enroll' && <EnrollModal student={student} onClose={() => setModal(null)} onEnrolled={() => { setModal(null); setMsg('Student enrolled — confirmation email sent'); load(); }} />}
-      {modal === 'delete' && <DeleteModal student={student} onClose={() => setModal(null)} onDeleted={() => router.push('/admin/students')} />}
+      {/* {modal === 'delete' && <DeleteModal student={student} onClose={() => setModal(null)} onDeleted={() => router.push('/admin/students')} />} */}
+      {modal === 'delete' && (
+        <DeleteImpactModal
+          kind="student"
+          id={student.id}
+          label={student.name}
+          onClose={() => setModal(null)}
+          onDeleted={() => router.push('/admin/students')}
+        />
+      )}
     </div>
   );
 }
@@ -438,6 +448,7 @@ function ModalActions({ saving, disabled, onSave, onClose, saveLabel }) {
     </div>
   );
 }
+
 function InfoRow({ k, v }) {
   return <div style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderBottom: '1px solid #f4f8fb', gap: 12 }}>
     <span style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>{k}</span>

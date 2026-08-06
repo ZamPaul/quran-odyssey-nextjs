@@ -1,17 +1,23 @@
 'use client';
 
 // ═══════════════════════════════════════════════════════════
-// FILE: src/app/admin/teachers/[id]/page.jsx   (NEW)
+// FILE: src/app/admin/teachers/[id]/page.jsx
 //
-// Teacher profile: details, active students, recent sessions, and
-// actions — edit, activate/deactivate, and reassign a student's
-// enrolment to another teacher.
-// Consumes GET /api/admin/teachers/:id.
+// Teacher profile: details, workload (active vs history), active students,
+// recent sessions, and actions — edit, activate/deactivate, reassign a
+// single enrolment, reassign all active work (offboarding), and delete.
+//
+// Deletion is guarded: a teacher who holds ANY record cannot be deleted,
+// because those records are the history of who actually taught each child.
+// Reassignment hands over active work; history stays put. In practice a
+// teacher who has taught is deactivated, never deleted.
+//
+// Consumes GET /api/admin/teachers/:id and GET /api/admin/teachers/:id/workload.
 // ═══════════════════════════════════════════════════════════
 
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import CountrySelect from '@/components/form/CountrySelect';
 import TimezoneSelect from '@/components/form/TimezoneSelect';
@@ -22,16 +28,21 @@ const SPECIALTY_LABELS = { NOORANI_QAIDA: 'Noorani Qaida', QURAN_RECITATION: 'Qu
 const COURSE_LABELS = SPECIALTY_LABELS;
 const SPECIALTIES = Object.entries(SPECIALTY_LABELS).map(([value, label]) => ({ value, label }));
 
+const ACTIVE_LABELS = { enrollments: 'Enrolments', sessions: 'Upcoming sessions', assignments: 'Open assignments', reports: 'Draft reports' };
+const HISTORY_LABELS = { sessions: 'Past sessions', assignments: 'Graded assignments', reports: 'Sent reports', attendance: 'Attendance records' };
+
 function fmtDateTime(iso) { return iso ? new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—'; }
 
 export default function TeacherProfilePage() {
   const { getToken } = useAuth();
   const { id } = useParams();
+  const router = useRouter();
 
   const [teacher, setTeacher] = useState(null);
+  const [workload, setWorkload] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [modal, setModal] = useState(null); // 'edit' | 'reassign'
+  const [modal, setModal] = useState(null); // 'edit' | 'reassign' | 'reassignAll' | 'delete'
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
 
@@ -48,7 +59,18 @@ export default function TeacherProfilePage() {
     finally { setLoading(false); }
   }, [id]);
 
+  const loadWorkload = useCallback(async () => {
+    try {
+      const token = await getToken();
+      const res = await fetch(`${apiBase()}/api/admin/teachers/${id}/workload`, { headers: { Authorization: `Bearer ${token}` } });
+      if (res.ok) setWorkload(await res.json());
+    } catch { /* workload is supplementary — never block the page */ }
+  }, [id]);
+
   useEffect(() => { load(); }, [load]);
+  useEffect(() => { loadWorkload(); }, [loadWorkload]);
+
+  const refreshAll = () => { load(); loadWorkload(); };
 
   const toggleActive = async () => {
     setBusy(true); setMsg('');
@@ -63,13 +85,15 @@ export default function TeacherProfilePage() {
       setMsg(teacher.isActive
         ? `Teacher deactivated${d.activeEnrollments ? ` — they had ${d.activeEnrollments} active enrolment(s). Consider reassigning.` : '.'}`
         : 'Teacher reactivated — portal access restored.');
-      await load();
+      refreshAll();
     } catch (err) { setMsg('⚠️ ' + err.message); }
     finally { setBusy(false); }
   };
 
   if (loading) return <div style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>Loading…</div>;
   if (error) return <div><Link href="/admin/teachers" style={backLink}>← Back to teachers</Link><div style={errBox}>⚠️ {error}</div></div>;
+
+  const canDelete = workload?.canDelete === true;
 
   return (
     <div>
@@ -87,7 +111,9 @@ export default function TeacherProfilePage() {
                 {teacher.isActive ? 'Active' : 'Inactive'}
               </span>
             </div>
-            <div style={{ fontSize: 13, color: '#64748b', marginTop: 2 }}>{teacher.email} · {teacher.timezone}</div>
+            <div style={{ fontSize: 13, color: '#64748b', marginTop: 2 }}>
+              {teacher.email} · {teacher.timezone}{teacher.country ? ` · ${teacher.country}` : ''}
+            </div>
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -95,6 +121,17 @@ export default function TeacherProfilePage() {
           <button onClick={() => setModal('edit')} style={ghostBtn}>Edit</button>
           <button onClick={toggleActive} disabled={busy} style={{ ...ghostBtn, color: teacher.isActive ? '#b45309' : '#15803d', borderColor: teacher.isActive ? 'rgba(250,167,26,0.5)' : 'rgba(34,197,94,0.4)' }}>
             {teacher.isActive ? 'Deactivate' : 'Reactivate'}
+          </button>
+          <button
+            onClick={() => canDelete && setModal('delete')}
+            disabled={!canDelete}
+            title={canDelete ? 'Delete this teacher' : (workload?.reason || 'Checking records…')}
+            style={{ ...ghostBtn,
+              color: canDelete ? '#dc2626' : '#cbd5e1',
+              borderColor: canDelete ? '#fecaca' : '#e2e8f0',
+              cursor: canDelete ? 'pointer' : 'not-allowed' }}
+          >
+            Delete
           </button>
         </div>
       </div>
@@ -112,12 +149,14 @@ export default function TeacherProfilePage() {
           <div style={cardTitle}>Profile</div>
           <InfoRow k="Email" v={teacher.email} />
           <InfoRow k="Gender" v={teacher.gender} />
+          <InfoRow k="Country" v={teacher.country || '—'} />
           <InfoRow k="Timezone" v={teacher.timezone} />
           {/* <InfoRow k="Rating" v={`${teacher.rating?.toFixed(1) ?? '0.0'} / 5`} /> */}
           {/* <InfoRow k="Calendar ID" v={<span style={{ fontFamily: 'monospace', fontSize: 12, wordBreak: 'break-all' }}>{teacher.calendarId}</span>} /> */}
           <InfoRow k="Specialties" v={(teacher.specialty || []).map(s => SPECIALTY_LABELS[s] || s).join(', ') || '—'} />
           {teacher.bio && <div style={{ marginTop: 12, fontSize: 13, color: '#64748b', lineHeight: 1.6 }}>{teacher.bio}</div>}
         </div>
+
         <div style={card}>
           <div style={cardTitle}>Workload</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
@@ -128,9 +167,52 @@ export default function TeacherProfilePage() {
               </div>
             ))}
           </div>
+
+          {/* Active vs history — what can be handed over, and what never moves */}
+          {workload && (
+            <div style={{ marginTop: 16, borderTop: '1px solid #f1f5f9', paddingTop: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <div>
+                  <div style={{ fontSize: 11.5, fontWeight: 800, color: '#0e6e8a', marginBottom: 6 }}>Active — can be handed over</div>
+                  {Object.entries(workload.active).map(([k, v]) => (
+                    <div key={k} style={miniRow}>
+                      <span style={{ color: '#64748b' }}>{ACTIVE_LABELS[k] || k}</span>
+                      <span style={{ fontWeight: 700, color: v > 0 ? '#0f172a' : '#cbd5e1' }}>{v}</span>
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  <div style={{ fontSize: 11.5, fontWeight: 800, color: '#94a3b8', marginBottom: 6 }}>History — never moved</div>
+                  {Object.entries(workload.historical).map(([k, v]) => (
+                    <div key={k} style={miniRow}>
+                      <span style={{ color: '#64748b' }}>{HISTORY_LABELS[k] || k}</span>
+                      <span style={{ fontWeight: 700, color: v > 0 ? '#0f172a' : '#cbd5e1' }}>{v}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 8, marginTop: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => setModal('reassignAll')}
+                  disabled={workload.activeTotal === 0}
+                  style={{ ...ghostBtn,
+                    color: workload.activeTotal === 0 ? '#cbd5e1' : '#0e6e8a',
+                    borderColor: workload.activeTotal === 0 ? '#e2e8f0' : 'rgba(40,183,217,0.4)',
+                    cursor: workload.activeTotal === 0 ? 'not-allowed' : 'pointer' }}
+                >
+                  Hand over all active work
+                </button>
+                {workload.reason && (
+                  <span style={{ fontSize: 11.5, color: '#94a3b8', flex: 1, minWidth: 180, lineHeight: 1.5 }}>{workload.reason}</span>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Availability is read from Google Calendar — link out rather than embed */}
           <div style={{ marginTop: 16, padding: '12px 14px', background: '#f7f9fb', borderRadius: 10, fontSize: 12, color: '#64748b', lineHeight: 1.6 }}>
-            📅 Availability lives in this teacher's Google Calendar (ID above). Open Google Calendar to view or resolve booking conflicts.
+            📅 Availability lives in this teacher&apos;s Google Calendar. Open Google Calendar to view or resolve booking conflicts.
           </div>
         </div>
       </div>
@@ -166,8 +248,10 @@ export default function TeacherProfilePage() {
         </div>
       )}
 
-      {modal === 'edit' && <EditModal teacher={teacher} onClose={() => setModal(null)} onSaved={() => { setModal(null); setMsg('Teacher updated'); load(); }} />}
-      {modal === 'reassign' && <ReassignModal teacher={teacher} onClose={() => setModal(null)} onDone={(m) => { setModal(null); setMsg(m); load(); }} />}
+      {modal === 'edit' && <EditModal teacher={teacher} onClose={() => setModal(null)} onSaved={() => { setModal(null); setMsg('Teacher updated'); refreshAll(); }} />}
+      {modal === 'reassign' && <ReassignModal teacher={teacher} onClose={() => setModal(null)} onDone={(m) => { setModal(null); setMsg(m); refreshAll(); }} />}
+      {modal === 'reassignAll' && <ReassignAllModal teacher={teacher} onClose={() => setModal(null)} onDone={(m) => { setModal(null); setMsg(m); refreshAll(); }} />}
+      {modal === 'delete' && <DeleteTeacherModal teacher={teacher} onClose={() => setModal(null)} onDeleted={() => router.push('/admin/teachers')} />}
     </div>
   );
 }
@@ -175,11 +259,6 @@ export default function TeacherProfilePage() {
 // ─── Edit modal ───────────────────────────────────────────
 function EditModal({ teacher, onClose, onSaved }) {
   const { getToken } = useAuth();
-  // const [form, setForm] = useState({
-  //   name: teacher.name || '', timezone: teacher.timezone || '', gender: teacher.gender || '',
-  //   bio: teacher.bio || '', rating: teacher.rating ?? 0, calendarId: teacher.calendarId || '',
-  //   specialty: teacher.specialty || [],
-  // });
   const [form, setForm] = useState({
     name: teacher.name || '', timezone: teacher.timezone || '', gender: teacher.gender || '',
     bio: teacher.bio || '', rating: teacher.rating ?? 0, calendarId: teacher.calendarId || '',
@@ -206,7 +285,6 @@ function EditModal({ teacher, onClose, onSaved }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
         <div style={{ gridColumn: '1 / -1' }}><label style={lbl}>Name</label><input value={form.name} onChange={e => set('name', e.target.value)} style={inp} /></div>
         <div><label style={lbl}>Gender</label><select value={form.gender} onChange={e => set('gender', e.target.value)} style={{ ...inp, cursor: 'pointer' }}><option value="MALE">Male</option><option value="FEMALE">Female</option></select></div>
-        {/* <div><label style={lbl}>Timezone</label><input value={form.timezone} onChange={e => set('timezone', e.target.value)} style={inp} /></div> */}
         <div style={{ gridColumn: '1 / -1' }}>
           <label style={lbl}>Country</label>
           <CountrySelect value={form.country} onChange={(c) => set('country', c)} />
@@ -240,7 +318,8 @@ function EditModal({ teacher, onClose, onSaved }) {
   );
 }
 
-// ─── Reassign modal ───────────────────────────────────────
+// ─── Reassign ONE enrolment ───────────────────────────────
+// POST /:id/reassign   { enrollmentId, toTeacherId, reassignSessions }
 function ReassignModal({ teacher, onClose, onDone }) {
   const { getToken } = useAuth();
   const [enrollmentId, setEnrollmentId] = useState('');
@@ -273,7 +352,7 @@ function ReassignModal({ teacher, onClose, onDone }) {
 
   return (
     <Modal title="Reassign a student's enrolment" onClose={onClose}>
-      <div style={{ fontSize: 13, color: '#64748b', marginBottom: 16 }}>Move one of {teacher.name}'s active enrolments to another teacher.</div>
+      <div style={{ fontSize: 13, color: '#64748b', marginBottom: 16 }}>Move one of {teacher.name}&apos;s active enrolments to another teacher.</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div>
           <label style={lbl}>Enrolment to move *</label>
@@ -291,11 +370,166 @@ function ReassignModal({ teacher, onClose, onDone }) {
         </div>
         <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#0f172a', cursor: 'pointer' }}>
           <input type="checkbox" checked={reassignSessions} onChange={e => setReassignSessions(e.target.checked)} />
-          Also move this enrolment's future scheduled sessions
+          Also move this enrolment&apos;s future scheduled sessions
         </label>
       </div>
       {error && <div style={{ marginTop: 12, fontSize: 13, color: '#dc2626' }}>⚠️ {error}</div>}
       <ModalActions saving={saving} disabled={!valid} onSave={submit} onClose={onClose} saveLabel="Reassign" />
+    </Modal>
+  );
+}
+
+// ─── Hand over ALL active work (offboarding) ──────────────
+// POST /:id/reassign-all   { toTeacherId, scope }
+function ReassignAllModal({ teacher, onClose, onDone }) {
+  const { getToken } = useAuth();
+  const [teachers, setTeachers] = useState([]);
+  const [toTeacherId, setToTeacherId] = useState('');
+  const [scope, setScope] = useState('future');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [done, setDone] = useState(null);
+
+  useEffect(() => {
+    (async () => { try {
+      const token = await getToken();
+      const res = await fetch(`${apiBase()}/api/admin/teachers?active=true`, { headers: { Authorization: `Bearer ${token}` } });
+      if (res.ok) { const d = await res.json(); setTeachers((d.teachers || []).filter(t => t.id !== teacher.id)); }
+    } catch {} })();
+  }, []);
+
+  const targetName = teachers.find(t => t.id === toTeacherId)?.name || 'the new teacher';
+
+  const run = async () => {
+    setSaving(true); setError('');
+    try {
+      const token = await getToken();
+      const res = await fetch(`${apiBase()}/api/admin/teachers/${teacher.id}/reassign-all`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ toTeacherId, scope }),
+      });
+      const d = await res.json(); if (!res.ok) throw new Error(d.error || 'Failed');
+      setDone(d);
+    } catch (err) { setError(err.message); setSaving(false); }
+  };
+
+  if (done) {
+    return (
+      <Modal title={`Handed over to ${done.to}`} onClose={() => onDone(`Active work handed over to ${done.to}.`)}>
+        <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.7, marginBottom: 14 }}>
+          Moved {done.moved.enrollments} enrolment(s), {done.moved.sessions} session(s),
+          {' '}{done.moved.assignments} assignment(s), {done.moved.reports} report(s)
+          {done.moved.attendance ? `, ${done.moved.attendance} attendance record(s)` : ''}.
+        </div>
+        {done.calendarResyncNeeded && (
+          <div style={warnBox}>
+            Moved sessions no longer have calendar events. Run <strong>Sync calendar</strong> from Class Sessions
+            so they appear on {done.to}&apos;s calendar.
+          </div>
+        )}
+        <div style={{ display: 'flex', gap: 8, marginTop: 18 }}>
+          <button onClick={() => onDone(`Active work handed over to ${done.to}.`)} style={primaryBtn}>Done</button>
+        </div>
+      </Modal>
+    );
+  }
+
+  return (
+    <Modal title={`Hand over ${teacher.name}'s work`} onClose={onClose}>
+      <div style={{ fontSize: 13, color: '#64748b', marginBottom: 16 }}>
+        Moves everything currently in progress to another active teacher — for offboarding or extended absence.
+      </div>
+      {error && <div style={{ ...errBox, marginBottom: 12 }}>⚠️ {error}</div>}
+
+      <div style={{ marginBottom: 14 }}>
+        <label style={lbl}>New teacher *</label>
+        <select value={toTeacherId} onChange={e => setToTeacherId(e.target.value)} style={{ ...inp, cursor: 'pointer' }}>
+          <option value="">Select a teacher…</option>
+          {teachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+        </select>
+      </div>
+
+      <label style={lbl}>What to move</label>
+      <label style={radioRow}>
+        <input type="radio" checked={scope === 'future'} onChange={() => setScope('future')} style={{ marginTop: 3 }} />
+        <span><strong>Active work only</strong> — enrolments, upcoming sessions, ungraded assignments and draft reports. Past lessons stay with {teacher.name}.</span>
+      </label>
+      <label style={radioRow}>
+        <input type="radio" checked={scope === 'all'} onChange={() => setScope('all')} style={{ marginTop: 3 }} />
+        <span><strong>Everything, including history</strong> — also rewrites completed lessons, graded work and attendance.</span>
+      </label>
+
+      {scope === 'all' && (
+        <div style={{ ...errBox, marginTop: 10, lineHeight: 1.6 }}>
+          This will make it appear that {targetName} taught lessons they did not. Only use it to correct a
+          data-entry mistake — it is recorded separately in the audit log.
+        </div>
+      )}
+
+      <ModalActions saving={saving} disabled={!toTeacherId} onSave={run} onClose={onClose} saveLabel="Hand over" />
+    </Modal>
+  );
+}
+
+// ─── Delete teacher (guarded) ─────────────────────────────
+function DeleteTeacherModal({ teacher, onClose, onDeleted }) {
+  const { getToken } = useAuth();
+  const [typed, setTyped] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [blocked, setBlocked] = useState(null); // counts returned by a 409
+
+  const matches = typed === teacher.name;
+
+  const del = async () => {
+    setBusy(true); setError(''); setBlocked(null);
+    try {
+      const token = await getToken();
+      const res = await fetch(`${apiBase()}/api/admin/teachers/${teacher.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ confirmName: typed }),
+      });
+      const d = await res.json();
+      if (!res.ok) {
+        if (d.counts) { setBlocked(d); setError(d.error); return; }
+        throw new Error(d.error || 'Failed');
+      }
+      onDeleted();
+    } catch (err) { setError(err.message); }
+    finally { setBusy(false); }
+  };
+
+  return (
+    <Modal title="Delete this teacher?" onClose={onClose}>
+      <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.7, marginBottom: 14 }}>
+        Permanently removes <strong>{teacher.name}</strong>. Only possible because they hold no sessions,
+        enrolments, assignments, reports or attendance records. <strong>Cannot be undone.</strong>
+      </div>
+
+      {error && <div style={{ ...errBox, marginBottom: 12 }}>⚠️ {error}</div>}
+
+      {blocked && (
+        <div style={{ ...warnBox, marginBottom: 12 }}>
+          <div style={{ fontWeight: 700, marginBottom: 6 }}>Still linked to:</div>
+          {Object.entries(blocked.counts).filter(([, v]) => v > 0).map(([k, v]) => (
+            <div key={k} style={miniRow}><span style={{ textTransform: 'capitalize' }}>{k}</span><span style={{ fontWeight: 700 }}>{v}</span></div>
+          ))}
+          {blocked.guidance && <div style={{ marginTop: 8 }}>{blocked.guidance}</div>}
+        </div>
+      )}
+
+      <label style={lbl}>Type the teacher&apos;s name to confirm</label>
+      <input value={typed} onChange={e => setTyped(e.target.value)} placeholder={teacher.name}
+        style={{ ...inp, marginBottom: 16, borderColor: typed && !matches ? '#fecaca' : '#e2e8f0' }} />
+
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button onClick={del} disabled={busy || !matches}
+          style={{ ...primaryBtn, background: (busy || !matches) ? '#e2e8f0' : '#dc2626', color: (busy || !matches) ? '#94a3b8' : 'white', cursor: (busy || !matches) ? 'not-allowed' : 'pointer' }}>
+          {busy ? 'Deleting…' : 'Permanently delete'}
+        </button>
+        <button onClick={onClose} disabled={busy} style={ghostBtn}>Cancel</button>
+      </div>
     </Modal>
   );
 }
@@ -325,9 +559,12 @@ const backLink = { display: 'inline-block', fontSize: 13, color: '#64748b', text
 const card = { background: 'white', border: '1px solid #e2e8f0', borderRadius: 14, padding: 20 };
 const cardTitle = { fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#94a3b8', marginBottom: 14 };
 const rowCard = { display: 'flex', alignItems: 'center', gap: 12, background: 'white', border: '1px solid #e2e8f0', borderRadius: 12, padding: '12px 16px' };
+const miniRow = { display: 'flex', justifyContent: 'space-between', fontSize: 12.5, padding: '2px 0' };
+const radioRow = { display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, color: '#334155', marginBottom: 10, lineHeight: 1.6, cursor: 'pointer' };
 const inp = { width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 13, outline: 'none', boxSizing: 'border-box', color: '#0f172a' };
 const lbl = { fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#94a3b8', display: 'block', marginBottom: 6 };
 const errBox = { padding: '12px 16px', borderRadius: 10, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#dc2626', fontSize: 13 };
+const warnBox = { padding: '12px 16px', borderRadius: 10, background: 'rgba(250,167,26,0.12)', border: '1px solid rgba(250,167,26,0.3)', color: '#92400e', fontSize: 12.5, lineHeight: 1.6 };
 const modalOverlay = { position: 'fixed', inset: 0, background: 'rgba(13,40,64,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: 20 };
 const modalCard = { background: 'white', borderRadius: 16, padding: 28, width: '100%', maxWidth: 460, boxShadow: '0 20px 60px rgba(0,0,0,0.2)' };
 const primaryBtn = { padding: '10px 20px', borderRadius: 8, border: 'none', background: '#0d2840', color: 'white', fontSize: 14, fontWeight: 800, cursor: 'pointer' };
