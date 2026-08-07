@@ -13,6 +13,7 @@ import { useAuth } from '@clerk/nextjs';
 import { useParams, useRouter } from 'next/navigation';
 import DeleteImpactModal from '@/components/admin/DeleteImpactModal';
 import Link from 'next/link';
+import CredentialsModal from '@/components/admin/CredentialsModal';
 
 function apiBase() { return process.env.NEXT_PUBLIC_API_URL; }
 
@@ -37,6 +38,7 @@ export default function AccountDetailPage() {
   const [busy, setBusy]       = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [actionMsg, setActionMsg] = useState('');
+  const [showCreds, setShowCreds] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true); setError('');
@@ -115,6 +117,7 @@ export default function AccountDetailPage() {
           <button onClick={toggleStatus} disabled={busy} style={{ ...ghostBtn, color: suspended ? '#15803d' : '#b45309', borderColor: suspended ? 'rgba(34,197,94,0.4)' : 'rgba(250,167,26,0.5)' }}>
             {suspended ? 'Reactivate' : 'Suspend'}
           </button>
+          <button onClick={() => setShowCreds(true)} style={ghostBtn}>Sign-in help</button>
           <button onClick={() => setConfirmDelete(true)} disabled={busy} style={{ ...ghostBtn, color: '#dc2626', borderColor: '#fecaca' }}>Delete</button>
         </div>
       </div>
@@ -215,6 +218,16 @@ export default function AccountDetailPage() {
           label={account.email}
           onClose={() => setConfirmDelete(false)}
           onDeleted={() => router.push('/admin/accounts')}
+        />
+      )}
+
+      {showCreds && (
+        <CredentialsModal
+          base="accounts"
+          id={account.id}
+          label={account.email}
+          name={account.name}
+          onClose={() => setShowCreds(false)}
         />
       )}
     </div>

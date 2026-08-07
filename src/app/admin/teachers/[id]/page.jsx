@@ -21,6 +21,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import CountrySelect from '@/components/form/CountrySelect';
 import TimezoneSelect from '@/components/form/TimezoneSelect';
+import CredentialsModal from '@/components/admin/CredentialsModal';
 
 function apiBase() { return process.env.NEXT_PUBLIC_API_URL; }
 
@@ -122,6 +123,7 @@ export default function TeacherProfilePage() {
           <button onClick={toggleActive} disabled={busy} style={{ ...ghostBtn, color: teacher.isActive ? '#b45309' : '#15803d', borderColor: teacher.isActive ? 'rgba(250,167,26,0.5)' : 'rgba(34,197,94,0.4)' }}>
             {teacher.isActive ? 'Deactivate' : 'Reactivate'}
           </button>
+          <button onClick={() => setModal('credentials')} style={ghostBtn}>Sign-in help</button>
           <button
             onClick={() => canDelete && setModal('delete')}
             disabled={!canDelete}
@@ -173,7 +175,7 @@ export default function TeacherProfilePage() {
             <div style={{ marginTop: 16, borderTop: '1px solid #f1f5f9', paddingTop: 14 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                 <div>
-                  <div style={{ fontSize: 11.5, fontWeight: 800, color: '#0e6e8a', marginBottom: 6 }}>Active — can be handed over</div>
+                  <div style={{ fontSize: 11.5, fontWeight: 800, color: '#0e6e8a', marginBottom: 6 }}>Active: can be handed over</div>
                   {Object.entries(workload.active).map(([k, v]) => (
                     <div key={k} style={miniRow}>
                       <span style={{ color: '#64748b' }}>{ACTIVE_LABELS[k] || k}</span>
@@ -182,7 +184,7 @@ export default function TeacherProfilePage() {
                   ))}
                 </div>
                 <div>
-                  <div style={{ fontSize: 11.5, fontWeight: 800, color: '#94a3b8', marginBottom: 6 }}>History — never moved</div>
+                  <div style={{ fontSize: 11.5, fontWeight: 800, color: '#94a3b8', marginBottom: 6 }}>History: never moved</div>
                   {Object.entries(workload.historical).map(([k, v]) => (
                     <div key={k} style={miniRow}>
                       <span style={{ color: '#64748b' }}>{HISTORY_LABELS[k] || k}</span>
@@ -252,6 +254,15 @@ export default function TeacherProfilePage() {
       {modal === 'reassign' && <ReassignModal teacher={teacher} onClose={() => setModal(null)} onDone={(m) => { setModal(null); setMsg(m); refreshAll(); }} />}
       {modal === 'reassignAll' && <ReassignAllModal teacher={teacher} onClose={() => setModal(null)} onDone={(m) => { setModal(null); setMsg(m); refreshAll(); }} />}
       {modal === 'delete' && <DeleteTeacherModal teacher={teacher} onClose={() => setModal(null)} onDeleted={() => router.push('/admin/teachers')} />}
+      {modal === 'credentials' && (
+        <CredentialsModal
+          base="teachers"
+          id={teacher.id}
+          label={teacher.email}
+          name={teacher.name}
+          onClose={() => setModal(null)}
+        />
+      )}
     </div>
   );
 }
