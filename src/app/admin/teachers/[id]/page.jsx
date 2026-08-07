@@ -213,9 +213,9 @@ export default function TeacherProfilePage() {
           )}
 
           {/* Availability is read from Google Calendar — link out rather than embed */}
-          <div style={{ marginTop: 16, padding: '12px 14px', background: '#f7f9fb', borderRadius: 10, fontSize: 12, color: '#64748b', lineHeight: 1.6 }}>
+          {/* <div style={{ marginTop: 16, padding: '12px 14px', background: '#f7f9fb', borderRadius: 10, fontSize: 12, color: '#64748b', lineHeight: 1.6 }}>
             📅 Availability lives in this teacher&apos;s Google Calendar. Open Google Calendar to view or resolve booking conflicts.
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -448,7 +448,7 @@ function ReassignAllModal({ teacher, onClose, onDone }) {
   return (
     <Modal title={`Hand over ${teacher.name}'s work`} onClose={onClose}>
       <div style={{ fontSize: 13, color: '#64748b', marginBottom: 16 }}>
-        Moves everything currently in progress to another active teacher — for offboarding or extended absence.
+        Moves everything currently in progress to another active teacher, for offboarding or extended absence.
       </div>
       {error && <div style={{ ...errBox, marginBottom: 12 }}>⚠️ {error}</div>}
 
@@ -463,17 +463,17 @@ function ReassignAllModal({ teacher, onClose, onDone }) {
       <label style={lbl}>What to move</label>
       <label style={radioRow}>
         <input type="radio" checked={scope === 'future'} onChange={() => setScope('future')} style={{ marginTop: 3 }} />
-        <span><strong>Active work only</strong> — enrolments, upcoming sessions, ungraded assignments and draft reports. Past lessons stay with {teacher.name}.</span>
+        <span><strong>Active work only</strong>: enrolments, upcoming sessions, ungraded assignments and draft reports. Past lessons stay with {teacher.name}.</span>
       </label>
       <label style={radioRow}>
         <input type="radio" checked={scope === 'all'} onChange={() => setScope('all')} style={{ marginTop: 3 }} />
-        <span><strong>Everything, including history</strong> — also rewrites completed lessons, graded work and attendance.</span>
+        <span><strong>Everything, including history</strong>:  also rewrites completed lessons, graded work and attendance.</span>
       </label>
 
       {scope === 'all' && (
         <div style={{ ...errBox, marginTop: 10, lineHeight: 1.6 }}>
           This will make it appear that {targetName} taught lessons they did not. Only use it to correct a
-          data-entry mistake — it is recorded separately in the audit log.
+          data entry mistake. It is recorded separately in the audit log.
         </div>
       )}
 

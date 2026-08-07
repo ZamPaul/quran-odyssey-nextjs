@@ -96,7 +96,7 @@ export default function CredentialsModal({ base, id, label, name, onClose }) {
 
         {/* Existing passwords cannot be retrieved — say so plainly. */}
         <div style={infoBox}>
-          Existing passwords can&apos;t be looked up — they&apos;re stored one-way and nobody,
+          Existing passwords can&apos;t be looked up. They&apos;re stored one way and nobody,
           including us, can read them back. Use one of the options below instead.
         </div>
 
@@ -141,7 +141,7 @@ export default function CredentialsModal({ base, id, label, name, onClose }) {
         {!result && tab === 'link' && (
           <>
             <p style={body}>
-              Emails a one-time link that signs them straight in — no password changes hands.
+              Emails a one-time link that signs them straight in, no password changes hands.
               They set a new password themselves once inside. <strong>This is the safest option.</strong>
             </p>
             <button onClick={sendLink} disabled={busy} style={primary}>
@@ -188,7 +188,7 @@ export default function CredentialsModal({ base, id, label, name, onClose }) {
         {!result && tab === 'sessions' && (
           <>
             <p style={body}>
-              Ends every active session on every device. Their password is unchanged —
+              Ends every active session on every device. Their password is unchanged,
               they can sign back in with it. Use this if a device was lost or shared.
             </p>
             <button onClick={revoke} disabled={busy} style={{ ...primary, background: '#b45309' }}>
