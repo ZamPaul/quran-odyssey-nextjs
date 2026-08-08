@@ -15,7 +15,7 @@ const TYPE_LABELS = {
   TRIAL_BOOKING_CONFIRMATION: 'Trial confirmation', ADMIN_TRIAL_NOTIFICATION: 'Admin: new trial',
   ENROLLMENT_ADMIN_NOTIFICATION: 'Admin: enrolment', ENROLLMENT_APPROVED: 'Enrolment approved',
   ENROLLMENT_REJECTED: 'Enrolment rejected', PROGRESS_REPORT: 'Progress report',
-  TEACHER_DUTIES_REMINDER: 'Teacher reminder', OTHER: 'Other',
+  TEACHER_DUTIES_REMINDER: 'Teacher reminder', MIGRATION_NOTICE: "Migration notice" , OTHER: 'Other',
 };
 
 export default function CommunicationsPage() {
