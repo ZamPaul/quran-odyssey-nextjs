@@ -605,7 +605,7 @@ function ParentalSVG() {
       <rect x="120" y="128" width="96" height="8" rx="4" fill="#e2e8f0" />
       <rect x="120" y="128" width="72" height="8" rx="4" fill="#5b7fd4" />
       <text x="120" y="148" fill="#64748b" fontSize="10" fontFamily="system-ui">
-        Memorisation
+        Memorization
       </text>
       <rect x="120" y="154" width="96" height="8" rx="4" fill="#e2e8f0" />
       <rect x="120" y="154" width="58" height="8" rx="4" fill="#22c55e" />
