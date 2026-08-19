@@ -26,6 +26,57 @@ const STATUS_COLORS = {
   OVERDUE: "#ef4444",
 };
 
+const TITLE_MAX = 200;
+
+// ─── Date/time helpers ────────────────────────────────────
+// `datetime-local` needs "YYYY-MM-DDTHH:mm" in LOCAL time. toISOString() is
+// UTC and would shift the value by the timezone offset — never use it here.
+function toLocalInput(d) {
+  const p = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+// Earliest selectable: 10 minutes out. The server allows 5, so this leaves
+// headroom — the picker never offers a value the API will then reject.
+function minDateTime() {
+  return toLocalInput(new Date(Date.now() + 10 * 60 * 1000));
+}
+
+// Sensible default: 7pm tomorrow. Teachers rarely mean "right now".
+function defaultDueDate() {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  d.setHours(19, 0, 0, 0);
+  return toLocalInput(d);
+}
+
+// Due date + time, so "today 9am" and "today 7pm" don't look identical.
+function fmtDue(iso) {
+  return new Date(iso).toLocaleString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+// Map a server `details[]` message back onto the field it belongs to.
+// Prefixes come from the labels set in the backend route (asn_02).
+function mapDetailsToFields(details = []) {
+  const mapped = {};
+  const unmapped = [];
+  for (const d of details) {
+    const l = String(d).toLowerCase();
+    if (l.startsWith("title")) mapped.title = d;
+    else if (l.startsWith("due date")) mapped.dueDate = d;
+    else if (l.startsWith("course")) mapped.courseType = d;
+    else if (l.startsWith("a student") || l.startsWith("student")) mapped.studentId = d;
+    else unmapped.push(d);
+  }
+  return { mapped, unmapped };
+}
+
 // ─── Shared input styles ──────────────────────────────────
 const labelStyle = {
   fontSize: 12,
@@ -48,6 +99,12 @@ const inputStyle = {
   boxSizing: "border-box",
   background: "white",
 };
+const errInput = (bad) => ({
+  ...inputStyle,
+  border: `1px solid ${bad ? "#fecaca" : "#e2e8f0"}`,
+  background: bad ? "#fffafa" : "white",
+});
+const hintStyle = { fontSize: 11, color: "#94a3b8", marginTop: 4 };
 
 const btnPrimary = (disabled) => ({
   padding: "9px 18px",
@@ -59,6 +116,27 @@ const btnPrimary = (disabled) => ({
   fontSize: 13,
   fontWeight: 700,
 });
+
+// ─── Field-level error ────────────────────────────────────
+function FieldError({ children }) {
+  if (!children) return null;
+  return (
+    <div
+      style={{
+        fontSize: 12,
+        color: "#dc2626",
+        marginTop: 4,
+        display: "flex",
+        gap: 5,
+        alignItems: "flex-start",
+        lineHeight: 1.5,
+      }}
+    >
+      <span aria-hidden="true">⚠</span>
+      <span>{children}</span>
+    </div>
+  );
+}
 
 // ─── Create Assignment Form ───────────────────────────────
 function CreateForm({
@@ -72,19 +150,23 @@ function CreateForm({
     studentId: "",
     title: "",
     description: "",
-    dueDate: "",
+    dueDate: defaultDueDate(),
     courseType: "",
     // File attachment fields
     attachmentUrl: "",
     attachmentName: "",
     attachmentType: "",
+    attachmentPath: "",
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
 
-  const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
-  const isValid =
-    form.studentId && form.title && form.dueDate && form.courseType;
+  const set = (k, v) => {
+    setForm((p) => ({ ...p, [k]: v }));
+    // Clear that field's error as soon as the teacher edits it.
+    setFieldErrors((f) => (f[k] ? { ...f, [k]: null } : f));
+  };
 
   // Auto-set courseType when student selected
   useEffect(() => {
@@ -93,28 +175,67 @@ function CreateForm({
     if (match) set("courseType", match.enrollment.courseType);
   }, [form.studentId]);
 
-  const handleUploadComplete = ({ url, fileName, fileType }) => {
-    set("attachmentUrl", url);
-    set("attachmentName", fileName);
-    set("attachmentType", fileType);
+  const handleUploadComplete = ({ url, fileName, fileType, path }) => {
+    setForm((p) => ({
+      ...p,
+      attachmentUrl: url,
+      attachmentName: fileName,
+      attachmentType: fileType,
+      attachmentPath: path || "",
+    }));
   };
 
   const handleFileClear = () => {
-    set("attachmentUrl", "");
-    set("attachmentName", "");
-    set("attachmentType", "");
+    setForm((p) => ({
+      ...p,
+      attachmentUrl: "",
+      attachmentName: "",
+      attachmentType: "",
+      attachmentPath: "",
+    }));
+  };
+
+  // Catch the obvious problems instantly, without a round trip.
+  const validate = () => {
+    const e = {};
+    if (!form.studentId) e.studentId = "Choose which student this is for.";
+    if (!form.title.trim()) e.title = "Give the assignment a title.";
+    else if (form.title.trim().length > TITLE_MAX)
+      e.title = `Title is too long (${form.title.trim().length}/${TITLE_MAX} characters).`;
+    if (!form.courseType) e.courseType = "Choose the course.";
+    if (!form.dueDate) e.dueDate = "Set a due date and time.";
+    else {
+      const due = new Date(form.dueDate);
+      if (isNaN(due.getTime())) e.dueDate = "That date doesn't look right — please pick again.";
+      else if (due <= new Date()) {
+        e.dueDate =
+          due.toDateString() === new Date().toDateString()
+            ? "That time has already passed. Pick a later time today."
+            : "That date is in the past. Pick a future date.";
+      }
+    }
+    setFieldErrors(e);
+    return Object.keys(e).length === 0;
   };
 
   const handleSubmit = async () => {
+    if (!validate()) return;
     setSaving(true);
     setError("");
+    setFieldErrors({});
     try {
       const body = {
-        ...form,
-        description: form.description || undefined,
+        studentId: form.studentId,
+        title: form.title.trim(),
+        courseType: form.courseType,
+        // Local wall-clock → UTC instant. The teacher picks in their own time;
+        // the student sees it in theirs.
+        dueDate: new Date(form.dueDate).toISOString(),
+        description: form.description.trim() || undefined,
         attachmentUrl: form.attachmentUrl || undefined,
         attachmentName: form.attachmentName || undefined,
         attachmentType: form.attachmentType || undefined,
+        attachmentPath: form.attachmentPath || undefined,
       };
       const data = await apiFetch("/api/teacher/assignments", {
         method: "POST",
@@ -122,8 +243,12 @@ function CreateForm({
       });
       onCreated(data.assignment);
     } catch (err) {
-      setError(err.message);
-    } finally {
+      // Requires `err.details` to be passed through by useTeacherFetch —
+      // see the note at the bottom of this file.
+      const { mapped, unmapped } = mapDetailsToFields(err.details);
+      if (Object.keys(mapped).length) setFieldErrors(mapped);
+      if (unmapped.length) setError(unmapped.join(" "));
+      else if (!Object.keys(mapped).length) setError(err.message);
       setSaving(false);
     }
   };
@@ -156,7 +281,7 @@ function CreateForm({
           <select
             value={form.studentId}
             onChange={(e) => set("studentId", e.target.value)}
-            style={inputStyle}
+            style={errInput(fieldErrors.studentId)}
           >
             <option value="">Select student</option>
             {students.map(({ student, enrollment }) => (
@@ -166,6 +291,7 @@ function CreateForm({
               </option>
             ))}
           </select>
+          <FieldError>{fieldErrors.studentId}</FieldError>
         </div>
 
         {/* Course */}
@@ -174,7 +300,7 @@ function CreateForm({
           <select
             value={form.courseType}
             onChange={(e) => set("courseType", e.target.value)}
-            style={inputStyle}
+            style={errInput(fieldErrors.courseType)}
           >
             <option value="">Select course</option>
             {COURSE_TYPES.map((c) => (
@@ -183,6 +309,7 @@ function CreateForm({
               </option>
             ))}
           </select>
+          <FieldError>{fieldErrors.courseType}</FieldError>
         </div>
 
         {/* Title */}
@@ -192,8 +319,14 @@ function CreateForm({
             value={form.title}
             onChange={(e) => set("title", e.target.value)}
             placeholder="e.g. Practice Surah Al-Fatiha"
-            style={inputStyle}
+            style={errInput(fieldErrors.title)}
           />
+          <FieldError>{fieldErrors.title}</FieldError>
+          {!fieldErrors.title && form.title.length > TITLE_MAX - 40 && (
+            <div style={hintStyle}>
+              {form.title.length}/{TITLE_MAX} characters
+            </div>
+          )}
         </div>
 
         {/* Description */}
@@ -208,16 +341,22 @@ function CreateForm({
           />
         </div>
 
-        {/* Due date */}
+        {/* Due date + time */}
         <div>
-          <label style={labelStyle}>Due Date *</label>
+          <label style={labelStyle}>Due Date &amp; Time *</label>
           <input
-            type="date"
+            type="datetime-local"
             value={form.dueDate}
+            min={minDateTime()}
             onChange={(e) => set("dueDate", e.target.value)}
-            min={new Date().toISOString().split("T")[0]}
-            style={inputStyle}
+            style={errInput(fieldErrors.dueDate)}
           />
+          <FieldError>{fieldErrors.dueDate}</FieldError>
+          {!fieldErrors.dueDate && (
+            <div style={hintStyle}>
+              Can be later today — pick any time from now onwards.
+            </div>
+          )}
         </div>
 
         {/* File attachment */}
@@ -261,8 +400,8 @@ function CreateForm({
       <div style={{ display: "flex", gap: 8, marginTop: 18 }}>
         <button
           onClick={handleSubmit}
-          disabled={saving || !isValid}
-          style={btnPrimary(saving || !isValid)}
+          disabled={saving}
+          style={btnPrimary(saving)}
         >
           {saving ? "Creating…" : "Create Assignment"}
         </button>
@@ -301,7 +440,7 @@ function GradeForm({ assignmentId, onGraded, apiFetch }) {
 
   const handleSubmit = async () => {
     if (!grade.trim()) {
-      setError("Enter a grade");
+      setError("Choose a quick grade above, or type your own.");
       return;
     }
     setSaving(true);
@@ -350,7 +489,10 @@ function GradeForm({ assignmentId, onGraded, apiFetch }) {
         {QUICK_GRADES.map((g) => (
           <button
             key={g}
-            onClick={() => setGrade(g)}
+            onClick={() => {
+              setGrade(g);
+              setError("");
+            }}
             style={{
               padding: "5px 10px",
               borderRadius: 6,
@@ -368,9 +510,12 @@ function GradeForm({ assignmentId, onGraded, apiFetch }) {
       </div>
       <input
         value={grade}
-        onChange={(e) => setGrade(e.target.value)}
+        onChange={(e) => {
+          setGrade(e.target.value);
+          setError("");
+        }}
         placeholder="Or type a custom grade…"
-        style={{ ...inputStyle, marginBottom: 8 }}
+        style={{ ...errInput(error), marginBottom: 8 }}
       />
       <textarea
         value={feedback}
@@ -379,11 +524,7 @@ function GradeForm({ assignmentId, onGraded, apiFetch }) {
         placeholder="Feedback for the student (optional)…"
         style={{ ...inputStyle, resize: "vertical" }}
       />
-      {error && (
-        <div style={{ marginTop: 6, fontSize: 12, color: "#ef4444" }}>
-          {error}
-        </div>
-      )}
+      <FieldError>{error}</FieldError>
       <button
         onClick={handleSubmit}
         disabled={saving}
@@ -404,17 +545,20 @@ function AssignmentCard({
   onDeleted,
   apiFetch,
 }) {
-  const { user } = useUser();     
-  const due = new Date(assignment.dueDate);
+  const { user } = useUser();
+  const [local, setLocal] = useState(assignment);
+  const [editing, setEditing] = useState(false);
+
+  // Keep the card in step if the parent list refreshes.
+  useEffect(() => {
+    setLocal(assignment);
+  }, [assignment]);
+
+  const due = new Date(local.dueDate);
   const isPastDue = due < new Date();
   const childName =
-    assignment.student?.name ||
-    assignment.student?.email?.split("@")[0] ||
-    "Student";
-  const sub = assignment.submission;
-  const [local, setLocal] = useState(assignment);
-
-  const [editing, setEditing] = useState(false); 
+    local.student?.name || local.student?.email?.split("@")[0] || "Student";
+  const sub = local.submission;
   const isGraded = local.status === "GRADED" || !!local.submission?.grade;
 
   const handleGraded = (grade, feedback) => {
@@ -534,12 +678,7 @@ function AssignmentCard({
                     : "#94a3b8",
               }}
             >
-              📅 Due{" "}
-              {due.toLocaleDateString("en-GB", {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-              })}
+              📅 Due {fmtDue(local.dueDate)}
             </span>
           </div>
         </div>
@@ -774,34 +913,88 @@ function UnlockButton({ assignmentId, apiFetch, onUnlocked }) {
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
- 
+
   const doUnlock = async () => {
-    setBusy(true); setError("");
+    setBusy(true);
+    setError("");
     try {
-      await apiFetch(`/api/teacher/assignments/${assignmentId}/unlock`, { method: "POST" });
+      await apiFetch(`/api/teacher/assignments/${assignmentId}/unlock`, {
+        method: "POST",
+      });
       onUnlocked();
-    } catch (err) { setError(err.message); setBusy(false); }
+    } catch (err) {
+      setError(err.message);
+      setBusy(false);
+    }
   };
- 
+
   if (!confirming) {
     return (
       <button
         onClick={() => setConfirming(true)}
-        style={{ padding: "7px 14px", borderRadius: 7, border: "1px solid #28b7d9", background: "white", color: "#0e6e8a", fontSize: 12, fontWeight: 700, cursor: "pointer" }}
+        style={{
+          padding: "7px 14px",
+          borderRadius: 7,
+          border: "1px solid #28b7d9",
+          background: "white",
+          color: "#0e6e8a",
+          fontSize: 12,
+          fontWeight: 700,
+          cursor: "pointer",
+        }}
       >
         Allow resubmission
       </button>
     );
   }
- 
+
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-      <span style={{ fontSize: 12, color: "#0e6e8a", fontWeight: 600 }}>Reopen for the student?</span>
-      <button onClick={doUnlock} disabled={busy} style={{ padding: "6px 12px", borderRadius: 7, border: "none", background: busy ? "#e2e8f0" : "#28b7d9", color: busy ? "#94a3b8" : "white", fontSize: 12, fontWeight: 700, cursor: busy ? "wait" : "pointer" }}>
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        flexWrap: "wrap",
+      }}
+    >
+      <span style={{ fontSize: 12, color: "#0e6e8a", fontWeight: 600 }}>
+        Reopen for the student?
+      </span>
+      <button
+        onClick={doUnlock}
+        disabled={busy}
+        style={{
+          padding: "6px 12px",
+          borderRadius: 7,
+          border: "none",
+          background: busy ? "#e2e8f0" : "#28b7d9",
+          color: busy ? "#94a3b8" : "white",
+          fontSize: 12,
+          fontWeight: 700,
+          cursor: busy ? "wait" : "pointer",
+        }}
+      >
         {busy ? "Reopening…" : "Yes"}
       </button>
-      <button onClick={() => setConfirming(false)} disabled={busy} style={{ padding: "6px 10px", borderRadius: 7, border: "1px solid #e2e8f0", background: "white", color: "#64748b", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>No</button>
-      {error && <span style={{ fontSize: 11, color: "#dc2626" }}>⚠️ {error}</span>}
+      <button
+        onClick={() => setConfirming(false)}
+        disabled={busy}
+        style={{
+          padding: "6px 10px",
+          borderRadius: 7,
+          border: "1px solid #e2e8f0",
+          background: "white",
+          color: "#64748b",
+          fontSize: 12,
+          fontWeight: 600,
+          cursor: "pointer",
+        }}
+      >
+        No
+      </button>
+      {error && (
+        <span style={{ fontSize: 11, color: "#dc2626" }}>⚠️ {error}</span>
+      )}
     </span>
   );
 }
@@ -812,9 +1005,10 @@ function DeleteButton({ assignment, apiFetch, onDeleted }) {
   const [stage, setStage] = useState("idle"); // idle | confirm | forceConfirm
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
- 
+
   const attempt = async (force) => {
-    setBusy(true); setError("");
+    setBusy(true);
+    setError("");
     try {
       const token = await getToken();
       const url = `${process.env.NEXT_PUBLIC_API_URL}/api/teacher/assignments/${assignment.id}${force ? "?force=true" : ""}`;
@@ -823,7 +1017,7 @@ function DeleteButton({ assignment, apiFetch, onDeleted }) {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json().catch(() => ({}));
- 
+
       if (res.status === 409 && data.requiresForce) {
         setStage("forceConfirm");
         setBusy(false);
@@ -831,137 +1025,412 @@ function DeleteButton({ assignment, apiFetch, onDeleted }) {
       }
       if (!res.ok) throw new Error(data.error || "Delete failed");
       onDeleted();
-    } catch (err) { setError(err.message); setBusy(false); }
+    } catch (err) {
+      setError(err.message);
+      setBusy(false);
+    }
   };
- 
+
   if (stage === "idle") {
     return (
       <button
         onClick={() => setStage("confirm")}
-        style={{ padding: "7px 14px", borderRadius: 7, border: "1px solid #fecaca", background: "white", color: "#dc2626", fontSize: 12, fontWeight: 700, cursor: "pointer" }}
+        style={{
+          padding: "7px 14px",
+          borderRadius: 7,
+          border: "1px solid #fecaca",
+          background: "white",
+          color: "#dc2626",
+          fontSize: 12,
+          fontWeight: 700,
+          cursor: "pointer",
+        }}
       >
         Delete
       </button>
     );
   }
- 
+
   if (stage === "confirm") {
     return (
-      <span style={{ display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-        <span style={{ fontSize: 12, color: "#dc2626", fontWeight: 600 }}>Delete this assignment?</span>
-        <button onClick={() => attempt(false)} disabled={busy} style={{ padding: "6px 12px", borderRadius: 7, border: "none", background: busy ? "#e2e8f0" : "#dc2626", color: busy ? "#94a3b8" : "white", fontSize: 12, fontWeight: 700, cursor: busy ? "wait" : "pointer" }}>
+      <span
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+          flexWrap: "wrap",
+        }}
+      >
+        <span style={{ fontSize: 12, color: "#dc2626", fontWeight: 600 }}>
+          Delete this assignment?
+        </span>
+        <button
+          onClick={() => attempt(false)}
+          disabled={busy}
+          style={{
+            padding: "6px 12px",
+            borderRadius: 7,
+            border: "none",
+            background: busy ? "#e2e8f0" : "#dc2626",
+            color: busy ? "#94a3b8" : "white",
+            fontSize: 12,
+            fontWeight: 700,
+            cursor: busy ? "wait" : "pointer",
+          }}
+        >
           {busy ? "…" : "Yes"}
         </button>
-        <button onClick={() => setStage("idle")} disabled={busy} style={{ padding: "6px 10px", borderRadius: 7, border: "1px solid #e2e8f0", background: "white", color: "#64748b", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>No</button>
-        {error && <span style={{ fontSize: 11, color: "#dc2626" }}>⚠️ {error}</span>}
+        <button
+          onClick={() => setStage("idle")}
+          disabled={busy}
+          style={{
+            padding: "6px 10px",
+            borderRadius: 7,
+            border: "1px solid #e2e8f0",
+            background: "white",
+            color: "#64748b",
+            fontSize: 12,
+            fontWeight: 600,
+            cursor: "pointer",
+          }}
+        >
+          No
+        </button>
+        {error && (
+          <span style={{ fontSize: 11, color: "#dc2626" }}>⚠️ {error}</span>
+        )}
       </span>
     );
   }
- 
+
   // forceConfirm — the student has a submission
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        flexWrap: "wrap",
+      }}
+    >
       <span style={{ fontSize: 12, color: "#dc2626", fontWeight: 700 }}>
         Student already submitted. Delete the assignment AND their submission?
       </span>
-      <button onClick={() => attempt(true)} disabled={busy} style={{ padding: "6px 12px", borderRadius: 7, border: "none", background: busy ? "#e2e8f0" : "#dc2626", color: busy ? "#94a3b8" : "white", fontSize: 12, fontWeight: 700, cursor: busy ? "wait" : "pointer" }}>
+      <button
+        onClick={() => attempt(true)}
+        disabled={busy}
+        style={{
+          padding: "6px 12px",
+          borderRadius: 7,
+          border: "none",
+          background: busy ? "#e2e8f0" : "#dc2626",
+          color: busy ? "#94a3b8" : "white",
+          fontSize: 12,
+          fontWeight: 700,
+          cursor: busy ? "wait" : "pointer",
+        }}
+      >
         {busy ? "Deleting…" : "Delete everything"}
       </button>
-      <button onClick={() => setStage("idle")} disabled={busy} style={{ padding: "6px 10px", borderRadius: 7, border: "1px solid #e2e8f0", background: "white", color: "#64748b", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Cancel</button>
-      {error && <span style={{ fontSize: 11, color: "#dc2626" }}>⚠️ {error}</span>}
+      <button
+        onClick={() => setStage("idle")}
+        disabled={busy}
+        style={{
+          padding: "6px 10px",
+          borderRadius: 7,
+          border: "1px solid #e2e8f0",
+          background: "white",
+          color: "#64748b",
+          fontSize: 12,
+          fontWeight: 600,
+          cursor: "pointer",
+        }}
+      >
+        Cancel
+      </button>
+      {error && (
+        <span style={{ fontSize: 11, color: "#dc2626" }}>⚠️ {error}</span>
+      )}
     </span>
   );
 }
 
 // ─── EditAssignmentModal ──────────────────────────────────
-function EditAssignmentModal({ assignment, apiFetch, userId, onClose, onSaved }) {
-  const [title, setTitle]             = useState(assignment.title || "");
+function EditAssignmentModal({
+  assignment,
+  apiFetch,
+  userId,
+  onClose,
+  onSaved,
+}) {
+  const [title, setTitle] = useState(assignment.title || "");
   const [description, setDescription] = useState(assignment.description || "");
-  const [dueDate, setDueDate]         = useState(assignment.dueDate ? assignment.dueDate.slice(0, 16) : "");
-  const [attachment, setAttachment]   = useState(
+  // Stored as a UTC instant; seed the picker with the teacher's LOCAL value.
+  const [dueDate, setDueDate] = useState(
+    assignment.dueDate ? toLocalInput(new Date(assignment.dueDate)) : "",
+  );
+  const [attachment, setAttachment] = useState(
     assignment.attachmentUrl
-      ? { url: assignment.attachmentUrl, fileName: assignment.attachmentName, fileType: assignment.attachmentType, path: assignment.attachmentPath }
-      : null
+      ? {
+          url: assignment.attachmentUrl,
+          fileName: assignment.attachmentName,
+          fileType: assignment.attachmentType,
+          path: assignment.attachmentPath,
+        }
+      : null,
   );
   const [removeAttachment, setRemoveAttachment] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [error, setError]   = useState("");
- 
+  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  const validate = () => {
+    const e = {};
+    if (!title.trim()) e.title = "Give the assignment a title before saving.";
+    else if (title.trim().length > TITLE_MAX)
+      e.title = `Title is too long (${title.trim().length}/${TITLE_MAX} characters).`;
+    if (dueDate) {
+      const due = new Date(dueDate);
+      if (isNaN(due.getTime()))
+        e.dueDate = "That date doesn't look right — please pick again.";
+      else if (due <= new Date()) {
+        e.dueDate =
+          due.toDateString() === new Date().toDateString()
+            ? "That time has already passed. Pick a later time today."
+            : "That date is in the past. Pick a future date.";
+      }
+    }
+    setFieldErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
   const save = async () => {
-    if (!title.trim()) { setError("Title is required."); return; }
-    setSaving(true); setError("");
+    if (!validate()) return;
+    setSaving(true);
+    setError("");
+    setFieldErrors({});
     try {
       const body = {
         title: title.trim(),
         description: description.trim() || undefined,
       };
       if (dueDate) body.dueDate = new Date(dueDate).toISOString();
- 
+
       if (attachment?.url && attachment.url !== assignment.attachmentUrl) {
-        body.attachmentUrl  = attachment.url;
+        body.attachmentUrl = attachment.url;
         body.attachmentName = attachment.fileName;
         body.attachmentType = attachment.fileType;
         body.attachmentPath = attachment.path;
       } else if (removeAttachment && !attachment) {
         body.removeAttachment = true;
       }
- 
-      const data = await apiFetch(`/api/teacher/assignments/${assignment.id}`, {
-        method: "PATCH",
-        body: JSON.stringify(body),
-      });
+
+      const data = await apiFetch(
+        `/api/teacher/assignments/${assignment.id}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify(body),
+        },
+      );
       onSaved(data.assignment);
-    } catch (err) { setError(err.message); setSaving(false); }
+    } catch (err) {
+      const { mapped, unmapped } = mapDetailsToFields(err.details);
+      if (Object.keys(mapped).length) setFieldErrors(mapped);
+      if (unmapped.length) setError(unmapped.join(" "));
+      else if (!Object.keys(mapped).length) setError(err.message);
+      setSaving(false);
+    }
   };
- 
+
   return (
-    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(13,40,64,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 20 }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background: "white", borderRadius: 16, padding: 28, width: "100%", maxWidth: 520, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
-        <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", marginBottom: 4 }}>Edit Assignment</div>
- 
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(13,40,64,0.5)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 100,
+        padding: 20,
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: "white",
+          borderRadius: 16,
+          padding: 28,
+          width: "100%",
+          maxWidth: 520,
+          maxHeight: "90vh",
+          overflowY: "auto",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+        }}
+      >
+        <div
+          style={{
+            fontSize: 18,
+            fontWeight: 800,
+            color: "#0f172a",
+            marginBottom: 4,
+          }}
+        >
+          Edit Assignment
+        </div>
+
         {assignment.submission && (
-          <div style={{ fontSize: 12, color: "#92400e", background: "#fff7e0", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 8, padding: "8px 12px", margin: "8px 0 4px" }}>
-            ⚠️ This student has already submitted. Editing the task now may not match what they answered.
+          <div
+            style={{
+              fontSize: 12,
+              color: "#92400e",
+              background: "#fff7e0",
+              border: "1px solid rgba(245,158,11,0.3)",
+              borderRadius: 8,
+              padding: "8px 12px",
+              margin: "8px 0 4px",
+            }}
+          >
+            ⚠️ This student has already submitted. Editing the task now may not
+            match what they answered.
           </div>
         )}
- 
-        <div style={{ display: "flex", flexDirection: "column", gap: 16, marginTop: 12 }}>
+
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 16,
+            marginTop: 12,
+          }}
+        >
           <div>
             <label style={labelStyle}>Title *</label>
-            <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} style={inputStyle} />
+            <input
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                setFieldErrors((f) => ({ ...f, title: null }));
+              }}
+              maxLength={TITLE_MAX}
+              style={errInput(fieldErrors.title)}
+            />
+            <FieldError>{fieldErrors.title}</FieldError>
           </div>
           <div>
             <label style={labelStyle}>Description</label>
-            <textarea value={description} onChange={(e) => setDescription(e.target.value)} maxLength={1000} rows={4} style={{ ...inputStyle, resize: "vertical" }} />
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              maxLength={1000}
+              rows={4}
+              style={{ ...inputStyle, resize: "vertical" }}
+            />
           </div>
           <div>
-            <label style={labelStyle}>Due Date</label>
-            <input type="datetime-local" value={dueDate} onChange={(e) => setDueDate(e.target.value)} style={inputStyle} />
+            <label style={labelStyle}>Due Date &amp; Time</label>
+            <input
+              type="datetime-local"
+              value={dueDate}
+              min={minDateTime()}
+              onChange={(e) => {
+                setDueDate(e.target.value);
+                setFieldErrors((f) => ({ ...f, dueDate: null }));
+              }}
+              style={errInput(fieldErrors.dueDate)}
+            />
+            <FieldError>{fieldErrors.dueDate}</FieldError>
+            {!fieldErrors.dueDate && (
+              <div style={hintStyle}>
+                Can be later today — pick any time from now onwards.
+              </div>
+            )}
           </div>
           <div>
             <label style={labelStyle}>Attachment (optional)</label>
             {attachment ? (
               <div>
-                <FilePreview url={attachment.url} fileName={attachment.fileName} fileType={attachment.fileType} label="Current attachment" />
-                <button onClick={() => { setAttachment(null); setRemoveAttachment(true); }} style={{ marginTop: 8, padding: "6px 12px", borderRadius: 7, border: "1px solid #fecaca", background: "white", color: "#dc2626", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                <FilePreview
+                  url={attachment.url}
+                  fileName={attachment.fileName}
+                  fileType={attachment.fileType}
+                  label="Current attachment"
+                />
+                <button
+                  onClick={() => {
+                    setAttachment(null);
+                    setRemoveAttachment(true);
+                  }}
+                  style={{
+                    marginTop: 8,
+                    padding: "6px 12px",
+                    borderRadius: 7,
+                    border: "1px solid #fecaca",
+                    background: "white",
+                    color: "#dc2626",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
                   Remove attachment
                 </button>
               </div>
             ) : (
-              <FileUpload role="teacher" userId={userId} label="Replace / add attachment" compact
-                onUploadComplete={(r) => { setAttachment(r); setRemoveAttachment(false); }}
-                onClear={() => setAttachment(null)} />
+              <FileUpload
+                role="teacher"
+                userId={userId}
+                label="Replace / add attachment"
+                compact
+                onUploadComplete={(r) => {
+                  setAttachment(r);
+                  setRemoveAttachment(false);
+                }}
+                onClear={() => setAttachment(null)}
+              />
             )}
           </div>
         </div>
- 
-        {error && <div style={{ marginTop: 12, fontSize: 13, color: "#dc2626" }}>⚠️ {error}</div>}
- 
+
+        {error && (
+          <div style={{ marginTop: 12, fontSize: 13, color: "#dc2626" }}>
+            ⚠️ {error}
+          </div>
+        )}
+
         <div style={{ display: "flex", gap: 8, marginTop: 20 }}>
-          <button onClick={save} disabled={saving} style={{ padding: "10px 20px", borderRadius: 8, border: "none", background: saving ? "#e2e8f0" : "#0d2840", color: saving ? "#94a3b8" : "white", fontSize: 14, fontWeight: 800, cursor: saving ? "wait" : "pointer" }}>
+          <button
+            onClick={save}
+            disabled={saving}
+            style={{
+              padding: "10px 20px",
+              borderRadius: 8,
+              border: "none",
+              background: saving ? "#e2e8f0" : "#0d2840",
+              color: saving ? "#94a3b8" : "white",
+              fontSize: 14,
+              fontWeight: 800,
+              cursor: saving ? "wait" : "pointer",
+            }}
+          >
             {saving ? "Saving…" : "Save Changes"}
           </button>
-          <button onClick={onClose} style={{ padding: "10px 16px", borderRadius: 8, border: "1px solid #e2e8f0", background: "white", color: "#64748b", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Cancel</button>
+          <button
+            onClick={onClose}
+            style={{
+              padding: "10px 16px",
+              borderRadius: 8,
+              border: "1px solid #e2e8f0",
+              background: "white",
+              color: "#64748b",
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            Cancel
+          </button>
         </div>
       </div>
     </div>
@@ -979,6 +1448,7 @@ export default function AssignmentsPage() {
   const [expanded, setExpanded] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
 
   useEffect(() => {
     const load = async () => {
@@ -1018,6 +1488,8 @@ export default function AssignmentsPage() {
   const handleCreated = (assignment) => {
     setAssignments((prev) => [assignment, ...prev]);
     setShowCreate(false);
+    setNotice(`"${assignment.title}" created — due ${fmtDue(assignment.dueDate)}.`);
+    setTimeout(() => setNotice(""), 6000);
   };
 
   const handleUpdated = (updated) => {
@@ -1032,12 +1504,15 @@ export default function AssignmentsPage() {
   };
 
   const handleBulkOverdue = async () => {
+    setError("");
     try {
       await apiFetch("/api/teacher/assignments/bulk-overdue", {
         method: "POST",
       });
       const data = await apiFetch("/api/teacher/assignments");
       setAssignments(data.assignments || []);
+      setNotice("Overdue assignments updated.");
+      setTimeout(() => setNotice(""), 4000);
     } catch (err) {
       setError(err.message);
     }
@@ -1111,6 +1586,23 @@ export default function AssignmentsPage() {
         />
       )}
 
+      {notice && (
+        <div
+          style={{
+            padding: "10px 14px",
+            borderRadius: 8,
+            background: "rgba(34,197,94,0.08)",
+            border: "1px solid rgba(34,197,94,0.2)",
+            color: "#15803d",
+            fontSize: 13,
+            fontWeight: 600,
+            marginBottom: 16,
+          }}
+        >
+          ✓ {notice}
+        </div>
+      )}
+
       {error && (
         <div
           style={{
@@ -1181,7 +1673,7 @@ export default function AssignmentsPage() {
               expanded={expanded === a.id}
               onToggle={() => setExpanded(expanded === a.id ? null : a.id)}
               onUpdated={handleUpdated}
-              onDeleted={handleDeleted}    
+              onDeleted={handleDeleted}
               apiFetch={apiFetch}
             />
           ))}
@@ -1192,3 +1684,22 @@ export default function AssignmentsPage() {
     </div>
   );
 }
+
+/* ═══════════════════════════════════════════════════════════
+   ⚠️ ONE CHANGE REQUIRED IN src/app/teacher/hooks/useTeacherFetch.js
+
+   This page maps per-field validation messages from the server onto the
+   field they belong to. Those messages arrive in `details` on the error
+   body. If the hook throws `new Error(data.error)`, that array is lost and
+   every teacher sees "Validation failed" with no idea which field is wrong.
+
+   Find where the hook throws on a failed response and add the two lines:
+
+     const err = new Error(data.error || "Request failed");
+     err.details = data.details;   // ← per-field messages
+     err.status  = res.status;     // ← useful for 409 handling
+     throw err;
+
+   Without this, the field-level errors still work for client-side checks
+   (empty title, past date) but server-side ones fall back to one banner.
+   ═══════════════════════════════════════════════════════════ */
