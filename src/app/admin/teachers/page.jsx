@@ -118,14 +118,14 @@ export default function TeachersPage() {
 function OnboardModal({ onClose, onDone }) {
   const { getToken } = useAuth();
   // const [form, setForm] = useState({ email: '', name: '', specialty: [], timezone: '', gender: '', calendarId: '00000000', bio: '' });
-  const [form, setForm] = useState({ email: '', name: '', specialty: [], timezone: '', gender: '', calendarId: '00000000', bio: '', country: '' });
+  const [form, setForm] = useState({ email: '', name: '', specialty: [], timezone: '', gender: '', calendarId: `samp${Math.random()}`, bio: '', country: '' });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
   const toggleSpec = (val) => setForm(p => ({ ...p, specialty: p.specialty.includes(val) ? p.specialty.filter(s => s !== val) : [...p.specialty, val] }));
 
-  const valid = form.email && form.name && form.timezone && form.gender && form.calendarId;
+  const valid = form.email && form.name && form.timezone && form.gender;
 
   const submit = async () => {
     setSaving(true); setError('');
