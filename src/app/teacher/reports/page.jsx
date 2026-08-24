@@ -45,8 +45,69 @@ function StarRating({ value, onChange }) {
   );
 }
 
+// ── Course progress slider ────────────────────────────────
+// This one field drives what every family sees on their dashboard.
+// `null` means "not assessed" and is rendered as such — a child must never be
+// shown 0% simply because a teacher hasn't filled it in.
+function ProgressSlider({ value, onChange, prefilledFrom }) {
+  const isSet = value !== null && value !== undefined;
+  return (
+    <div>
+      <label style={labelStyle}>
+        Course progress
+        <span style={{ fontWeight:400, color:'#94a3b8' }}>
+          {' '}— roughly how far through the course is this student?
+        </span>
+      </label>
+
+      <div style={{ display:'flex', alignItems:'center', gap:14 }}>
+        <input
+          type="range" min="0" max="100" step="5"
+          value={isSet ? value : 0}
+          onChange={(e) => onChange(Number(e.target.value))}
+          style={{ flex:1, accentColor:'#28b7d9', cursor:'pointer' }}
+        />
+        <div style={{
+          minWidth:64, textAlign:'center', padding:'7px 10px', borderRadius:8,
+          background: isSet ? 'rgba(40,183,217,0.10)' : '#f1f5f9',
+          border: `1px solid ${isSet ? 'rgba(40,183,217,0.3)' : '#e2e8f0'}`,
+          fontSize:15, fontWeight:800, color: isSet ? '#0e6e8a' : '#94a3b8',
+        }}>
+          {isSet ? `${value}%` : '—'}
+        </div>
+      </div>
+
+      <div style={{ display:'flex', alignItems:'center', gap:10, marginTop:6, flexWrap:'wrap' }}>
+        {!isSet ? (
+          <span style={{ fontSize:12, color:'#b45309' }}>
+            Not set — the family will see “awaiting teacher assessment”.
+          </span>
+        ) : (
+          <>
+            <span style={{ fontSize:12, color:'#94a3b8' }}>
+              Shown on the family’s dashboard until your next report.
+            </span>
+            <button
+              type="button"
+              onClick={() => onChange(null)}
+              style={{ border:'none', background:'none', padding:0, fontSize:12, fontWeight:700, color:'#94a3b8', cursor:'pointer', textDecoration:'underline' }}
+            >
+              clear
+            </button>
+          </>
+        )}
+        {prefilledFrom != null && isSet && (
+          <span style={{ fontSize:12, color:'#0e6e8a', fontWeight:600 }}>
+            Last report: {prefilledFrom}%
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Report form (create / edit) ───────────────────────────
-function ReportForm({ students, editReport, onSaved, onCancel, apiFetch }) {
+function ReportForm({ students, reports, editReport, onSaved, onCancel, apiFetch }) {
   const isEdit = !!editReport;
   const { user } = useUser();
   const wasSent = editReport?.status === 'SENT';
@@ -56,6 +117,7 @@ function ReportForm({ students, editReport, onSaved, onCancel, apiFetch }) {
     period:          editReport?.period || '',
     courseType:      editReport?.courseType || '',
     overallRating:   editReport?.overallRating || 0,
+    progressPercent: editReport?.progressPercent ?? null,
     tajweedProgress: editReport?.tajweedProgress || '',
     recitationNotes: editReport?.recitationNotes || '',
     behaviourNotes:  editReport?.behaviourNotes  || '',
@@ -63,6 +125,12 @@ function ReportForm({ students, editReport, onSaved, onCancel, apiFetch }) {
     teacherMessage:  editReport?.teacherMessage  || '',
     nextSteps:       editReport?.nextSteps       || '',
   });
+
+  // What this student was last assessed at — shown beside the slider so the
+  // question becomes "have they moved since last month?" rather than a blank.
+  const [prefilledFrom, setPrefilledFrom] = useState(
+    isEdit ? null : null
+  );
 
   // Attachment state — pre-loads the existing attachment when editing.
   const [attachment, setAttachment] = useState(
@@ -79,16 +147,33 @@ function ReportForm({ students, editReport, onSaved, onCancel, apiFetch }) {
   const set = (k,v) => setForm(p => ({ ...p, [k]:v }));
   const isValid = form.studentId && form.period && form.courseType;
 
-  // Auto-set courseType when student selected (only on create)
+  // Auto-set courseType, and seed the progress slider from this student's most
+  // recent assessed report. Create only — never overwrite an edit in progress.
   useEffect(() => {
     if (!form.studentId || isEdit) return;
+
     const match = students.find(s => s.student.id === form.studentId);
     if (match) set('courseType', match.enrollment.courseType);
+
+    const last = (reports || [])
+      .filter(r => r.studentId === form.studentId && r.progressPercent != null)
+      .sort((a, b) => new Date(b.sentAt || b.createdAt || 0) - new Date(a.sentAt || a.createdAt || 0))[0];
+
+    if (last) {
+      set('progressPercent', last.progressPercent);
+      setPrefilledFrom(last.progressPercent);
+    } else {
+      set('progressPercent', null);
+      setPrefilledFrom(null);
+    }
   }, [form.studentId]);
 
   const buildBody = () => ({
     ...form,
     overallRating: form.overallRating || undefined,
+    // undefined (not null) when unset, so a PATCH never wipes a value the
+    // teacher previously saved.
+    progressPercent: form.progressPercent ?? undefined,
     attachmentUrl:  attachment?.url      || undefined,
     attachmentName: attachment?.fileName || undefined,
     attachmentType: attachment?.fileType || undefined,
@@ -121,7 +206,11 @@ function ReportForm({ students, editReport, onSaved, onCancel, apiFetch }) {
         report = sendData.report;
       }
       onSaved(report, isEdit);
-    } catch (err) { setError(err.message); }
+    } catch (err) {
+      // The API returns per-field messages in `details`; show them rather than
+      // a bare "Validation failed".
+      setError(err.details?.length ? err.details.join(' ') : err.message);
+    }
     finally { setSaving(false); setSending(false); }
   };
 
@@ -178,6 +267,15 @@ function ReportForm({ students, editReport, onSaved, onCancel, apiFetch }) {
       <div style={{ marginBottom:18 }}>
         <label style={labelStyle}>Overall Rating</label>
         <StarRating value={form.overallRating} onChange={v=>set('overallRating',v)} />
+      </div>
+
+      {/* Course progress — drives the family's dashboard */}
+      <div style={{ marginBottom:18 }}>
+        <ProgressSlider
+          value={form.progressPercent}
+          onChange={v=>set('progressPercent',v)}
+          prefilledFrom={prefilledFrom}
+        />
       </div>
 
       {/* Content fields */}
@@ -248,6 +346,7 @@ function ReportCard({ report, onEdit, onSent, onDeleted, apiFetch }) {
 
   const isSent = localReport.status === 'SENT';
   const childName = localReport.student?.name || localReport.student?.email?.split('@')[0] || 'Student';
+  const hasProgress = localReport.progressPercent !== null && localReport.progressPercent !== undefined;
 
   const handleSend = async () => {
     setSending(true); setError('');
@@ -260,7 +359,6 @@ function ReportCard({ report, onEdit, onSent, onDeleted, apiFetch }) {
   };
 
   const handleResend = async () => {
-    // if (!confirm('Re-send the updated report to the parent?')) return;
     setSending(true); setError('');
     try {
       const data = await apiFetch(`/api/teacher/reports/${localReport.id}/resend`, { method:'POST' });
@@ -304,6 +402,11 @@ function ReportCard({ report, onEdit, onSent, onDeleted, apiFetch }) {
                 {'⭐'.repeat(localReport.overallRating)}
               </span>
             )}
+            {hasProgress && (
+              <span style={{ fontSize:11, fontWeight:700, color:'#0e6e8a', background:'rgba(40,183,217,0.10)', borderRadius:5, padding:'2px 7px' }}>
+                {localReport.progressPercent}% through
+              </span>
+            )}
             <span style={{
               fontSize:11, fontWeight:700,
               color: isSent?'#22c55e':'#f97316',
@@ -333,6 +436,28 @@ function ReportCard({ report, onEdit, onSent, onDeleted, apiFetch }) {
 
       {expanded && (
         <div style={{ borderTop:'1px solid #e2e8f0', padding:'18px', background:'#fafbfc' }}>
+          {/* Course progress bar */}
+          <div style={{ marginBottom:16 }}>
+            <div style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.05em', color:'#94a3b8', marginBottom:6 }}>
+              Course progress
+            </div>
+            {hasProgress ? (
+              <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+                <div style={{ flex:1, height:9, background:'#e2e8f0', borderRadius:5, overflow:'hidden' }}>
+                  <div style={{ width:`${localReport.progressPercent}%`, height:'100%', background:'linear-gradient(90deg,#28b7d9,#0e6e8a)', borderRadius:5 }} />
+                </div>
+                <span style={{ fontSize:14, fontWeight:800, color:'#0e6e8a', minWidth:44, textAlign:'right' }}>
+                  {localReport.progressPercent}%
+                </span>
+              </div>
+            ) : (
+              <div style={{ fontSize:12.5, color:'#b45309' }}>
+                Not assessed — the family sees “awaiting teacher assessment”.
+                Edit this report to set it.
+              </div>
+            )}
+          </div>
+
           {contentFields.length > 0 ? (
             <div style={{ display:'flex', flexDirection:'column', gap:12, marginBottom:16 }}>
               {contentFields.map(([label, value]) => (
@@ -428,8 +553,18 @@ export default function ReportsPage() {
       ...opts,
       headers: { 'Content-Type':'application/json', Authorization:`Bearer ${token}`, ...opts.headers },
     });
-    if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.error||'Failed'); }
-    return res.json();
+    if (!res.ok) {
+      const body = await res.json().catch(()=>({}));
+      const e = new Error(body.error || 'Failed');
+      // Per-field validation messages arrive here. Without passing them
+      // through, every field error collapses into a bare "Validation failed".
+      e.details = body.details;
+      e.status  = res.status;
+      e.body    = body;
+      throw e;
+    }
+    if (res.status === 204) return null;
+    return res.json().catch(()=>({}));
   }, [getToken]);
 
   const loadReports = useCallback(async () => {
@@ -448,6 +583,13 @@ export default function ReportsPage() {
   useEffect(() => { loadReports(); }, []);
 
   const filteredReports = reports.filter(r => r.status === tab);
+
+  // How many sent reports still have no course-progress figure. This is the
+  // number that decides whether families see a real percentage or "awaiting
+  // teacher assessment", so it is worth surfacing rather than hiding.
+  const missingProgress = reports.filter(
+    r => r.status === 'SENT' && (r.progressPercent === null || r.progressPercent === undefined)
+  ).length;
 
   const handleSaved = (report, isEdit) => {
     if (isEdit) {
@@ -497,9 +639,17 @@ export default function ReportsPage() {
         </button>
       </div>
 
+      {!loading && missingProgress > 0 && (
+        <div style={{ padding:'11px 15px', borderRadius:8, background:'rgba(250,167,26,0.10)', border:'1px solid rgba(250,167,26,0.3)', color:'#92400e', fontSize:13, marginBottom:16, lineHeight:1.6 }}>
+          {missingProgress} sent report{missingProgress!==1?'s have':' has'} no course-progress figure.
+          Those families see “awaiting teacher assessment” on their dashboard — edit the report to add it.
+        </div>
+      )}
+
       {(showForm || editReport) && (
         <ReportForm
           students={students}
+          reports={reports}
           editReport={editReport}
           onSaved={handleSaved}
           onCancel={() => { setShowForm(false); setEditReport(null); }}
