@@ -1,0 +1,173 @@
+/* ═══════════════════════════════════════════════════════════
+   src/app/theme.css  —  Design tokens, Tailwind v4 @theme
+   Import once in globals.css. Single source of truth for every
+   colour, size, radius, shadow and motion value in the product.
+
+   RULE FOR THE WHOLE MODULE: no arbitrary values in components.
+   If a value isn't here, it either gets added here or it's wrong.
+   ═══════════════════════════════════════════════════════════ */
+
+   @theme {
+    /* ── Brand ─────────────────────────────────────────────── */
+    --color-teal:        #28b7d9;
+    --color-teal-mid:    #1a9abf;
+    --color-teal-dark:   #0e6e8a;
+    --color-teal-pale:   #e8f8fc;
+    --color-teal-border: rgba(40, 183, 217, 0.25);
+  
+    --color-gold:        #faa71a;
+    --color-gold-dark:   #e8920a;
+    --color-gold-pale:   #fff8e7;
+  
+    --color-navy:        #0d2840;
+    --color-navy-mid:    #111d2b;
+    --color-navy-soft:   #16324c;
+  
+    /* ── Surfaces ──────────────────────────────────────────── */
+    --color-white:       #ffffff;
+    --color-off-white:   #f7f9fb;
+    --color-surface:     #f0f4f8;
+    --color-border:      #e2e8f0;
+    --color-border-soft: #f1f5f9;
+  
+    /* ── Text ──────────────────────────────────────────────── */
+    --color-ink:         #0f172a;
+    --color-body:        #334155;
+    --color-muted:       #64748b;
+    --color-faint:       #94a3b8;
+    --color-ghost:       #cbd5e1;
+  
+    /* ── Semantic ──────────────────────────────────────────── */
+    --color-success:     #22c55e;
+    --color-success-ink: #15803d;
+    --color-warn:        #faa71a;
+    --color-warn-ink:    #b45309;
+    --color-danger:      #ef4444;
+    --color-danger-ink:  #dc2626;
+    --color-info:        #28b7d9;
+  
+    /* ── Journey stages ────────────────────────────────────── */
+    /* Eight stages, cool → warm as the child advances. Used by the
+       journey map, stage badges and level-up celebrations. */
+    --color-stage-1: #94a3b8;
+    --color-stage-2: #5fd0ec;
+    --color-stage-3: #28b7d9;
+    --color-stage-4: #0e6e8a;
+    --color-stage-5: #8b5cf6;
+    --color-stage-6: #faa71a;
+    --color-stage-7: #e8920a;
+    --color-stage-8: #0d2840;
+  
+    /* ── Typography ────────────────────────────────────────── */
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    /* Arabic stage names, calligraphic celebration moments */
+    --font-arabic: 'Amiri', 'Scheherazade New', 'Plus Jakarta Sans', serif;
+  
+    /* Fluid where it matters. clamp() means one value covers phone
+       through desktop, so a heading never needs a breakpoint override. */
+    --text-display:  clamp(2rem, 1.4rem + 3vw, 3.25rem);   /* 32 → 52 hero */
+    --text-h1:       clamp(1.5rem, 1.2rem + 1.5vw, 2rem);  /* 24 → 32 */
+    --text-h2:       clamp(1.25rem, 1.1rem + 0.8vw, 1.5rem);
+    --text-h3:       1.125rem;
+    --text-body:     1rem;
+    --text-sm:       0.875rem;
+    --text-xs:       0.8125rem;
+    --text-micro:    0.6875rem;
+  
+    /* Big numbers: streak counts, XP totals, stat cards */
+    --text-stat:     clamp(1.75rem, 1.3rem + 2.2vw, 2.75rem);
+  
+    --leading-tight:  1.15;
+    --leading-snug:   1.35;
+    --leading-normal: 1.6;
+    --leading-relaxed: 1.75;
+  
+    --tracking-display: -0.03em;
+    --tracking-tight:   -0.02em;
+    --tracking-wide:    0.05em;   /* uppercase micro-labels */
+  
+    /* ── Spacing (4px base) ────────────────────────────────── */
+    --spacing-1:  0.25rem;
+    --spacing-2:  0.5rem;
+    --spacing-3:  0.75rem;
+    --spacing-4:  1rem;
+    --spacing-5:  1.25rem;
+    --spacing-6:  1.5rem;
+    --spacing-8:  2rem;
+    --spacing-10: 2.5rem;
+    --spacing-12: 3rem;
+    --spacing-16: 4rem;
+  
+    /* Page gutter — tighter on a phone, generous on desktop */
+    --gutter: clamp(1rem, 0.5rem + 2vw, 1.75rem);
+  
+    /* ── Radii ─────────────────────────────────────────────── */
+    --radius-xs:   0.3125rem;   /* chips, pills */
+    --radius-sm:   0.5rem;      /* buttons, inputs */
+    --radius-md:   0.75rem;     /* small cards */
+    --radius-lg:   0.875rem;    /* cards */
+    --radius-xl:   1rem;        /* modals, hero cards */
+    --radius-2xl:  1.375rem;    /* profile tiles */
+    --radius-full: 999px;
+  
+    /* ── Shadows ───────────────────────────────────────────── */
+    --shadow-sm:    0 1px 2px rgba(13, 40, 64, 0.04);
+    --shadow-card:  0 1px 3px rgba(13, 40, 64, 0.06);
+    --shadow-lift:  0 6px 20px rgba(13, 40, 64, 0.10);
+    --shadow-modal: 0 20px 60px rgba(13, 40, 64, 0.20);
+    --shadow-focus: 0 0 0 3px rgba(40, 183, 217, 0.25);
+    --shadow-glow:  0 0 24px rgba(250, 167, 26, 0.45);   /* celebration */
+  
+    /* ── Layout ────────────────────────────────────────────── */
+    --sidebar-w:        248px;   /* matches the Figma desktop design */
+    --sidebar-rail-w:   72px;    /* tablet: icons only */
+    --bottom-nav-h:     64px;    /* phone */
+    --content-max:      1192px;
+    --topbar-h:         60px;
+  
+    /* ── Motion ────────────────────────────────────────────── */
+    /* Tier 1 — response. Every tap and hover. Invisible when right. */
+    --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    /* Tier 2 — reward. Slight overshoot: things arrive, they don't slide. */
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  
+    --dur-instant: 100ms;
+    --dur-fast:    150ms;   /* press, hover */
+    --dur-base:    250ms;   /* card entrance, tab change */
+    --dur-slow:    400ms;   /* panel, sheet */
+    --dur-reward:  600ms;   /* progress fill, marker advance */
+    --dur-celebrate: 1200ms;
+  
+    /* Cascade beats — the staggering IS the satisfaction.
+       Reveal all at once and it reads as a notification. */
+    --beat-1: 200ms;   /* journey marker advances */
+    --beat-2: 400ms;   /* "+10 XP" floats up */
+    --beat-3: 700ms;   /* total counts up */
+    --beat-4: 1000ms;  /* streak flame reignites */
+    --beat-5: 1400ms;  /* badge takeover, if any */
+  
+    --stagger: 50ms;   /* between cards on entry */
+  }
+  
+  /* ═══════════════════════════════════════════════════════════
+     Accessibility — non-negotiable, and a client-facing answer
+     you will be glad to have.
+     ═══════════════════════════════════════════════════════════ */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+  
+  /* Only animate transform and opacity — these are GPU-composited.
+     Animating width/height/top/left forces layout on every frame and
+     is what makes a dashboard stutter on a mid-range Android. */
+  .will-animate {
+    will-change: transform, opacity;
+  }
