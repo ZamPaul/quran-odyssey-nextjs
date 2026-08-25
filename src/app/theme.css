@@ -7,7 +7,7 @@
    If a value isn't here, it either gets added here or it's wrong.
    ═══════════════════════════════════════════════════════════ */
 
-   @theme {
+   @theme static {
     /* ── Brand ─────────────────────────────────────────────── */
     --color-teal:        #28b7d9;
     --color-teal-mid:    #1a9abf;
