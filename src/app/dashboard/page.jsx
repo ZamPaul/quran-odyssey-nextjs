@@ -20,7 +20,7 @@
 
 import { useUser, useClerk, useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import FileUpload, { FileCard, FilePreview } from '../../components/FileUpload';
 import { deleteFile } from '../../lib/uploadFile';
@@ -162,35 +162,53 @@ function BirthdayBanner({ student }) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// CHILD SELECTOR (only shown when 2+ learners)
+// CHILD SWITCHER (dropdown, lives in the top bar)
 // ═══════════════════════════════════════════════════════════
-function ChildSelector({ students, activeId, onSelect }) {
-  if (!students || students.length < 2) return null;
+function ChildSwitcher({ students, activeId, onSelect, onAddChild, onManage }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    const onEsc = (e) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('mousedown', onDoc);
+    document.addEventListener('keydown', onEsc);
+    return () => { document.removeEventListener('mousedown', onDoc); document.removeEventListener('keydown', onEsc); };
+  }, [open]);
+
+  const active = students.find(s => s.id === activeId) || students[0] || null;
+  if (!active) return null;
+  const faceOf = (s) => (s.gender === 'FEMALE' ? '👧' : '👦');
+  const subOf  = (s) => courseLabelFromEnum(s.courseInterest) || 'Learner';
+
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, overflowX: 'auto', paddingBottom: 4 }}>
-      <span style={{ flexShrink: 0, fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: QO.muted }}>
-        Your children
-      </span>
-      {students.map(s => {
-        const active = s.id === activeId;
-        const face = s.gender === 'FEMALE' ? '👧' : '👦';
-        const sub = courseLabelFromEnum(s.courseInterest) || 'Learner';
-        return (
-          <button key={s.id} onClick={() => onSelect(s.id)} style={{
-            display: 'flex', flexShrink: 0, alignItems: 'center', gap: 12, borderRadius: 16, padding: '10px 16px', cursor: 'pointer',
-            border: `1px solid ${active ? QO.blue : QO.line}`,
-            background: active ? QO.blue : '#fff',
-            boxShadow: active ? '0 10px 24px rgba(25,174,226,.28)' : '0 10px 30px rgba(16,24,40,.06)',
-            transition: 'all 150ms ease',
-          }}>
-            <span style={{ display: 'grid', placeItems: 'center', height: 36, width: 36, borderRadius: '50%', background: active ? 'rgba(255,255,255,0.2)' : QO.sky, fontSize: 18 }}>{face}</span>
-            <span style={{ textAlign: 'left' }}>
-              <b style={{ display: 'block', fontSize: 14, lineHeight: 1.2, color: active ? '#fff' : QO.ink }}>{s.name}</b>
-              <span style={{ fontSize: 11, color: active ? 'rgba(255,255,255,0.8)' : QO.muted }}>{sub}</span>
-            </span>
+    <div className="qo-switch" ref={ref}>
+      <button className="qo-switch-btn" onClick={() => setOpen(o => !o)} aria-haspopup="listbox" aria-expanded={open}>
+        <span className="qo-switch-ava">{faceOf(active)}</span>
+        <span className="qo-switch-meta"><b>{active.name}</b><span>{subOf(active)}</span></span>
+        <span className="qo-switch-caret" style={{ transform: open ? 'rotate(180deg)' : 'none' }}>▾</span>
+      </button>
+      {open && (
+        <div className="qo-switch-menu" role="listbox">
+          <div className="qo-switch-head">Switch child</div>
+          {students.map(s => {
+            const sel = s.id === activeId;
+            return (
+              <button key={s.id} className="qo-switch-item" onClick={() => { onSelect(s.id); setOpen(false); }} role="option" aria-selected={sel}>
+                <span className="qo-switch-ava2" style={{ background: sel ? QO.blue : QO.sky, color: sel ? '#fff' : QO.ink }}>{faceOf(s)}</span>
+                <span className="qo-switch-meta2"><b>{s.name}</b><span>{subOf(s)}</span></span>
+                {sel && <span className="qo-switch-check">✓</span>}
+              </button>
+            );
+          })}
+          <div className="qo-switch-sep" />
+          <button className="qo-switch-add" onClick={() => { setOpen(false); onAddChild?.(); }}>
+            <span className="qo-switch-plus">＋</span> Add another child
           </button>
-        );
-      })}
+          <button className="qo-switch-manage" onClick={() => { setOpen(false); onManage?.(); }}>Manage children →</button>
+        </div>
+      )}
     </div>
   );
 }
@@ -198,52 +216,36 @@ function ChildSelector({ students, activeId, onSelect }) {
 // ═══════════════════════════════════════════════════════════
 // SIDEBAR
 // ═══════════════════════════════════════════════════════════
-function Sidebar({ activeTab, setActiveTab, account, onSignOut }) {
+function Sidebar({ activeTab, setActiveTab, account, onSignOut, onNavigate }) {
   const displayName = account?.name || account?.email?.split('@')[0] || 'Account';
   const initials = (displayName || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  const go = (id) => { setActiveTab(id); onNavigate?.(); };
 
   return (
-    <aside className="qo-sidebar" style={{
-      position: 'sticky', top: 24, alignSelf: 'flex-start', height: 'calc(100vh - 48px)',
-      width: 280, flexShrink: 0, display: 'flex', flexDirection: 'column',
-      borderRadius: 28, ...GLASS, boxShadow: '0 16px 45px rgba(15,23,42,.08)',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 28 }}>
-        <div style={{ display: 'grid', placeItems: 'center', height: 44, width: 44, borderRadius: 16, background: `linear-gradient(135deg, ${QO.blue}, ${QO.blueDark})`, color: '#fff', fontSize: 20, boxShadow: '0 10px 15px -3px rgba(186,230,253,.7)' }}>📖</div>
-        <div style={{ fontSize: 20, fontWeight: 900, letterSpacing: -0.4 }}>
-          <span style={{ color: QO.blue }}>Quran</span> <span style={{ color: QO.gold }}>Odyssey</span>
-        </div>
+    <aside className="qo-side">
+      <div className="qo-brand">
+        <div className="qo-brand-mark">📖</div>
+        <div className="qo-brand-text"><span style={{ color: QO.blue }}>Quran</span> <span style={{ color: QO.gold }}>Odyssey</span></div>
       </div>
 
-      <nav style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 8, fontSize: 15 }}>
-        {NAV.map(item => {
-          const active = activeTab === item.id;
-          return (
-            <button key={item.id} onClick={() => setActiveTab(item.id)} style={{
-              display: 'flex', alignItems: 'center', gap: 12, borderRadius: 16, padding: '12px 16px',
-              fontWeight: active ? 700 : 600, border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left',
-              background: active ? QO.sky : 'transparent', color: active ? QO.blueDark : '#475569',
-              transition: 'background 150ms ease',
-            }}>
-              <span style={{ width: 20, textAlign: 'center' }}>{item.icon}</span>{item.label}
-            </button>
-          );
-        })}
+      <nav className="qo-nav">
+        {NAV.map(item => (
+          <button key={item.id} className={`qo-navbtn${activeTab === item.id ? ' active' : ''}`} onClick={() => go(item.id)} title={item.label}>
+            <span className="qo-ic">{item.icon}</span><span className="qo-navlabel">{item.label}</span>
+          </button>
+        ))}
       </nav>
 
-      <div style={{ marginTop: 'auto', padding: 20 }}>
-        <div style={{ overflow: 'hidden', borderRadius: 24, border: `1px solid ${QO.line}`, background: `linear-gradient(135deg, ${QO.sky}, #fff)`, padding: 20 }}>
-          <div style={{ fontSize: 40 }}>📖</div>
-          <h3 style={{ margin: '16px 0 0', fontSize: 18, fontWeight: 800, color: QO.ink }}>Keep the journey alive.</h3>
-          <p style={{ margin: '8px 0 0', fontSize: 13, lineHeight: 1.6, color: QO.muted }}>Consistency today, excellence tomorrow.</p>
+      <div className="qo-side-foot">
+        <div className="qo-promo">
+          <div style={{ fontSize: 32 }}>📖</div>
+          <h3>Keep the journey alive.</h3>
+          <p>Consistency today, excellence tomorrow.</p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 16, padding: '0 4px' }}>
-          <div style={{ width: 34, height: 34, borderRadius: '50%', background: `linear-gradient(135deg, ${QO.gold}, #e8920a)`, display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 800, color: QO.ink, flexShrink: 0 }}>{initials}</div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: QO.ink, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayName}</div>
-            <div style={{ fontSize: 10, color: QO.muted, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{account?.email}</div>
-          </div>
-          <button onClick={onSignOut} title="Sign out" style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: QO.muted, fontSize: 18, flexShrink: 0 }}>⎋</button>
+        <div className="qo-user">
+          <div className="qo-user-ava">{initials}</div>
+          <div className="qo-usermeta"><b>{displayName}</b><span>{account?.email}</span></div>
+          <button className="qo-signout" onClick={onSignOut} title="Sign out">⎋</button>
         </div>
       </div>
     </aside>
@@ -1478,7 +1480,12 @@ export default function DashboardPage() {
   const [activeId,  setActiveId]  = useState(null);
   const [loading,   setLoading]   = useState(true);
   const [showAddChild, setShowAddChild] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const [drawer, setDrawer] = useState(false);
   const { checking, complete } = useProfileGate();
+
+  useEffect(() => { try { setCollapsed(localStorage.getItem('qo_side_collapsed') === '1'); } catch { /* ignore */ } }, []);
+  const toggleCollapse = () => setCollapsed(c => { const n = !c; try { localStorage.setItem('qo_side_collapsed', n ? '1' : '0'); } catch { /* ignore */ } return n; });
 
   useEffect(() => {
     if (isLoaded && !user) router.push('/login');
@@ -1569,49 +1576,160 @@ export default function DashboardPage() {
   if (!complete) return null;
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', overflowX: 'hidden', color: QO.ink, fontFamily: "'Plus Jakarta Sans', plus-r, system-ui, sans-serif",
-      background: `radial-gradient(circle at 82% 6%, rgba(246,168,0,.12), transparent 24%), radial-gradient(circle at 14% 20%, rgba(25,174,226,.12), transparent 22%), linear-gradient(180deg,#ffffff 0%,#f7fbff 100%)` }}>
+    <div className={`qo-app${collapsed ? ' collapsed' : ''}${drawer ? ' drawer' : ''}`}>
       <style>{`
-        @keyframes shimmer { 0%,100%{opacity:1} 50%{opacity:0.5} }
-        @keyframes spin    { to{transform:rotate(360deg)} }
-        @keyframes qfloat  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-        .qo-bento{ display:grid; gap:20px; grid-template-columns:repeat(12,minmax(0,1fr)); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes qfloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+
+        .qo-app { position:relative; display:flex; min-height:100vh; overflow-x:hidden; color:${QO.ink};
+          font-family:'Plus Jakarta Sans', plus-r, system-ui, sans-serif;
+          background:
+            radial-gradient(circle at 82% 4%, rgba(246,168,0,.10), transparent 22%),
+            radial-gradient(circle at 12% 16%, rgba(25,174,226,.10), transparent 20%),
+            linear-gradient(180deg,#ffffff 0%,#f7fbff 100%); }
+
+        /* ── Sidebar ── */
+        .qo-side { position:sticky; top:0; align-self:flex-start; height:100vh; width:264px; flex:0 0 264px;
+          display:flex; flex-direction:column; background:rgba(255,255,255,.92); backdrop-filter:blur(14px);
+          border-right:1px solid ${QO.line}; transition:width .22s ease, transform .22s ease; z-index:50; }
+        .qo-app.collapsed .qo-side { width:80px; flex-basis:80px; }
+        .qo-brand { display:flex; align-items:center; gap:12px; padding:22px 20px; }
+        .qo-brand-mark { display:grid; place-items:center; height:44px; width:44px; flex:none; border-radius:14px;
+          background:linear-gradient(135deg,${QO.blue},${QO.blueDark}); color:#fff; font-size:20px; box-shadow:0 10px 15px -3px rgba(186,230,253,.7); }
+        .qo-brand-text { font-size:19px; font-weight:900; letter-spacing:-.4px; white-space:nowrap; }
+        .qo-app.collapsed .qo-brand { justify-content:center; padding:22px 0; }
+        .qo-app.collapsed .qo-brand-text { display:none; }
+        .qo-nav { display:flex; flex-direction:column; gap:6px; padding:8px 12px; overflow-y:auto; }
+        .qo-navbtn { display:flex; align-items:center; gap:12px; width:100%; border:none; background:transparent;
+          cursor:pointer; padding:11px 14px; border-radius:14px; color:#475569; font-weight:600; font-size:14px;
+          font-family:inherit; text-align:left; white-space:nowrap; transition:background .15s ease,color .15s ease; }
+        .qo-navbtn:hover { background:#f1f5f9; }
+        .qo-navbtn.active { background:${QO.sky}; color:${QO.blueDark}; font-weight:800; }
+        .qo-navbtn .qo-ic { width:22px; flex:none; text-align:center; font-size:16px; }
+        .qo-app.collapsed .qo-navbtn { justify-content:center; padding:12px; }
+        .qo-app.collapsed .qo-navlabel { display:none; }
+        .qo-side-foot { margin-top:auto; padding:16px; }
+        .qo-promo { border-radius:20px; border:1px solid ${QO.line}; background:linear-gradient(135deg,${QO.sky},#fff); padding:18px; }
+        .qo-promo h3 { margin:12px 0 0; font-size:16px; font-weight:800; }
+        .qo-promo p { margin:6px 0 0; font-size:12.5px; line-height:1.5; color:${QO.muted}; }
+        .qo-app.collapsed .qo-promo { display:none; }
+        .qo-user { display:flex; align-items:center; gap:10px; margin-top:14px; padding:0 4px; }
+        .qo-user-ava { height:34px; width:34px; flex:none; border-radius:50%; display:grid; place-items:center;
+          background:linear-gradient(135deg,${QO.gold},#e8920a); color:${QO.ink}; font-size:12px; font-weight:800; }
+        .qo-usermeta { flex:1; min-width:0; }
+        .qo-usermeta b { display:block; font-size:12px; color:${QO.ink}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .qo-usermeta span { display:block; font-size:10px; color:${QO.muted}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .qo-signout { border:none; background:transparent; cursor:pointer; color:${QO.muted}; font-size:18px; flex:none; }
+        .qo-app.collapsed .qo-user { justify-content:center; }
+        .qo-app.collapsed .qo-usermeta, .qo-app.collapsed .qo-signout { display:none; }
+
+        /* ── Main + topbar ── */
+        .qo-main { flex:1; min-width:0; display:flex; flex-direction:column; overflow-x:hidden; }
+        .qo-topbar { position:sticky; top:0; z-index:40; display:flex; align-items:center; gap:12px;
+          padding:12px 20px; background:rgba(255,255,255,.82); backdrop-filter:blur(12px); border-bottom:1px solid ${QO.line}; }
+        .qo-top-actions { margin-left:auto; display:flex; align-items:center; gap:10px; flex:none; }
+        .qo-hamburger, .qo-collapse { height:40px; width:40px; flex:none; border-radius:12px; border:1px solid ${QO.line};
+          background:#fff; cursor:pointer; font-size:18px; color:${QO.ink}; display:grid; place-items:center; }
+        .qo-journey-btn { display:inline-flex; align-items:center; gap:6px; background:linear-gradient(90deg,#FF7EB6,#8B5CF6);
+          color:#fff; padding:10px 16px; border-radius:14px; font-size:14px; font-weight:800; text-decoration:none; white-space:nowrap; box-shadow:0 3px 0 #b45aa8; }
+        .qo-add-btn { border-radius:12px; border:1px solid ${QO.line}; background:#fff; padding:10px 14px; font-weight:700; color:${QO.ink}; cursor:pointer; font-family:inherit; white-space:nowrap; }
+        .qo-add-mini { display:none; }
+
+        /* ── Content ── */
+        .qo-content { padding:24px; max-width:1600px; width:100%; margin:0 auto; }
+        .qo-head { margin-bottom:20px; }
+        .qo-greet { margin:0; font-size:14px; font-weight:500; color:${QO.muted}; }
+        .qo-title { margin:2px 0 0; font-size:30px; font-weight:900; letter-spacing:-.7px; }
+        .qo-sub { margin:6px 0 0; font-size:14px; color:${QO.muted}; }
+
+        /* ── Scrim (mobile drawer) ── */
+        .qo-scrim { position:fixed; inset:0; background:rgba(13,40,64,.45); z-index:49; opacity:0; pointer-events:none; transition:opacity .2s ease; }
+
+        /* ── Bento ── */
+        .qo-bento { display:grid; gap:18px; grid-template-columns:repeat(12,minmax(0,1fr)); align-items:start; }
         .qo-bento .col-2{grid-column:span 2} .qo-bento .col-3{grid-column:span 3}
-        .qo-bento .col-4{grid-column:span 4} .qo-bento .col-5{grid-column:span 5}
-        .qo-bento .col-8{grid-column:span 8}
-        @media (max-width:1200px){ .qo-bento{grid-template-columns:repeat(6,minmax(0,1fr))} .qo-bento .col-8{grid-column:span 6} .qo-bento .col-5{grid-column:span 6} .qo-bento .col-4{grid-column:span 3} .qo-bento .col-3{grid-column:span 3} .qo-bento .col-2{grid-column:span 3} }
-        @media (max-width:820px){ .qo-bento{grid-template-columns:1fr} .qo-bento>*{grid-column:auto !important} }
-        @media (max-width:1023px){ .qo-sidebar{display:none !important} }
+        .qo-bento .col-4{grid-column:span 4} .qo-bento .col-5{grid-column:span 5} .qo-bento .col-8{grid-column:span 8}
+        @media (max-width:1280px){
+          .qo-bento .col-2,.qo-bento .col-3,.qo-bento .col-4,.qo-bento .col-5{grid-column:span 6}
+          .qo-bento .col-8{grid-column:span 12}
+        }
+        @media (max-width:640px){
+          .qo-bento{grid-template-columns:1fr; gap:14px}
+          .qo-bento>*{grid-column:auto !important}
+        }
+
+        /* ── Child switcher ── */
+        .qo-switch { position:relative; flex:0 1 auto; min-width:0; }
+        .qo-switch-btn { display:flex; align-items:center; gap:10px; max-width:280px; border:1px solid ${QO.line}; background:#fff;
+          border-radius:14px; padding:6px 12px 6px 6px; cursor:pointer; font-family:inherit; box-shadow:0 4px 14px rgba(16,24,40,.06); }
+        .qo-switch-ava { height:36px; width:36px; flex:none; border-radius:10px; display:grid; place-items:center; background:${QO.sky}; font-size:18px; }
+        .qo-switch-meta { min-width:0; text-align:left; }
+        .qo-switch-meta b { display:block; font-size:14px; color:${QO.ink}; line-height:1.15; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .qo-switch-meta span { display:block; font-size:11px; color:${QO.muted}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .qo-switch-caret { color:${QO.muted}; font-size:12px; flex:none; transition:transform .15s ease; }
+        .qo-switch-menu { position:absolute; top:calc(100% + 8px); left:0; width:290px; max-width:86vw; background:#fff;
+          border:1px solid ${QO.line}; border-radius:18px; box-shadow:0 24px 60px rgba(13,40,64,.22); padding:8px; z-index:60; }
+        .qo-switch-head { font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:${QO.muted}; padding:8px 10px 6px; }
+        .qo-switch-item { display:flex; align-items:center; gap:12px; width:100%; border:none; background:transparent; cursor:pointer; padding:9px 10px; border-radius:12px; font-family:inherit; text-align:left; }
+        .qo-switch-item:hover { background:#f8fafc; }
+        .qo-switch-ava2 { height:36px; width:36px; flex:none; border-radius:50%; display:grid; place-items:center; font-size:16px; font-weight:800; }
+        .qo-switch-meta2 { flex:1; min-width:0; }
+        .qo-switch-meta2 b { display:block; font-size:14px; color:${QO.ink}; line-height:1.15; }
+        .qo-switch-meta2 span { font-size:11px; color:${QO.muted}; }
+        .qo-switch-check { color:${QO.blue}; font-weight:800; }
+        .qo-switch-sep { height:1px; background:${QO.line}; margin:8px 4px; }
+        .qo-switch-add { display:flex; align-items:center; gap:10px; width:100%; border:none; background:transparent; cursor:pointer; padding:9px 10px; border-radius:12px; font-family:inherit; font-weight:700; color:${QO.blueDark}; font-size:14px; }
+        .qo-switch-add:hover { background:${QO.sky}; }
+        .qo-switch-plus { height:30px; width:30px; flex:none; border-radius:50%; border:1.5px dashed ${QO.blue}; display:grid; place-items:center; color:${QO.blue}; }
+        .qo-switch-manage { width:100%; border:none; background:transparent; cursor:pointer; padding:9px 10px; font-family:inherit; font-size:12.5px; color:${QO.muted}; text-align:center; }
+        .qo-switch-manage:hover { color:${QO.ink}; }
+
+        /* ── Desktop vs mobile chrome ── */
+        .qo-hamburger { display:none; }
+        @media (min-width:1024px){ .qo-scrim{ display:none; } }
+        @media (max-width:1023px){
+          .qo-collapse { display:none; }
+          .qo-hamburger { display:grid; }
+          .qo-side { position:fixed; top:0; left:0; height:100vh; width:280px; flex-basis:280px; transform:translateX(-100%); box-shadow:0 24px 60px rgba(13,40,64,.25); }
+          .qo-app.collapsed .qo-side { width:280px; flex-basis:280px; }
+          .qo-app.collapsed .qo-navlabel, .qo-app.collapsed .qo-brand-text, .qo-app.collapsed .qo-promo, .qo-app.collapsed .qo-usermeta, .qo-app.collapsed .qo-signout { display:revert; }
+          .qo-app.collapsed .qo-navbtn { justify-content:flex-start; padding:11px 14px; }
+          .qo-app.drawer .qo-side { transform:none; }
+          .qo-app.drawer .qo-scrim { opacity:1; pointer-events:auto; }
+        }
+        @media (max-width:560px){
+          .qo-add-btn { display:none; }
+          .qo-switch { flex:1 1 auto; }
+          .qo-switch-btn { max-width:100%; }
+          .qo-topbar { gap:8px; padding:10px 14px; }
+          .qo-journey-btn { padding:10px 12px; }
+          .qo-title { font-size:24px; }
+        }
       `}</style>
 
-      {/* decorative celestial doodles */}
-      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', opacity: 0.7, zIndex: 0 }} aria-hidden="true">
-        <div style={{ position: 'absolute', right: 40, top: 70, fontSize: 44, color: QO.gold, animation: 'qfloat 5s ease-in-out infinite' }}>☾</div>
-        <div style={{ position: 'absolute', right: 130, top: 170, fontSize: 30, color: QO.gold, animation: 'qfloat 6s ease-in-out infinite' }}>✦</div>
-      </div>
+      <div className="qo-scrim" onClick={() => setDrawer(false)} aria-hidden="true" />
 
-      <main style={{ position: 'relative', zIndex: 1, margin: '0 auto', maxWidth: 1720, display: 'flex', gap: 24, padding: 24 }}>
-        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} account={account} onSignOut={handleSignOut} />
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} account={account} onSignOut={handleSignOut} onNavigate={() => setDrawer(false)} />
 
-        <section style={{ minWidth: 0, flex: 1 }}>
-          {/* Header */}
-          <header style={{ marginBottom: 20, display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-            <div>
-              <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: QO.muted }}>{greeting}, {greetName}! 👋</p>
-              <h1 style={{ margin: '4px 0 0', fontSize: 34, fontWeight: 900, letterSpacing: -0.8, color: QO.ink }}>Parent Dashboard</h1>
-              {activeStudent && <p style={{ margin: '8px 0 0', color: QO.muted }}>Here&apos;s how <b style={{ color: QO.ink }}>{activeStudent.name}</b> is progressing on the Quran journey.</p>}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-              {activeStudent && (
-                <Link href={`/learn/${activeStudent.id}`} title="Open the child's gamified journey" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'linear-gradient(90deg,#FF7EB6,#8B5CF6)', color: '#fff', padding: '11px 18px', borderRadius: 16, fontSize: 14, fontWeight: 800, textDecoration: 'none', boxShadow: '0 3px 0 #b45aa8' }}>✨ Journey</Link>
-              )}
-              <button onClick={() => setShowAddChild(true)} style={{ borderRadius: 16, border: `1px solid ${QO.line}`, background: '#fff', padding: '11px 16px', fontWeight: 700, color: QO.ink, cursor: 'pointer', boxShadow: '0 10px 30px rgba(16,24,40,.06)' }}>+ Add a child</button>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, borderRadius: 16, border: `1px solid ${QO.line}`, background: '#fff', padding: '8px 14px', boxShadow: '0 10px 30px rgba(16,24,40,.06)' }}>
-                <div style={{ display: 'grid', placeItems: 'center', height: 38, width: 38, borderRadius: '50%', background: QO.sky, fontSize: 18 }}>👤</div>
-                <div><b style={{ fontSize: 13, color: QO.ink }}>{account?.name || 'Parent'}</b><p style={{ margin: 0, fontSize: 11, color: QO.muted }}>Parent</p></div>
-              </div>
-            </div>
-          </header>
+      <div className="qo-main">
+        <header className="qo-topbar">
+          <button className="qo-hamburger" onClick={() => setDrawer(true)} aria-label="Open menu">☰</button>
+          <button className="qo-collapse" onClick={toggleCollapse} aria-label="Collapse sidebar" title="Collapse sidebar">{collapsed ? '»' : '«'}</button>
+          {students.length > 0 && (
+            <ChildSwitcher students={students} activeId={activeId} onSelect={setActiveId} onAddChild={() => setShowAddChild(true)} onManage={() => setActiveTab('profile')} />
+          )}
+          <div className="qo-top-actions">
+            {activeStudent && <Link href={`/learn/${activeStudent.id}`} className="qo-journey-btn" title="Open the child's gamified journey">✨ Journey</Link>}
+            <button className="qo-add-btn" onClick={() => setShowAddChild(true)}><span className="qo-add-full">+ Add a child</span><span className="qo-add-mini">＋</span></button>
+          </div>
+        </header>
+
+        <div className="qo-content">
+          <div className="qo-head">
+            <p className="qo-greet">{greeting}, {greetName} 👋</p>
+            <h1 className="qo-title">Parent Dashboard</h1>
+            {activeStudent && <p className="qo-sub">Here&apos;s how <b style={{ color: QO.ink }}>{activeStudent.name}</b> is progressing on the Quran journey.</p>}
+          </div>
 
           {loading ? (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300, flexDirection: 'column', gap: 12 }}>
@@ -1627,9 +1745,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             <>
-              <ChildSelector students={students} activeId={activeId} onSelect={setActiveId} />
               <BirthdayBanner student={activeStudent} />
-
               {activeTab === 'overview' && <OverviewTab account={account} student={activeStudent} />}
               {activeTab === 'classes'  && <ClassesTab  student={activeStudent} />}
               {activeTab === 'progress' && <ProgressTab student={activeStudent} />}
@@ -1645,8 +1761,8 @@ export default function DashboardPage() {
               )}
             </>
           )}
-        </section>
-      </main>
+        </div>
+      </div>
 
       {showAddChild && <AddChildModal onClose={() => setShowAddChild(false)} onCreated={handleChildCreated} />}
     </div>
