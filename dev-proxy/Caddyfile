@@ -1,0 +1,26 @@
+# ─────────────────────────────────────────────────────────
+# Local HTTPS proxy for testing against the PRODUCTION Clerk instance.
+#
+# Clerk production keys (pk_live/sk_live) only work on the production
+# domain or a SUBDOMAIN of it, served over HTTPS on port 443 (a port
+# like :3000 breaks the Origin check). This serves the Next app + the
+# API under ONE https host so it's same-origin (no CORS, no mixed
+# content):  https://local.quranodyssey.com
+#
+#   /api/*  → Node server (localhost:3001)
+#   /*      → Next.js     (localhost:3000)
+#
+# One-time: add to your hosts file (C:\Windows\System32\drivers\etc\hosts):
+#   127.0.0.1  local.quranodyssey.com
+# and trust Caddy's local CA (admin):  caddy trust
+# Run (admin, because port 443):        caddy run --config dev-proxy/Caddyfile
+# ─────────────────────────────────────────────────────────
+{
+	local_certs
+}
+
+local.quranodyssey.com {
+	@api path /api/* /webhooks/*
+	reverse_proxy @api 127.0.0.1:3001
+	reverse_proxy 127.0.0.1:3000
+}

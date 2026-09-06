@@ -148,6 +148,29 @@
     --beat-5: 1400ms;  /* badge takeover, if any */
   
     --stagger: 50ms;   /* between cards on entry */
+
+    /* ── Candy child-surface (Module 5 v2) ─────────────────── */
+    /* Brighter, higher-chroma palette for the child "Journey" home.
+       Deliberately OUT of the teal/gold/navy system, per client v2. */
+    --color-candy-1: #FF7EB6;
+    --color-candy-2: #FF9F45;
+    --color-candy-3: #19AEE2;
+    --color-candy-4: #16C098;
+    --color-candy-5: #8B5CF6;
+    --color-candy-6: #F6A800;
+    --color-candy-7: #FF6B6B;
+    --color-candy-8: #0B8FC1;
+    --color-candy-sky-1: #FFE29A;
+    --color-candy-sky-2: #FFC1CF;
+    --color-candy-sky-3: #F6A8D8;
+    --color-candy-sky-4: #C6A8F6;
+    --color-candy-hill: #7ED957;
+    --color-candy-hill-deep: #5CC93F;
+    --color-candy-stripe: #ff9ec4;
+    --color-candy-node-shadow: rgba(13, 40, 64, 0.13);
+    --color-candy-play: #F6A800;
+    --color-candy-play-dark: #e8920a;
+    --color-candy-play-shadow: #c47a08;
   }
   
   /* ═══════════════════════════════════════════════════════════

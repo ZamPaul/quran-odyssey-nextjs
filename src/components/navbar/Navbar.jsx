@@ -434,6 +434,7 @@ export default function Navbar() {
     pathname === "/landing-page" ||
     // pathname?.startsWith("/booking") ||
     pathname?.startsWith("/dashboard") ||
+    pathname?.startsWith("/learn") ||
     pathname?.startsWith("/register") ||
     pathname?.startsWith("/admin") ||
     pathname?.startsWith("/login");

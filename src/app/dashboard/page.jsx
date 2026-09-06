@@ -93,6 +93,25 @@ function courseLabelFromEnum(c) {
 }
 function apiBase() { return process.env.NEXT_PUBLIC_API_URL; }
 
+// ─── v2 parent-dashboard palette (matches the client reference) ───
+const QO = {
+  blue: '#19AEE2', blueDark: '#0B8FC1', gold: '#F6A800', goldSoft: '#FFF3D4',
+  green: '#16C098', violet: '#8B5CF6', ink: '#101828', muted: '#667085',
+  line: '#E8EEF5', sky: '#EAF8FD', white: '#ffffff',
+};
+const GLASS = { background: 'rgba(255,255,255,0.86)', backdropFilter: 'blur(14px)', border: `1px solid rgba(232,238,245,0.9)` };
+const CARD = { borderRadius: 28, boxShadow: '0 10px 30px rgba(16,24,40,.06)' };
+const glassCard = { ...GLASS, ...CARD };
+
+function fmtCountdown(ms) {
+  if (ms == null || ms <= 0) return null;
+  const s = Math.floor(ms / 1000);
+  const h = String(Math.floor(s / 3600)).padStart(2, '0');
+  const m = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+  const ss = String(s % 60).padStart(2, '0');
+  return `${h}:${m}:${ss}`;
+}
+
 // ═══════════════════════════════════════════════════════════
 // SHARED SMALL COMPONENTS
 // ═══════════════════════════════════════════════════════════
@@ -148,24 +167,27 @@ function BirthdayBanner({ student }) {
 function ChildSelector({ students, activeId, onSelect }) {
   if (!students || students.length < 2) return null;
   return (
-    <div style={{ display: 'flex', gap: 8, marginBottom: 22, flexWrap: 'wrap', alignItems: 'center' }}>
-      <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#94a3b8', marginRight: 4 }}>
-        Viewing
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, overflowX: 'auto', paddingBottom: 4 }}>
+      <span style={{ flexShrink: 0, fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: QO.muted }}>
+        Your children
       </span>
       {students.map(s => {
         const active = s.id === activeId;
-        const initials = (s.name || 'S').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+        const face = s.gender === 'FEMALE' ? '👧' : '👦';
+        const sub = courseLabelFromEnum(s.courseInterest) || 'Learner';
         return (
           <button key={s.id} onClick={() => onSelect(s.id)} style={{
-            display: 'flex', alignItems: 'center', gap: 8, padding: '7px 14px 7px 8px', borderRadius: 999, cursor: 'pointer',
-            border: `1.5px solid ${active ? '#0d2840' : '#e2e8f0'}`,
-            background: active ? '#0d2840' : 'white',
+            display: 'flex', flexShrink: 0, alignItems: 'center', gap: 12, borderRadius: 16, padding: '10px 16px', cursor: 'pointer',
+            border: `1px solid ${active ? QO.blue : QO.line}`,
+            background: active ? QO.blue : '#fff',
+            boxShadow: active ? '0 10px 24px rgba(25,174,226,.28)' : '0 10px 30px rgba(16,24,40,.06)',
             transition: 'all 150ms ease',
           }}>
-            <span style={{ width: 26, height: 26, borderRadius: '50%', background: active ? '#28b7d9' : '#f0f4f8', color: active ? 'white' : '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, flexShrink: 0 }}>
-              {initials}
+            <span style={{ display: 'grid', placeItems: 'center', height: 36, width: 36, borderRadius: '50%', background: active ? 'rgba(255,255,255,0.2)' : QO.sky, fontSize: 18 }}>{face}</span>
+            <span style={{ textAlign: 'left' }}>
+              <b style={{ display: 'block', fontSize: 14, lineHeight: 1.2, color: active ? '#fff' : QO.ink }}>{s.name}</b>
+              <span style={{ fontSize: 11, color: active ? 'rgba(255,255,255,0.8)' : QO.muted }}>{sub}</span>
             </span>
-            <span style={{ fontSize: 13, fontWeight: 700, color: active ? 'white' : '#0f172a' }}>{s.name}</span>
           </button>
         );
       })}
@@ -181,37 +203,47 @@ function Sidebar({ activeTab, setActiveTab, account, onSignOut }) {
   const initials = (displayName || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 
   return (
-    <aside style={{ width: 248, background: '#0a2035', display: 'flex', flexDirection: 'column', position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 50, borderRight: '1px solid rgba(255,255,255,0.06)' }}>
-      <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ width: 34, height: 34, background: 'linear-gradient(135deg, #28b7d9, #0e6e8a)', borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: 'white', flexShrink: 0 }}>QO</div>
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 800, color: 'white', letterSpacing: -0.2 }}>Quran Odyssey</div>
-          <div style={{ fontSize: 10, fontWeight: 500, color: 'rgba(255,255,255,0.35)' }}>Family Portal</div>
+    <aside className="qo-sidebar" style={{
+      position: 'sticky', top: 24, alignSelf: 'flex-start', height: 'calc(100vh - 48px)',
+      width: 280, flexShrink: 0, display: 'flex', flexDirection: 'column',
+      borderRadius: 28, ...GLASS, boxShadow: '0 16px 45px rgba(15,23,42,.08)',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 28 }}>
+        <div style={{ display: 'grid', placeItems: 'center', height: 44, width: 44, borderRadius: 16, background: `linear-gradient(135deg, ${QO.blue}, ${QO.blueDark})`, color: '#fff', fontSize: 20, boxShadow: '0 10px 15px -3px rgba(186,230,253,.7)' }}>📖</div>
+        <div style={{ fontSize: 20, fontWeight: 900, letterSpacing: -0.4 }}>
+          <span style={{ color: QO.blue }}>Quran</span> <span style={{ color: QO.gold }}>Odyssey</span>
         </div>
       </div>
 
-      <nav style={{ flex: 1, padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto' }}>
-        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', padding: '16px 8px 6px' }}>Main Menu</div>
+      <nav style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 8, fontSize: 15 }}>
         {NAV.map(item => {
           const active = activeTab === item.id;
           return (
             <button key={item.id} onClick={() => setActiveTab(item.id)} style={{
-              display: 'flex', alignItems: 'center', gap: 10, padding: '9px 10px', borderRadius: 8, cursor: 'pointer', border: 'none', width: '100%', textAlign: 'left',
-              background: active ? 'rgba(40,183,217,0.14)' : 'transparent',
-              color: active ? 'white' : 'rgba(255,255,255,0.6)', fontSize: 13, fontWeight: active ? 700 : 500,
+              display: 'flex', alignItems: 'center', gap: 12, borderRadius: 16, padding: '12px 16px',
+              fontWeight: active ? 700 : 600, border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left',
+              background: active ? QO.sky : 'transparent', color: active ? QO.blueDark : '#475569',
+              transition: 'background 150ms ease',
             }}>
-              <span style={{ fontSize: 15, width: 20, textAlign: 'center' }}>{item.icon}</span>
-              {item.label}
+              <span style={{ width: 20, textAlign: 'center' }}>{item.icon}</span>{item.label}
             </button>
           );
         })}
       </nav>
 
-      <div style={{ padding: '14px 16px', borderTop: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #faa71a, #e8920a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, color: '#0d2840', flexShrink: 0 }}>{initials}</div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: 'white', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayName}</div>
-          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{account?.email}</div>
+      <div style={{ marginTop: 'auto', padding: 20 }}>
+        <div style={{ overflow: 'hidden', borderRadius: 24, border: `1px solid ${QO.line}`, background: `linear-gradient(135deg, ${QO.sky}, #fff)`, padding: 20 }}>
+          <div style={{ fontSize: 40 }}>📖</div>
+          <h3 style={{ margin: '16px 0 0', fontSize: 18, fontWeight: 800, color: QO.ink }}>Keep the journey alive.</h3>
+          <p style={{ margin: '8px 0 0', fontSize: 13, lineHeight: 1.6, color: QO.muted }}>Consistency today, excellence tomorrow.</p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 16, padding: '0 4px' }}>
+          <div style={{ width: 34, height: 34, borderRadius: '50%', background: `linear-gradient(135deg, ${QO.gold}, #e8920a)`, display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 800, color: QO.ink, flexShrink: 0 }}>{initials}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: QO.ink, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayName}</div>
+            <div style={{ fontSize: 10, color: QO.muted, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{account?.email}</div>
+          </div>
+          <button onClick={onSignOut} title="Sign out" style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: QO.muted, fontSize: 18, flexShrink: 0 }}>⎋</button>
         </div>
       </div>
     </aside>
@@ -221,14 +253,293 @@ function Sidebar({ activeTab, setActiveTab, account, onSignOut }) {
 // ═══════════════════════════════════════════════════════════
 // OVERVIEW TAB
 // ═══════════════════════════════════════════════════════════
+function Ring({ pct, size = 176, thickness = 22, track = '#edf2f7', color = QO.blue, children }) {
+  const p = Math.max(0, Math.min(100, Math.round(pct || 0)));
+  return (
+    <div style={{ position: 'relative', width: size, height: size, borderRadius: '50%', flexShrink: 0,
+      background: `conic-gradient(${color} ${p * 3.6}deg, ${track} 0deg)`, display: 'grid', placeItems: 'center' }}>
+      <div style={{ width: size - thickness * 2, height: size - thickness * 2, borderRadius: '50%', background: '#fff',
+        display: 'grid', placeItems: 'center', textAlign: 'center', boxShadow: 'inset 0 2px 4px rgba(0,0,0,.05)' }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function Bar({ label, pct, color }) {
+  const p = Math.max(0, Math.min(100, Math.round(pct || 0)));
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '118px 1fr 42px', alignItems: 'center', gap: 12 }}>
+      <span style={{ fontSize: 14, fontWeight: 600, color: QO.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>
+      <span style={{ height: 10, borderRadius: 999, background: '#f1f5f9', overflow: 'hidden', display: 'block' }}>
+        <span style={{ display: 'block', height: '100%', width: `${p}%`, borderRadius: 999, background: color, transition: 'width 600ms ease' }} />
+      </span>
+      <span style={{ textAlign: 'right', fontSize: 14, fontWeight: 800, color: QO.ink }}>{p}%</span>
+    </div>
+  );
+}
+
+function Bento({ col = 'col-4', children, style }) {
+  return <article className={col} style={{ ...glassCard, padding: 24, ...style }}>{children}</article>;
+}
+
 function OverviewTab({ account, student }) {
   const { getToken } = useAuth();
   const childName   = student?.name || 'your child';
   const courseLabel = courseLabelFromEnum(student?.courseInterest);
+  const face        = student?.gender === 'FEMALE' ? '👧' : '👦';
 
+  const [gam,     setGam]     = useState(null);
+  const [prog,    setProg]    = useState(null);
+  const [sessions,setSessions]= useState(null);
+  const [loading, setLoading] = useState(true);
+  const [now,     setNow]     = useState(Date.now());
+
+  useEffect(() => {
+    if (!student) return;
+    let cancelled = false;
+    const load = async () => {
+      setLoading(true);
+      try {
+        const token = await getToken();
+        const headers = { Authorization: `Bearer ${token}` };
+        const [gRes, pRes, sRes] = await Promise.all([
+          fetch(`${apiBase()}/api/students/${student.id}/gamification`, { headers }),
+          fetch(`${apiBase()}/api/students/${student.id}/progress`,     { headers }),
+          fetch(`${apiBase()}/api/students/${student.id}/sessions`,     { headers }),
+        ]);
+        if (cancelled) return;
+        setGam(gRes.ok  ? await gRes.json()  : null);
+        setProg(pRes.ok ? await pRes.json() : null);
+        setSessions(sRes.ok ? await sRes.json() : null);
+      } catch { /* non-critical */ }
+      finally { if (!cancelled) setLoading(false); }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, [student?.id]);
+
+  // Tick the countdown once a second while there is an upcoming lesson.
+  const nextSession = (sessions?.upcoming || [])[0] || null;
+  useEffect(() => {
+    if (!nextSession) return;
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [nextSession?.id]);
+
+  if (loading) {
+    return <div style={{ display: 'grid', placeItems: 'center', minHeight: 300, color: QO.muted, fontWeight: 600 }}>Loading {childName}&apos;s dashboard…</div>;
+  }
+
+  const level   = gam?.level || {};
+  const xp      = gam?.xp || {};
+  const streak  = gam?.streak || {};
+  const journey = gam?.journey || {};
+  const totals  = gam?.totals || {};
+  const att     = prog?.attendance || { total: 0, present: 0, late: 0, absent: 0, excused: 0, percentage: 0 };
+  const tz      = student?.timezone || 'UTC';
+  const isNew   = gam?.isNew || (att.total === 0 && (xp.total || 0) === 0);
+
+  const stage      = level.level || 1;
+  const stageName  = level.arabic || level.name || '—';
+  const stars      = xp.total || 0;
+  const journeyPct = journey.percentOfJourney || 0;
+  const stagePct   = level.percentToNext || 0;
+  const hwPct      = totals.homeworkSubmitted ? Math.round((totals.homeworkOnTime / totals.homeworkSubmitted) * 100) : 0;
+  const recent     = journey.recentSteps || [];
+  const nextBadge  = gam?.nextBadge || null;
+  const earned     = gam?.earnedBadges || [];
+  const topBadge   = earned[earned.length - 1] || null;
+
+  const countdown = nextSession ? fmtCountdown(new Date(nextSession.scheduledAt).getTime() - now) : null;
+
+  // New / dormant learner → keep the original onboarding path (trial + enrollment).
+  if (isNew) {
+    return <OverviewOnboarding account={account} student={student} childName={childName} courseLabel={courseLabel} />;
+  }
+
+  return (
+    <div className="qo-bento">
+      {/* Featured child */}
+      <article className="col-4" style={{ ...CARD, overflow: 'hidden', background: QO.blue, color: '#fff' }}>
+        <div style={{ position: 'relative', padding: 28 }}>
+          <div style={{ position: 'absolute', right: 22, top: 22, color: QO.gold, fontSize: 28 }}>✦</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+            <div style={{ display: 'grid', placeItems: 'center', height: 96, width: 96, flexShrink: 0, borderRadius: '50%', border: '4px solid #fff', background: '#fff', fontSize: 44 }}>{face}</div>
+            <div>
+              <h2 style={{ margin: 0, fontSize: 26, fontWeight: 900 }}>{student?.name}</h2>
+              <p style={{ margin: '6px 0 0', fontWeight: 600 }}>{student?.age ? `Age ${student.age} • ` : ''}Stage {stage} · {stageName}</p>
+              <p style={{ margin: '14px 0 0', maxWidth: 260, color: 'rgba(255,255,255,0.9)', fontSize: 14, lineHeight: 1.5 }}>“The best among you are those who learn the Quran and teach it.”</p>
+            </div>
+          </div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', borderTop: '1px solid rgba(255,255,255,0.25)', background: 'rgba(255,255,255,0.95)', color: QO.ink }}>
+          <div style={{ padding: 18, textAlign: 'center' }}><div style={{ color: QO.gold, fontSize: 22 }}>★</div><b>{stage}</b><p style={{ margin: 0, fontSize: 12, color: QO.muted }}>Stage</p></div>
+          <div style={{ padding: 18, textAlign: 'center', borderLeft: `1px solid ${QO.line}`, borderRight: `1px solid ${QO.line}` }}><div style={{ color: QO.blue, fontSize: 22 }}>📘</div><b style={{ fontSize: 13 }}>{courseLabel || 'Quran'}</b><p style={{ margin: 0, fontSize: 12, color: QO.muted }}>Course</p></div>
+          <div style={{ padding: 18, textAlign: 'center' }}><div style={{ color: QO.gold, fontSize: 22 }}>🏆</div><b>{stars}</b><p style={{ margin: 0, fontSize: 12, color: QO.muted }}>Stars</p></div>
+        </div>
+      </article>
+
+      {/* Overall progress */}
+      <Bento col="col-4">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: QO.ink }}>Overall Progress</h2>
+        </div>
+        <div style={{ marginTop: 24, display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
+          <Ring pct={journeyPct} size={168} color={QO.blue}>
+            <div><b style={{ display: 'block', fontSize: 34, lineHeight: 1, color: QO.ink }}>{Math.round(journeyPct)}%</b><p style={{ margin: '4px 0 0', fontSize: 13, color: QO.muted }}>Journey</p></div>
+          </Ring>
+          <div style={{ flex: 1, minWidth: 200, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <Bar label="Journey" pct={journeyPct} color={QO.blue} />
+            <Bar label="This stage" pct={stagePct} color={QO.gold} />
+            <Bar label="Attendance" pct={att.percentage} color={QO.green} />
+            <Bar label="Homework" pct={hwPct} color={QO.violet} />
+          </div>
+        </div>
+      </Bento>
+
+      {/* Daily lesson */}
+      <Bento col="col-4">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: QO.ink }}>Next Lesson</h2>
+        </div>
+        {nextSession ? (
+          <div style={{ marginTop: 20, borderRadius: 24, background: `linear-gradient(90deg, #fff, ${QO.sky})`, padding: 20 }}>
+            <p style={{ margin: 0, fontSize: 13, color: QO.muted }}>{fmtDate(nextSession.scheduledAt, tz)} · {fmtTime(nextSession.scheduledAt, tz)}</p>
+            <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: QO.ink }}>{COURSE_LABELS[nextSession.courseType] || nextSession.courseType}</h3>
+                <p style={{ margin: '4px 0 0', color: QO.muted }}>{nextSession.teacher?.name ? `with ${nextSession.teacher.name}` : 'Teacher to be assigned'}</p>
+              </div>
+              <div style={{ fontSize: 48 }}>📖</div>
+            </div>
+          </div>
+        ) : (
+          <div style={{ marginTop: 20, borderRadius: 24, border: `1px dashed ${QO.line}`, padding: 24, textAlign: 'center', color: QO.muted }}>
+            <div style={{ fontSize: 34 }}>📅</div>
+            <p style={{ margin: '10px 0 14px', fontSize: 14 }}>No upcoming lessons scheduled.</p>
+            <Link href={`/booking/trial?studentId=${student?.id}`} style={{ display: 'inline-flex', background: QO.blue, color: '#fff', padding: '10px 18px', borderRadius: 14, fontSize: 13, fontWeight: 800, textDecoration: 'none' }}>Book a class</Link>
+          </div>
+        )}
+        {journey.nextMilestone && (
+          <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 12, borderRadius: 16, border: `1px solid ${QO.line}`, padding: 14 }}>
+            <span style={{ display: 'grid', placeItems: 'center', height: 40, width: 40, borderRadius: 12, background: QO.goldSoft }}>{journey.nextMilestone.type === 'badge' ? (journey.nextMilestone.icon || '🏅') : '✦'}</span>
+            <div><b style={{ color: QO.ink }}>{journey.nextMilestone.remaining} {journey.nextMilestone.unit} to {journey.nextMilestone.arabic || journey.nextMilestone.label}</b><p style={{ margin: 0, fontSize: 13, color: QO.muted }}>Keep the streak going!</p></div>
+          </div>
+        )}
+      </Bento>
+
+      {/* Attendance */}
+      <Bento col="col-3" style={{ height: '100%' }}>
+        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: QO.ink }}>Attendance</h2>
+        <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
+          <Ring pct={att.percentage} size={128} thickness={18} color={QO.green}>
+            <div><b style={{ fontSize: 24, color: QO.ink }}>{att.percentage}%</b><p style={{ margin: 0, fontSize: 11, color: QO.muted }}>Present</p></div>
+          </Ring>
+          <ul style={{ flex: 1, minWidth: 130, listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13, fontWeight: 600 }}>
+            {[['Present', att.present, QO.green], ['Late', att.late, QO.gold], ['Absent', att.absent, '#ef4444'], ['Excused', att.excused, QO.violet]].map(([l, v, c]) => (
+              <li key={l} style={{ display: 'flex', justifyContent: 'space-between', borderRadius: 12, background: '#fff', border: `1px solid ${QO.line}`, padding: '8px 12px' }}>{l}<span style={{ color: c, fontWeight: 800 }}>{v}</span></li>
+            ))}
+          </ul>
+        </div>
+      </Bento>
+
+      {/* This week */}
+      <Bento col="col-5" style={{ height: '100%' }}>
+        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: QO.ink }}>This Week</h2>
+        <div style={{ marginTop: 20, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12 }}>
+          {[['⭐', xp.thisWeek ?? 0, 'Stars this week', QO.gold], ['🔥', streak.current ?? 0, 'Day streak', QO.blue], ['✓', totals.sessionsAttended ?? 0, 'Classes', QO.green], ['🏅', gam?.badgeCount ?? 0, 'Badges', QO.violet]].map(([ic, v, l, c]) => (
+            <div key={l} style={{ borderRadius: 18, border: `1px solid ${QO.line}`, padding: '16px 10px', textAlign: 'center' }}>
+              <div style={{ fontSize: 22 }}>{ic}</div>
+              <b style={{ display: 'block', fontSize: 24, color: c }}>{v}</b>
+              <p style={{ margin: 0, fontSize: 11, color: QO.muted }}>{l}</p>
+            </div>
+          ))}
+        </div>
+        <div style={{ marginTop: 18 }}>
+          <p style={{ margin: '0 0 8px', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: QO.muted }}>Recent classes</p>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 64 }}>
+            {recent.length ? recent.map((s, i) => {
+              const c = s.status === 'ABSENT' ? '#ef4444' : s.status === 'LATE' ? QO.gold : QO.green;
+              const h = s.status === 'ABSENT' ? 22 : s.status === 'LATE' ? 44 : 60;
+              return <span key={i} title={`${s.status} · ${fmtDate(s.at, tz)}`} style={{ flex: 1, height: h, borderRadius: 8, background: c, opacity: 0.9 }} />;
+            }) : <span style={{ fontSize: 13, color: QO.muted }}>No classes recorded yet.</span>}
+          </div>
+        </div>
+      </Bento>
+
+      {/* Recent activity */}
+      <Bento col="col-2" style={{ height: '100%' }}>
+        <h2 style={{ margin: 0, fontSize: 18, fontWeight: 900, color: QO.ink }}>Activity</h2>
+        <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column', gap: 14, fontSize: 13 }}>
+          {recent.slice(-3).reverse().map((s, i) => (
+            <div key={i} style={{ display: 'flex', gap: 10 }}>
+              <span style={{ display: 'grid', placeItems: 'center', height: 34, width: 34, borderRadius: 12, background: QO.sky, flexShrink: 0 }}>{s.status === 'ABSENT' ? '✗' : '✓'}</span>
+              <div><b style={{ color: QO.ink }}>{s.status === 'ABSENT' ? 'Missed class' : 'Attended class'}</b><p style={{ margin: 0, color: QO.muted }}>{fmtDate(s.at, tz)}</p></div>
+            </div>
+          ))}
+          {!recent.length && <p style={{ margin: 0, color: QO.muted }}>Activity will appear here.</p>}
+        </div>
+      </Bento>
+
+      {/* Achievement */}
+      <Bento col="col-2" style={{ padding: 20 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 280, justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 900, color: QO.ink }}>Achievement</h2>
+            {topBadge && <span style={{ flexShrink: 0, borderRadius: 999, background: QO.goldSoft, padding: '4px 10px', fontSize: 11, fontWeight: 900, color: QO.gold }}>Earned</span>}
+          </div>
+          <div style={{ display: 'flex', flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+            <div style={{ position: 'relative', display: 'grid', placeItems: 'center', height: 96, width: 96, borderRadius: '50%', background: `linear-gradient(135deg, ${QO.goldSoft}, #fff)` }}>
+              <div style={{ position: 'absolute', inset: 8, borderRadius: '50%', border: `2px dashed rgba(246,168,0,0.5)` }} />
+              <span style={{ position: 'relative', fontSize: 44 }}>{topBadge?.icon || nextBadge?.icon || '🏅'}</span>
+            </div>
+            <h3 style={{ margin: '16px 0 0', fontSize: 16, fontWeight: 900, lineHeight: 1.3, color: QO.ink }}>{topBadge?.name || nextBadge?.name || 'Keep going!'}</h3>
+            <p style={{ margin: '8px 0 0', maxWidth: 180, fontSize: 12, lineHeight: 1.4, color: QO.muted }}>
+              {topBadge ? `Mashallah ${childName}! Badge unlocked.` : nextBadge ? `${nextBadge.remaining} to go — you're close!` : 'Attend classes to earn badges.'}
+            </p>
+          </div>
+        </div>
+      </Bento>
+
+      {/* Upcoming lesson banner */}
+      <article className="col-8" style={{ ...CARD, border: `1px solid ${QO.line}`, background: `linear-gradient(90deg, ${QO.goldSoft}, #fff, ${QO.sky})`, padding: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
+          <div style={{ fontSize: 56 }}>🕌</div>
+          <div style={{ flex: 1, minWidth: 180 }}>
+            <h2 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: QO.ink }}>Upcoming Lesson</h2>
+            <p style={{ margin: '4px 0 0', color: QO.muted }}>
+              {nextSession ? `${COURSE_LABELS[nextSession.courseType] || nextSession.courseType} • ${nextSession.teacher?.name || 'Teacher TBA'} • ${fmtTime(nextSession.scheduledAt, tz)}` : 'No lesson scheduled yet.'}
+            </p>
+          </div>
+          {nextSession && countdown && (
+            <div style={{ borderRadius: 16, background: '#fff', padding: '12px 20px', textAlign: 'center', boxShadow: '0 10px 30px rgba(16,24,40,.06)' }}>
+              <p style={{ margin: 0, fontSize: 12, color: QO.muted }}>Starts in</p><b style={{ fontSize: 26, color: QO.gold }}>{countdown}</b>
+            </div>
+          )}
+          {nextSession && isLiveSession(nextSession.scheduledAt) && nextSession.zoomLink && (
+            <a href={nextSession.zoomLink} target="_blank" rel="noreferrer" style={{ borderRadius: 16, background: QO.blue, color: '#fff', padding: '14px 24px', fontWeight: 900, textDecoration: 'none' }}>Join Lesson</a>
+          )}
+        </div>
+      </article>
+
+      {/* Inspiration */}
+      <article className="col-4" style={{ ...CARD, background: QO.sky, padding: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+          <div style={{ fontSize: 48 }}>📖</div>
+          <div><h2 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: QO.ink }}>Every step in the Quran journey is a step towards Jannah.</h2><p style={{ margin: '8px 0 0', color: QO.muted }}>Keep guiding, keep inspiring 💙</p></div>
+        </div>
+      </article>
+    </div>
+  );
+}
+
+// New/dormant learner: keep the original onboarding (trial + enrollment).
+function OverviewOnboarding({ account, student, childName, courseLabel }) {
+  const { getToken } = useAuth();
   const [applications, setApplications] = useState([]);
-  const [trials,       setTrials]       = useState([]);
-  const [loading,      setLoading]      = useState(true);
+  const [trials, setTrials] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!student) return;
@@ -239,7 +550,7 @@ function OverviewTab({ account, student }) {
         const headers = { Authorization: `Bearer ${token}` };
         const [appRes, trialRes] = await Promise.all([
           fetch(`${apiBase()}/api/enrollment/my?studentId=${student.id}`, { headers }),
-          fetch(`${apiBase()}/api/booking/mine?studentId=${student.id}`,   { headers }),
+          fetch(`${apiBase()}/api/booking/mine?studentId=${student.id}`, { headers }),
         ]);
         if (appRes.ok)   { const d = await appRes.json();   setApplications(d.applications || []); }
         if (trialRes.ok) { const d = await trialRes.json(); setTrials(d.bookings || []); }
@@ -249,69 +560,49 @@ function OverviewTab({ account, student }) {
     load();
   }, [student?.id]);
 
-  const activeApplication = applications.find(a => a.status !== 'CANCELLED' && a.status !== 'REJECTED') || null;
   const latestTrial = trials[0] || null;
+  const activeApplication = applications.find(a => a.status !== 'CANCELLED' && a.status !== 'REJECTED') || null;
 
   return (
-    <div>
-      <div style={{ fontSize: 20, fontWeight: 800, color: '#0f172a', marginBottom: 6 }}>
-        {childName}'s Overview
-      </div>
-      <div style={{ fontSize: 13, color: '#94a3b8', marginBottom: 24 }}>
-        {courseLabel ? `Enrolled interest: ${courseLabel}` : 'No course selected yet'}
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <article style={{ ...glassCard, padding: 28 }}>
+        <div style={{ fontSize: 22, fontWeight: 900, color: QO.ink }}>Welcome, {childName}! 🌟</div>
+        <div style={{ fontSize: 14, color: QO.muted, marginTop: 6 }}>
+          {courseLabel ? `Interested in ${courseLabel}. ` : ''}Let&apos;s get the first class booked — the journey map fills up as {childName} attends.
+        </div>
+      </article>
 
-      {/* Trial booking card */}
       {latestTrial && (
-        <div style={{ background: 'white', borderRadius: 12, border: '1px solid #e2e8f0', padding: 20, marginBottom: 16 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#94a3b8', marginBottom: 10 }}>Trial Class</div>
+        <article style={{ ...glassCard, padding: 24 }}>
+          <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: QO.muted, marginBottom: 10 }}>Trial Class</div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
             <div>
-              <div style={{ fontSize: 15, fontWeight: 800, color: '#0f172a' }}>
-                {fmtDate(latestTrial.slotStart, student?.timezone)} · {fmtTime(latestTrial.slotStart, student?.timezone)}
-              </div>
-              <div style={{ fontSize: 13, color: '#64748b', marginTop: 2 }}>Status: {latestTrial.status}</div>
+              <div style={{ fontSize: 15, fontWeight: 800, color: QO.ink }}>{fmtDate(latestTrial.slotStart, student?.timezone)} · {fmtTime(latestTrial.slotStart, student?.timezone)}</div>
+              <div style={{ fontSize: 13, color: QO.muted, marginTop: 2 }}>Status: {latestTrial.status}</div>
             </div>
-            {latestTrial.zoomLink && isLiveSession(latestTrial.slotStart) ? (
-              <a href={latestTrial.zoomLink} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#22c55e', color: 'white', padding: '12px 22px', borderRadius: 8, fontSize: 14, fontWeight: 800, textDecoration: 'none' }}>▶ Join Class Now</a>
-            ) : latestTrial.status === 'PENDING' ? (
-              <div style={{ padding: '12px 14px', background: '#fff7e0', borderRadius: 8, border: '1px solid rgba(245,158,11,0.3)' }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: '#92400e', marginBottom: 3 }}>⏳ Zoom Link Pending</div>
-                <div style={{ fontSize: 12, color: '#b45309', lineHeight: 1.5 }}>The teacher will email the link at least 1 hour before class.</div>
-              </div>
-            ) : null}
+            {latestTrial.zoomLink && isLiveSession(latestTrial.slotStart) && (
+              <a href={latestTrial.zoomLink} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: QO.green, color: '#fff', padding: '12px 22px', borderRadius: 14, fontSize: 14, fontWeight: 800, textDecoration: 'none' }}>▶ Join Class Now</a>
+            )}
           </div>
-        </div>
+        </article>
       )}
 
-      {/* Enrollment application status */}
-      <div style={{ background: 'white', borderRadius: 12, border: '1px solid #e2e8f0', padding: 20, marginBottom: 16 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#94a3b8', marginBottom: 10 }}>Enrollment Applications</div>
+      <article style={{ ...glassCard, padding: 24 }}>
+        <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: QO.muted, marginBottom: 10 }}>Enrollment</div>
         {loading ? (
-          <div style={{ fontSize: 13, color: '#94a3b8' }}>Loading…</div>
+          <div style={{ fontSize: 13, color: QO.muted }}>Loading…</div>
         ) : activeApplication ? (
-          <div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: '#0f172a' }}>{activeApplication.courseLabel || activeApplication.courseType}</div>
-            <div style={{ fontSize: 13, color: '#64748b', marginTop: 2 }}>Application status: {activeApplication.status}</div>
-          </div>
+          <div><div style={{ fontSize: 15, fontWeight: 800, color: QO.ink }}>{activeApplication.courseLabel || activeApplication.courseType}</div><div style={{ fontSize: 13, color: QO.muted, marginTop: 2 }}>Application status: {activeApplication.status}</div></div>
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-            <div style={{ fontSize: 13, color: '#64748b' }}>No active enrollment application for {childName}.</div>
-            <Link href={`/enroll?studentId=${student?.id}`} style={{ display: 'inline-flex', background: '#0d2840', color: 'white', padding: '9px 18px', borderRadius: 8, fontSize: 13, fontWeight: 700, textDecoration: 'none' }}>
-              New Enrollment application for {childName} →
-            </Link>
+            <div style={{ fontSize: 13, color: QO.muted }}>No active enrollment application for {childName}.</div>
+            <Link href={`/enroll?studentId=${student?.id}`} style={{ display: 'inline-flex', background: QO.ink, color: '#fff', padding: '9px 18px', borderRadius: 14, fontSize: 13, fontWeight: 800, textDecoration: 'none' }}>Start enrollment →</Link>
           </div>
         )}
-      </div>
+      </article>
 
-      {/* Book trial CTA if no trial yet */}
       {!latestTrial && (
-        <EmptyState
-          icon="📅"
-          title={`Book a free trial for ${childName}`}
-          sub="A 30-minute trial class to get started."
-          action={{ href: `/booking/trial?studentId=${student?.id}`, label: 'Book Free Trial' }}
-        />
+        <EmptyState icon="📅" title={`Book a free trial for ${childName}`} sub="A 30-minute trial class to get started." action={{ href: `/booking/trial?studentId=${student?.id}`, label: 'Book Free Trial' }} />
       )}
     </div>
   );
@@ -1278,40 +1569,62 @@ export default function DashboardPage() {
   if (!complete) return null;
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', fontFamily: "'Plus Jakarta Sans', sans-serif", background: '#f7f9fb' }}>
+    <div style={{ position: 'relative', minHeight: '100vh', overflowX: 'hidden', color: QO.ink, fontFamily: "'Plus Jakarta Sans', plus-r, system-ui, sans-serif",
+      background: `radial-gradient(circle at 82% 6%, rgba(246,168,0,.12), transparent 24%), radial-gradient(circle at 14% 20%, rgba(25,174,226,.12), transparent 22%), linear-gradient(180deg,#ffffff 0%,#f7fbff 100%)` }}>
       <style>{`
         @keyframes shimmer { 0%,100%{opacity:1} 50%{opacity:0.5} }
         @keyframes spin    { to{transform:rotate(360deg)} }
+        @keyframes qfloat  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+        .qo-bento{ display:grid; gap:20px; grid-template-columns:repeat(12,minmax(0,1fr)); }
+        .qo-bento .col-2{grid-column:span 2} .qo-bento .col-3{grid-column:span 3}
+        .qo-bento .col-4{grid-column:span 4} .qo-bento .col-5{grid-column:span 5}
+        .qo-bento .col-8{grid-column:span 8}
+        @media (max-width:1200px){ .qo-bento{grid-template-columns:repeat(6,minmax(0,1fr))} .qo-bento .col-8{grid-column:span 6} .qo-bento .col-5{grid-column:span 6} .qo-bento .col-4{grid-column:span 3} .qo-bento .col-3{grid-column:span 3} .qo-bento .col-2{grid-column:span 3} }
+        @media (max-width:820px){ .qo-bento{grid-template-columns:1fr} .qo-bento>*{grid-column:auto !important} }
+        @media (max-width:1023px){ .qo-sidebar{display:none !important} }
       `}</style>
 
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} account={account} onSignOut={handleSignOut} />
+      {/* decorative celestial doodles */}
+      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', opacity: 0.7, zIndex: 0 }} aria-hidden="true">
+        <div style={{ position: 'absolute', right: 40, top: 70, fontSize: 44, color: QO.gold, animation: 'qfloat 5s ease-in-out infinite' }}>☾</div>
+        <div style={{ position: 'absolute', right: 130, top: 170, fontSize: 30, color: QO.gold, animation: 'qfloat 6s ease-in-out infinite' }}>✦</div>
+      </div>
 
-      <main style={{ marginLeft: 248, flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        {/* Topbar */}
-        <div style={{ background: 'white', borderBottom: '1px solid #e2e8f0', padding: '0 28px', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 40 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>
-            {greeting}, <span style={{ color: '#0e6e8a' }}>{greetName}</span> 👋
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <button onClick={() => setShowAddChild(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#faa71a', color: '#0d2840', padding: '7px 14px', borderRadius: 8, fontSize: 13, fontWeight: 800, border: 'none', cursor: 'pointer' }}>+ Add a child</button>
-            <button onClick={handleSignOut} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 8, border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', fontSize: 13, fontWeight: 700, color: '#64748b' }}>Sign out</button>
-          </div>
-        </div>
+      <main style={{ position: 'relative', zIndex: 1, margin: '0 auto', maxWidth: 1720, display: 'flex', gap: 24, padding: 24 }}>
+        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} account={account} onSignOut={handleSignOut} />
 
-        {/* Content */}
-        <div style={{ padding: 28, flex: 1 }}>
+        <section style={{ minWidth: 0, flex: 1 }}>
+          {/* Header */}
+          <header style={{ marginBottom: 20, display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+            <div>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: QO.muted }}>{greeting}, {greetName}! 👋</p>
+              <h1 style={{ margin: '4px 0 0', fontSize: 34, fontWeight: 900, letterSpacing: -0.8, color: QO.ink }}>Parent Dashboard</h1>
+              {activeStudent && <p style={{ margin: '8px 0 0', color: QO.muted }}>Here&apos;s how <b style={{ color: QO.ink }}>{activeStudent.name}</b> is progressing on the Quran journey.</p>}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+              {activeStudent && (
+                <Link href={`/learn/${activeStudent.id}`} title="Open the child's gamified journey" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'linear-gradient(90deg,#FF7EB6,#8B5CF6)', color: '#fff', padding: '11px 18px', borderRadius: 16, fontSize: 14, fontWeight: 800, textDecoration: 'none', boxShadow: '0 3px 0 #b45aa8' }}>✨ Journey</Link>
+              )}
+              <button onClick={() => setShowAddChild(true)} style={{ borderRadius: 16, border: `1px solid ${QO.line}`, background: '#fff', padding: '11px 16px', fontWeight: 700, color: QO.ink, cursor: 'pointer', boxShadow: '0 10px 30px rgba(16,24,40,.06)' }}>+ Add a child</button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, borderRadius: 16, border: `1px solid ${QO.line}`, background: '#fff', padding: '8px 14px', boxShadow: '0 10px 30px rgba(16,24,40,.06)' }}>
+                <div style={{ display: 'grid', placeItems: 'center', height: 38, width: 38, borderRadius: '50%', background: QO.sky, fontSize: 18 }}>👤</div>
+                <div><b style={{ fontSize: 13, color: QO.ink }}>{account?.name || 'Parent'}</b><p style={{ margin: 0, fontSize: 11, color: QO.muted }}>Parent</p></div>
+              </div>
+            </div>
+          </header>
+
           {loading ? (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300, flexDirection: 'column', gap: 12 }}>
-              <div style={{ width: 32, height: 32, borderRadius: '50%', border: '3px solid #e2e8f0', borderTopColor: '#28b7d9', animation: 'spin 0.8s linear infinite' }} />
-              <div style={{ fontSize: 14, color: '#94a3b8' }}>Loading your dashboard…</div>
+              <div style={{ width: 32, height: 32, borderRadius: '50%', border: '3px solid #e2e8f0', borderTopColor: QO.blue, animation: 'spin 0.8s linear infinite' }} />
+              <div style={{ fontSize: 14, color: QO.muted }}>Loading your dashboard…</div>
             </div>
           ) : students.length === 0 ? (
-            <EmptyState
-              icon="👋"
-              title="Welcome! Add your first learner"
-              sub="Create a learner profile to book trials, enroll in courses, and track progress."
-              action={null}
-            />
+            <div style={{ ...glassCard, padding: 40, textAlign: 'center' }}>
+              <div style={{ fontSize: 36 }}>👋</div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: QO.ink, marginTop: 10 }}>Welcome! Add your first learner</div>
+              <div style={{ fontSize: 14, color: QO.muted, marginTop: 6, marginBottom: 18 }}>Create a learner profile to book trials, enroll in courses, and track progress.</div>
+              <button onClick={() => setShowAddChild(true)} style={{ display: 'inline-flex', background: QO.ink, color: 'white', padding: '11px 24px', borderRadius: 14, fontSize: 14, fontWeight: 800, border: 'none', cursor: 'pointer' }}>+ Add your first learner</button>
+            </div>
           ) : (
             <>
               <ChildSelector students={students} activeId={activeId} onSelect={setActiveId} />
@@ -1332,15 +1645,7 @@ export default function DashboardPage() {
               )}
             </>
           )}
-
-          {students.length === 0 && !loading && (
-            <div style={{ marginTop: 20, textAlign: 'center' }}>
-              <button onClick={() => setShowAddChild(true)} style={{ display: 'inline-flex', background: '#0d2840', color: 'white', padding: '11px 24px', borderRadius: 10, fontSize: 14, fontWeight: 800, border: 'none', cursor: 'pointer' }}>
-                + Add your first learner
-              </button>
-            </div>
-          )}
-        </div>
+        </section>
       </main>
 
       {showAddChild && <AddChildModal onClose={() => setShowAddChild(false)} onCreated={handleChildCreated} />}

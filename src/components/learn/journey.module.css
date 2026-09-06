@@ -1,0 +1,232 @@
+/* ─────────────────────────────────────────────────────────
+   journey.module.css — the child "Journey" home (Module 5 v2).
+   Candy-bright, phone-shaped column centred in a full-screen world.
+   Tokens come from theme.css (--color-candy-*). SVG-internal animation
+   classes are wrapped in :global because the map markup is injected.
+   ───────────────────────────────────────────────────────── */
+
+.world {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(
+    var(--color-candy-sky-1),
+    var(--color-candy-sky-2) 40%,
+    var(--color-candy-sky-3) 72%,
+    var(--color-candy-sky-4)
+  );
+  font-family: plus-r, 'Plus Jakarta Sans', system-ui, sans-serif;
+  overflow: hidden;
+}
+
+/* ── Top HUD ─────────────────────────────────────────────── */
+.hud {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  padding-top: max(12px, env(safe-area-inset-top));
+  background: linear-gradient(#ffffffee, #ffffffbb);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid #ffffff;
+  z-index: 10;
+}
+.who { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--color-candy-3); color: #fff;
+  display: grid; place-items: center;
+  font-family: plus-eb, sans-serif; font-size: 18px;
+  border: 2px solid #fff; box-shadow: 0 2px 6px rgba(13, 40, 64, 0.18);
+  flex: none;
+}
+.name {
+  font-family: plus-eb, sans-serif; font-size: 15px;
+  color: var(--color-navy); line-height: 1.1;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.stage { font-size: 12px; color: var(--color-teal-dark); font-family: plus-b, sans-serif; }
+.pills { display: flex; gap: 8px; flex: none; }
+.pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 13px; font-family: plus-eb, sans-serif; color: var(--color-navy);
+  background: #fff; border: 1.5px solid #ffe1a6; border-radius: 999px;
+  padding: 5px 11px; box-shadow: 0 3px 0 #ffe1a6;
+}
+.pillGold { border-color: #ffe1a6; box-shadow: 0 3px 0 #ffe1a6; }
+.pillBlue { border-color: #bfe9f6; box-shadow: 0 3px 0 #bfe9f6; }
+
+/* ── Scrolling map ───────────────────────────────────────── */
+.scroller {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch; position: relative;
+}
+.scroller::-webkit-scrollbar { width: 0; }
+.maproot {
+  position: relative; width: 100%; max-width: 480px; margin: 0 auto;
+}
+.mapsvg { display: block; width: 100%; }
+.mapsvg svg { display: block; width: 100%; height: auto; }
+
+.buddy {
+  position: absolute; z-index: 6;
+  aspect-ratio: 190 / 232;
+  transform: translateX(-50%);
+  cursor: pointer; background: transparent;
+  --poster-color: transparent;
+  animation: buddyBob 3.4s ease-in-out infinite;
+}
+.buddy::part(default-progress-bar) { display: none; }
+
+/* ── Continue button ─────────────────────────────────────── */
+.continueBtn {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: max(18px, env(safe-area-inset-bottom)); z-index: 20;
+  background: linear-gradient(var(--color-candy-play), var(--color-candy-play-dark));
+  color: #fff; font-family: plus-eb, sans-serif; font-size: 16px;
+  padding: 15px 40px; border-radius: 999px; border: none; cursor: pointer;
+  box-shadow: 0 6px 0 var(--color-candy-play-shadow), 0 12px 24px rgba(246, 168, 0, 0.4);
+  letter-spacing: 0.3px; animation: buddyBob 2.2s ease-in-out infinite;
+}
+.continueBtn:active { transform: translateX(-50%) translateY(3px); box-shadow: 0 3px 0 var(--color-candy-play-shadow); }
+
+.milestone {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: max(76px, calc(env(safe-area-inset-bottom) + 62px)); z-index: 19;
+  background: #ffffffe6; color: var(--color-navy);
+  font-family: plus-b, sans-serif; font-size: 12.5px;
+  padding: 7px 14px; border-radius: 999px; white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(13, 40, 64, 0.14); border: 1px solid #fff;
+}
+
+.backBtn {
+  position: fixed; top: max(64px, calc(env(safe-area-inset-top) + 56px)); left: 14px; z-index: 20;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: #ffffffdd; border: 1px solid #fff; cursor: pointer;
+  display: grid; place-items: center; font-size: 18px; color: var(--color-navy);
+  box-shadow: 0 4px 12px rgba(13, 40, 64, 0.15); backdrop-filter: blur(6px);
+}
+
+/* ── Loading / error ─────────────────────────────────────── */
+.center {
+  position: fixed; inset: 0; display: grid; place-items: center;
+  background: linear-gradient(var(--color-candy-sky-1), var(--color-candy-sky-4));
+  font-family: plus-b, sans-serif; color: var(--color-navy);
+}
+.spinner {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 4px solid #ffffff88; border-top-color: var(--color-candy-3);
+  animation: spin 0.8s linear infinite; margin: 0 auto 14px;
+}
+
+@keyframes buddyBob { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-7px); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ═══ SVG-internal animations (injected markup → :global) ═══ */
+:global(.cmap) { display: block; }
+:global(.pathdraw) {
+  stroke-dasharray: 1; stroke-dashoffset: 1;
+  animation: draw 2.2s ease-out 0.2s forwards;
+}
+@keyframes draw { to { stroke-dashoffset: 0; } }
+:global(.cmap .candy) { animation: cfloat 5s ease-in-out infinite; }
+@keyframes cfloat {
+  0%, 100% { transform: translateY(0) rotate(-6deg); }
+  50% { transform: translateY(-12px) rotate(6deg); }
+}
+:global(.cmap .cloud) { animation: drift 16s ease-in-out infinite; }
+@keyframes drift { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(26px); } }
+:global(.cmap .bob) { animation: nodeBob 3.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes nodeBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+:global(.cmap .glow) { animation: glow 2.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes glow { 0%, 100% { transform: scale(1); opacity: 0.22; } 50% { transform: scale(1.18); opacity: 0.32; } }
+:global(.cmap .glow2) { animation: glow2 2.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes glow2 { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.12); opacity: 0.15; } }
+:global(.cmap .twinkle) { animation: tw 1.8s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes tw { 0%, 100% { transform: scale(0.8); opacity: 0.7; } 50% { transform: scale(1.15); opacity: 1; } }
+:global(.cmap .goalbob) { animation: nodeBob 2.6s ease-in-out infinite; }
+:global(.cmap .nlab) {
+  font-family: plus-eb, 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 800;
+  fill: #fff; paint-order: stroke; stroke: #00000030; stroke-width: 3px;
+}
+:global(.cmap .nlab.cur) { fill: var(--color-navy); stroke: #ffffff88; stroke-width: 4px; }
+:global(.cmap .nlab.lock) { fill: #ffffffcc; font-size: 13px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .buddy, .continueBtn { animation: none !important; }
+  :global(.cmap .candy), :global(.cmap .cloud), :global(.cmap .bob),
+  :global(.cmap .glow), :global(.cmap .glow2), :global(.cmap .twinkle),
+  :global(.cmap .goalbob) { animation: none !important; }
+  :global(.pathdraw) { stroke-dashoffset: 0 !important; }
+}
+
+/* ═══ Celebrations (reward cascade + stage advancement) ═══ */
+.celebOverlay { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 20px; background: rgba(13,40,64,.55); backdrop-filter: blur(4px); }
+.celebScene { position: relative; width: min(400px, 94vw); height: min(760px, 90vh); border-radius: 28px; overflow: hidden; display: flex; flex-direction: column; align-items: center; padding: 44px 26px 26px; box-shadow: 0 30px 80px rgba(13,40,64,.4); }
+.celebLight { color: #0d2840; background:
+  radial-gradient(120% 70% at 50% 0%, rgba(40,183,217,.14), transparent 55%),
+  radial-gradient(120% 70% at 50% 100%, rgba(250,167,26,.14), transparent 55%), #f7f9fb; }
+.celebDark { color: #fff; background:
+  radial-gradient(90% 55% at 50% 26%, rgba(40,183,217,.30), transparent 60%),
+  radial-gradient(80% 50% at 50% 90%, rgba(250,167,26,.18), transparent 60%),
+  linear-gradient(180deg,#0b2036,#0d2840 55%,#0a1a2c); }
+
+.confetti i { position: absolute; top: -20px; width: 9px; height: 14px; border-radius: 2px; opacity: 0; }
+.play .confetti i { animation: celebFall 2.4s ease-in forwards; }
+@keyframes celebFall { 0% { opacity: 0; transform: translateY(-10px) rotate(0); } 10% { opacity: 1; } 100% { opacity: 0; transform: translateY(620px) rotate(320deg); } }
+.particles i { position: absolute; bottom: -10px; border-radius: 50%; opacity: 0; }
+.play .particles i { animation: celebRise 2.6s ease-out forwards; }
+@keyframes celebRise { 0% { opacity: 0; transform: translateY(0) scale(.6); } 12% { opacity: 1; } 100% { opacity: 0; transform: translateY(-640px) scale(1); } }
+
+.doneLbl { font-family: plus-eb, sans-serif; font-size: 12px; font-weight: 800; letter-spacing: .7px; text-transform: uppercase; color: #28b7d9; opacity: 0; transform: translateY(8px); }
+.play .doneLbl { animation: celebRise2 .5s ease-out .05s forwards; }
+@keyframes celebRise2 { to { opacity: 1; transform: none; } }
+.celebH { font-family: plus-eb, sans-serif; font-size: 27px; font-weight: 800; letter-spacing: -.7px; margin-top: 8px; opacity: 0; transform: translateY(10px) scale(.96); text-align: center; }
+.play .celebH { animation: celebPop .55s cubic-bezier(.2,.9,.3,1.3) .12s forwards; }
+@keyframes celebPop { to { opacity: 1; transform: none; } }
+.celebHs { font-size: 14px; color: #64748b; margin-top: 6px; max-width: 280px; text-align: center; opacity: 0; }
+.play .celebHs { animation: celebRise2 .5s ease-out .22s forwards; }
+.celebMascot { width: 168px; height: 198px; object-fit: contain; margin: 10px 0 2px; opacity: 0; transform: scale(.6); }
+.play .celebMascot { animation: celebBounce .6s cubic-bezier(.2,.9,.3,1.4) .3s forwards; }
+@keyframes celebBounce { to { opacity: 1; transform: none; } }
+
+.stats2 { display: flex; gap: 14px; margin-top: 10px; width: 100%; max-width: 300px; }
+.scard { flex: 1; background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px 12px; position: relative; text-align: center; }
+.lab { font-size: 10.5px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: #94a3b8; }
+.val { font-family: plus-eb, sans-serif; font-size: 26px; font-weight: 800; color: #0d2840; margin-top: 3px; line-height: 1; }
+.xpfloat { position: absolute; top: -6px; left: 50%; transform: translateX(-50%); font-size: 15px; font-weight: 800; color: #0e6e8a; background: #e8f8fc; border: 1px solid rgba(40,183,217,.3); border-radius: 999px; padding: 3px 12px; opacity: 0; }
+.play .xpfloat { animation: celebXpf 1s cubic-bezier(.2,.8,.3,1) .4s forwards; }
+@keyframes celebXpf { 0% { opacity: 0; transform: translate(-50%,16px); } 25% { opacity: 1; transform: translate(-50%,-30px); } 80% { opacity: 1; transform: translate(-50%,-34px); } 100% { opacity: 0; transform: translate(-50%,-30px); } }
+.celebCta { margin-top: auto; width: 100%; max-width: 300px; background: #faa71a; color: #0d2840; font-family: plus-eb, sans-serif; font-weight: 800; font-size: 15px; padding: 15px; border-radius: 14px; border: none; cursor: pointer; opacity: 0; }
+.play .celebCta { animation: celebRise2 .5s ease-out 1.2s forwards; }
+
+.eyebrow { font-family: plus-eb, sans-serif; font-size: 12.5px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: #5fd0ec; opacity: 0; transform: translateY(8px); }
+.play .eyebrow { animation: celebRise2 .6s ease-out .15s forwards; }
+.ring { position: absolute; top: 120px; left: 50%; width: 150px; height: 150px; margin-left: -75px; border: 3px solid rgba(95,208,236,.6); border-radius: 50%; opacity: 0; }
+.play .ring { animation: celebRingout 1s ease-out .5s forwards; }
+@keyframes celebRingout { 0% { opacity: .8; transform: scale(.6); } 100% { opacity: 0; transform: scale(2.1); } }
+.medal { font-size: 64px; margin: 14px 0 4px; opacity: 0; transform: scale(.3); }
+.play .medal { animation: celebBurst .8s cubic-bezier(.2,.9,.3,1.5) .25s forwards; }
+@keyframes celebBurst { to { opacity: 1; transform: scale(1); } }
+.arabicName { font-family: var(--font-arabic), 'Amiri', serif; font-weight: 700; font-size: 62px; line-height: 1; color: #fff; margin-top: 8px; direction: rtl; text-shadow: 0 4px 30px rgba(40,183,217,.5); clip-path: inset(0 0 0 100%); }
+.play .arabicName { animation: celebWriteon 1.1s cubic-bezier(.5,0,.2,1) .8s forwards; }
+@keyframes celebWriteon { to { clip-path: inset(0 0 0 0); } }
+.translit { font-family: plus-eb, sans-serif; font-size: 28px; font-weight: 800; letter-spacing: -.4px; color: #fff; margin-top: 8px; opacity: 0; transform: translateY(8px); }
+.play .translit { animation: celebRise2 .6s ease-out 1.55s forwards; }
+.enline { font-size: 14px; font-weight: 700; letter-spacing: .3px; color: #5fd0ec; margin-top: 6px; opacity: 0; }
+.play .enline { animation: celebRise2 .6s ease-out 1.7s forwards; }
+.celebMascotDark { width: 150px; height: 170px; object-fit: contain; margin-top: 8px; opacity: 0; transform: scale(.5); }
+.play .celebMascotDark { animation: celebBounce .6s cubic-bezier(.2,.9,.3,1.5) 1.85s forwards; }
+.celebSubtitle { font-size: 15px; color: rgba(255,255,255,.82); margin-top: 8px; max-width: 260px; text-align: center; opacity: 0; }
+.play .celebSubtitle { animation: celebRise2 .6s ease-out 2.15s forwards; }
+.celebCtaGold { margin-top: auto; width: 100%; max-width: 300px; background: #faa71a; color: #0d2840; font-family: plus-eb, sans-serif; font-weight: 800; font-size: 15px; padding: 15px; border-radius: 14px; border: none; cursor: pointer; opacity: 0; }
+.play .celebCtaGold { animation: celebRise2 .6s ease-out 2.35s forwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  .celebOverlay * { animation: none !important; }
+  .arabicName { clip-path: none !important; }
+  .doneLbl, .celebH, .celebHs, .celebMascot, .xpfloat, .celebCta, .eyebrow, .medal, .translit, .enline, .celebMascotDark, .celebSubtitle, .celebCtaGold { opacity: 1 !important; transform: none !important; }
+}
