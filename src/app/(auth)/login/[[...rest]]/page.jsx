@@ -40,7 +40,7 @@ const clerkAppearance = {
     },
   },
   elements: {
-    card:                   'shadow-none border border-line-light rounded-[var(--radius-lg)] p-8',
+    card:                   'shadow-none border border-line-light rounded-[var(--radius-lg)] w-full p-6 sm:p-8',
     headerTitle:            'hidden',
     headerSubtitle:         'hidden',
     socialButtonsBlockButton: 'border border-line-light bg-white text-content-primary hover:bg-surface-light transition rounded-[var(--radius)]',

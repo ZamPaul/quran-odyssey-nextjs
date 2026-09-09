@@ -237,7 +237,7 @@ function ReportForm({ students, reports, editReport, onSaved, onCancel, apiFetch
       )}
 
       {/* Top row */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:14, marginBottom:14 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))', gap:14, marginBottom:14 }}>
         <div>
           <label style={labelStyle}>Student *</label>
           <select value={form.studentId} onChange={e=>set('studentId',e.target.value)} style={inputStyle} disabled={isEdit}>

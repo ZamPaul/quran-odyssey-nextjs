@@ -274,7 +274,7 @@ function CreateForm({
       >
         New Assignment
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14 }}>
         {/* Student */}
         <div>
           <label style={labelStyle}>Student *</label>

@@ -44,7 +44,7 @@ const clerkAppearance = {
     },
   },
   elements: {
-    card:                 'shadow-none border border-line-light rounded-[var(--radius-lg)] p-8',
+    card:                 'shadow-none border border-line-light rounded-[var(--radius-lg)] w-full p-6 sm:p-8',
     headerTitle:          'hidden',
     headerSubtitle:       'hidden',
     formButtonPrimary:    'bg-brand-amber text-brand-navy font-[800] hover:bg-brand-amber-dark transition rounded-[var(--radius)] h-11',

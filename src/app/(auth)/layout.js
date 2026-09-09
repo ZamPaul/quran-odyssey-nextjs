@@ -128,14 +128,23 @@ export default function AuthLayout({ children }) {
         </div>
       </div>
 
-      <div className="min-h-screen w-[55%] bg-surface-white flex flex-col">
+      <div className="min-h-screen w-full md:w-[55%] bg-surface-white flex flex-col">
+        {/* Mobile-only brand header (the left panel is hidden on phones) */}
+        <div className="md:hidden flex items-center justify-center gap-2 pt-8">
+          <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-cyan text-white text-lg">📖</span>
+          <span className="text-[19px] font-[900] tracking-[-0.02em]">
+            <span className="text-brand-cyan">Quran</span>{" "}
+            <span className="text-brand-amber">Odyssey</span>
+          </span>
+        </div>
+
         {/* Centered content */}
-        <div className="flex items-center justify-center px-6 pb-12 pt-[6vw]">
+        <div className="flex flex-1 items-center justify-center px-5 pb-12 pt-8 sm:px-6 md:pt-[6vw]">
           {children}
         </div>
 
         {/* Minimal footer */}
-        <div className="text-center pb-8 text-[13px] text-content-muted">
+        <div className="text-center pb-8 px-5 text-[13px] text-content-muted">
           © 2026 Quran Odyssey. Built by VISAITECH.
         </div>
       </div>

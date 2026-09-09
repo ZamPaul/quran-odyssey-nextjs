@@ -97,7 +97,7 @@ function ProfileFallback() {
       <div className="flex-1 flex items-start justify-center px-6 pb-12 pt-4">
         <div className="w-full max-w-[560px]">
           <div className="h-[3px] w-full rounded bg-line-light mb-8" />
-          <div className="bg-white rounded-[var(--radius-lg)] border border-line-light p-8">
+          <div className="bg-white rounded-[var(--radius-lg)] border border-line-light p-6 sm:p-8">
             <div className="h-6 w-2/3 rounded bg-line-light mb-4" />
             <div className="h-4 w-1/2 rounded bg-line-light mb-8" />
             <div className="flex flex-col gap-5">
@@ -267,7 +267,7 @@ function ProfileForm() {
           </div>
 
           {/* Card */}
-          <div className="bg-white rounded-[var(--radius-lg)] border border-line-light p-8">
+          <div className="bg-white rounded-[var(--radius-lg)] border border-line-light p-6 sm:p-8">
 
             {/* ── STEP 1 — Account holder ── */}
             {step === 1 && (
@@ -352,7 +352,7 @@ function ProfileForm() {
                   {/* <div className="text-[12px] text-content-muted">
                     Timezone detected: <span className="font-[700] text-content-primary">{form.timezone || "—"}</span>
                   </div> */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <DateOfBirthField
                       value={form.learnerDob}
                       onChange={(v) => set("learnerDob", v)}

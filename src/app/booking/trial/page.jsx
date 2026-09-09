@@ -363,7 +363,7 @@ function BookTrialContent() {
                           <input style={inputStyle} type="text" placeholder="e.g. Ahmed"
                             value={form.childName} onChange={e => set('childName', e.target.value)} />
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 16 }}>
                           <div>
                             <label style={labelStyle}>Age</label>
                             <input style={inputStyle} type="number" placeholder="e.g. 10"
