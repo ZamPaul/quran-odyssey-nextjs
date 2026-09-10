@@ -25,14 +25,14 @@ export default function HeroSection() {
       {/* </div> */}
 
       <div className="relative w-full flex items-center justify-center py-[10vh]">
-        <div className="w-[85%] grid items-center gap-10 md:grid-cols-2">
+        <div className="w-full max-w-[1240px] px-6 md:px-[60px] grid items-center gap-10 md:grid-cols-2">
           <div className="flex flex-col items-start">
             <div className="hero-badge inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--brand-cyan)_25%,transparent)] bg-surface-cyan-tint px-[14px] py-[5px] text-[12px] font-[600] tracking-[0.02em] text-brand-cyan-dark">
               <span className="hero-badge-dot h-[7px] w-[7px] rounded-full bg-brand-cyan" />
               Live classes · UK · USA · Canada
             </div>
 
-            <h1 className="mt-7 text-[44px] font-[plus-eb] leading-[1.06] tracking-[-0.03em] text-content-primary md:text-[52px]">
+            <h1 className="mt-7 text-[34px] sm:text-[42px] font-[plus-eb] leading-[1.08] tracking-[-0.03em] text-content-primary md:text-[52px]">
               Your child deserves
               <br />
               more than <span className="text-brand-cyan">inconsistent</span>
@@ -124,7 +124,7 @@ export default function HeroSection() {
             </div>
           </div>
 
-          <div className="relative left-[-3vw] md:justify-self-end">
+          <div className="relative md:left-[-3vw] md:justify-self-end">
             <div className="reveal-right">
               <HeroCountriesMap />
             </div>

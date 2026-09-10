@@ -549,7 +549,7 @@ export default function TeacherLayout({ children }) {
           position: "fixed",
           inset: 0,
           background: "rgba(0,0,0,0.5)",
-          zIndex: 199,
+          zIndex: 150,
           opacity: sidebarOpen ? 1 : 0,
           pointerEvents: sidebarOpen ? "auto" : "none",
           transition: "opacity 250ms ease",
@@ -575,7 +575,10 @@ export default function TeacherLayout({ children }) {
             left: 0,
             height: "100vh",
             overflowY: "auto",
-            zIndex: 100,
+            // Must sit ABOVE the mobile overlay (z-150). This is an inline
+            // style so it beats the media-query rule; keeping them in sync
+            // is what makes the open drawer clickable on mobile.
+            zIndex: 200,
           }}
         >
           <SidebarContent

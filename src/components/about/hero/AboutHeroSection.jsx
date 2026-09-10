@@ -30,7 +30,7 @@ export default function AboutHeroSection() {
             </span>
           </div>
 
-          <h1 className="mt-6 text-[44px] font-[plus-eb] leading-[1.06] tracking-[-0.03em] text-content-primary md:text-[52px]">
+          <h1 className="mt-6 text-[34px] sm:text-[42px] font-[plus-eb] leading-[1.08] tracking-[-0.03em] text-content-primary md:text-[52px]">
             Most Muslim children growing up in the West &nbsp;
             <span className="text-brand-cyan">
               face challenges staying&nbsp;

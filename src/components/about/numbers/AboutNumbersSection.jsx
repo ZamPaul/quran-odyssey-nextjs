@@ -52,7 +52,7 @@ export default function AboutNumbersSection() {
           </p>
         </div>
 
-        <div className="stat-grid reveal grid grid-cols-1 gap-4 md:grid-cols-5">
+        <div className="stat-grid reveal grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
           {STATS.map((s) => (
             <div
               key={s.label}

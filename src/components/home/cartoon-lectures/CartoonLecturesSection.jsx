@@ -339,7 +339,7 @@ export default function CartoonLecturesSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-4">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-4">
           {CARDS.map((c, idx) => (
             <CartoonCard key={`cartoon_card_${idx}`} c={c} idx={idx} />
           ))}

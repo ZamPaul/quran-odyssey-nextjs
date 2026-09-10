@@ -48,7 +48,7 @@ export default function NumbersSection() {
           </p>
         </div>
 
-        <div className="stat-grid reveal grid grid-cols-1 gap-4 md:grid-cols-4">
+        <div className="stat-grid reveal grid grid-cols-2 gap-4 md:grid-cols-4">
           {STATS.map((s) => (
             <div
               key={s.label}

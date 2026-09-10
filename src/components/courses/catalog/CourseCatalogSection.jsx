@@ -115,7 +115,7 @@ export default function CourseCatalogSection() {
   return (
     <section className="bg-surface-off-white px-6 py-[70px] md:px-[60px]">
       <div className="mx-auto w-full max-w-[1240px]">
-        <div className="flex items-center justify-between w-full gap-6 md:grid-cols-2 md:items-end">
+        <div className="grid grid-cols-1 gap-6 w-full md:grid-cols-2 md:items-end">
           <div className="reveal-left">
             <div className="section-chip inline-flex items-center rounded-full border border-[color-mix(in_srgb,var(--brand-cyan)_25%,transparent)] bg-[color-mix(in_srgb,var(--brand-cyan)_12%,transparent)] px-4 py-[6px] text-[11px] font-[700] tracking-[0.06em] text-brand-cyan-dark">
               Our courses

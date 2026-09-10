@@ -414,6 +414,22 @@ function AuthSkeleton() {
   );
 }
 
+// ─── Hamburger / close icons ──────────────────────────────
+function BurgerIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+function CloseIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 // ─── Main Navbar ──────────────────────────────────────────
 export default function Navbar() {
   const pathname = usePathname();
@@ -421,10 +437,11 @@ export default function Navbar() {
   const { user, isLoaded } = useUser();
   const { signOut } = useClerk();
   const navRef = useRef(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const role       = user?.publicMetadata?.role || "PARENT";
   const isTeacher  = isLoaded && !!user && role === "TEACHER";
-  const isAdmin    = isLoaded && !!user && role === "ADMIN"; 
+  const isAdmin    = isLoaded && !!user && role === "ADMIN";
   const isLoggedIn = isLoaded && !!user;
   // No more isParent branch — parents and students share one dashboard.
 
@@ -439,15 +456,21 @@ export default function Navbar() {
     pathname?.startsWith("/admin") ||
     pathname?.startsWith("/login");
 
-  // Active link detection
-  const activeHref =
-    pathname === "/about"
-      ? "/about"
-      : pathname === "/courses"
-      ? "/courses"
-      : pathname === "/contact"
-      ? "/contact"
-      : "/";
+  // Close the mobile menu whenever the route changes
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  // Lock body scroll while the mobile menu is open
+  useEffect(() => {
+    if (mobileOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [mobileOpen]);
 
   // GSAP scroll effect
   useLayoutEffect(() => {
@@ -464,35 +487,42 @@ export default function Navbar() {
     return () => ScrollTrigger.getAll().forEach((t) => t.kill());
   }, [hideNavbar]);
 
-  const handleSignOut = () => signOut(() => router.push("/"));
+  const handleSignOut = () => {
+    setMobileOpen(false);
+    signOut(() => router.push("/"));
+  };
 
   if (hideNavbar) return null;
+
+  const dashHref = isAdmin ? "/admin" : isTeacher ? "/teacher/dashboard" : "/dashboard";
+  const dashLabel = isAdmin ? "Admin Panel" : isTeacher ? "Teacher Portal" : "Dashboard";
 
   return (
     <>
       <nav
         ref={navRef}
-        className="fixed top-0 left-0 right-0 z-50 border-b-none shadow-sm border-line-light bg-white transition-all duration-300"
+        className="fixed top-0 left-0 right-0 z-50 shadow-sm border-line-light bg-white transition-all duration-300"
         style={{ height: 68 }}
       >
         <div
-          className="mx-auto flex h-full items-center justify-between"
-          style={{ maxWidth: 1240, padding: "0 100px" }}
+          className="mx-auto flex h-full items-center justify-between gap-3"
+          style={{ maxWidth: 1240, paddingInline: "clamp(1rem, 4vw, 100px)" }}
         >
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 shrink-0">
+          <Link href="/" className="flex items-center gap-2 shrink-0" onClick={() => setMobileOpen(false)}>
             <Image
               src="/logo2.png"
               alt="Quran Odyssey"
               width={130}
               height={36}
+              className="h-8 w-auto sm:h-9"
               style={{ objectFit: "contain" }}
               priority
             />
           </Link>
 
-          {/* Nav links */}
-          <ul className="hidden items-center gap-1 md:flex">
+          {/* ── Desktop nav links (lg and up) ── */}
+          <ul className="hidden items-center gap-1 lg:flex">
             {NAV_LINKS.map((link) => (
               <li key={link.href}>
                 <Link
@@ -511,10 +541,8 @@ export default function Navbar() {
 
             {/* Auth controls */}
             <li className="ml-2 flex items-center gap-2">
-              {/* Loading skeleton */}
               {!isLoaded && <AuthSkeleton />}
 
-              {/* ── Logged in ── */}
               {isLoaded && isLoggedIn && (
                 <>
                   <UserDropdown
@@ -523,56 +551,19 @@ export default function Navbar() {
                     isAdmin={isAdmin}
                     onSignOut={handleSignOut}
                   />
-
-                  {/* Primary CTA — role-specific */}
-                  {/* {isTeacher ? (
-                    <Link
-                      href="/teacher/dashboard"
-                      className="inline-flex items-center gap-[6px] rounded-[6px] bg-brand-cyan px-5 py-2 text-[13px] font-[700] text-white transition hover:-translate-y-[1px] hover:opacity-90"
-                    >
-                      <DashboardIcon />
-                      Teacher Portal
-                    </Link>
-                  ) : (
-                    <Link
-                      href="/dashboard"
-                      className="inline-flex items-center gap-[6px] rounded-[6px] bg-brand-navy px-5 py-2 text-[13px] font-[700] text-white transition hover:-translate-y-[1px] hover:opacity-90"
-                    >
-                      <HomeIcon />
-                      Dashboard
-                    </Link>
-                  )} */}
-
-                  {isAdmin ? (
-                    <Link
-                      href="/admin"
-                      className="inline-flex items-center gap-[6px] rounded-[6px] bg-brand-navy px-5 py-2 text-[13px] font-[700] text-white transition hover:-translate-y-[1px] hover:opacity-90"
-                    >
-                      <DashboardIcon />
-                      Admin Panel
-                    </Link>
-                  ) : isTeacher ? (
-                    <Link
-                      href="/teacher/dashboard"
-                      className="inline-flex items-center gap-[6px] rounded-[6px] bg-brand-cyan px-5 py-2 text-[13px] font-[700] text-white transition hover:-translate-y-[1px] hover:opacity-90"
-                    >
-                      <DashboardIcon />
-                      Teacher Portal
-                    </Link>
-                  ) : (
-                    <Link
-                      href="/dashboard"
-                      className="inline-flex items-center gap-[6px] rounded-[6px] bg-brand-navy px-5 py-2 text-[13px] font-[700] text-white transition hover:-translate-y-[1px] hover:opacity-90"
-                    >
-                      <HomeIcon />
-                      Dashboard
-                    </Link>
-                  )}
-
+                  <Link
+                    href={dashHref}
+                    className={[
+                      "inline-flex items-center gap-[6px] rounded-[6px] px-5 py-2 text-[13px] font-[700] text-white transition hover:-translate-y-[1px] hover:opacity-90",
+                      isTeacher ? "bg-brand-cyan" : "bg-brand-navy",
+                    ].join(" ")}
+                  >
+                    {isTeacher ? <DashboardIcon /> : isAdmin ? <DashboardIcon /> : <HomeIcon />}
+                    {dashLabel}
+                  </Link>
                 </>
               )}
 
-              {/* ── Logged out ── */}
               {isLoaded && !isLoggedIn && (
                 <>
                   <Link
@@ -591,8 +582,128 @@ export default function Navbar() {
               )}
             </li>
           </ul>
+
+          {/* ── Mobile / tablet controls (below lg) ── */}
+          <div className="flex items-center gap-2 lg:hidden">
+            {isLoaded && !isLoggedIn && (
+              <Link
+                href="/booking/trial"
+                className="hidden sm:inline-flex rounded-[6px] bg-brand-amber px-4 py-2 text-[13px] font-[700] tracking-[0.01em] text-brand-navy transition active:translate-y-[1px]"
+              >
+                Book Trial
+              </Link>
+            )}
+            <button
+              type="button"
+              onClick={() => setMobileOpen((p) => !p)}
+              aria-label={mobileOpen ? "Close menu" : "Open menu"}
+              aria-expanded={mobileOpen}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-[8px] border border-neutral-200 bg-white text-brand-navy transition active:scale-95"
+            >
+              {mobileOpen ? <CloseIcon /> : <BurgerIcon />}
+            </button>
+          </div>
         </div>
       </nav>
+
+      {/* ── Mobile menu overlay + panel (below lg) ── */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40"
+            style={{ top: 68 }}
+            onClick={() => setMobileOpen(false)}
+          />
+          {/* Panel */}
+          <div
+            className="absolute left-0 right-0 max-h-[calc(100vh-68px)] overflow-y-auto border-b border-line-light bg-white shadow-lg"
+            style={{ top: 68 }}
+          >
+            <div className="flex flex-col gap-1 px-5 py-4 sm:px-8">
+              {NAV_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileOpen(false)}
+                  className={[
+                    "rounded-lg px-4 py-3 text-[15px] font-[600] transition",
+                    pathname === link.href
+                      ? "bg-brand-cyan/10 text-brand-cyan-dark"
+                      : "text-content-primary hover:bg-neutral-100",
+                  ].join(" ")}
+                >
+                  {link.label}
+                </Link>
+              ))}
+
+              <div className="my-2 h-px bg-line-light" />
+
+              {!isLoaded && (
+                <div className="h-11 w-full animate-pulse rounded-lg bg-neutral-100" />
+              )}
+
+              {isLoaded && isLoggedIn && (
+                <>
+                  <div className="mb-1 px-4 py-2">
+                    <div className="text-[14px] font-[700] text-content-primary">
+                      {user.firstName} {user.lastName}
+                    </div>
+                    <div className="text-[12px] text-content-muted">
+                      {user.emailAddresses?.[0]?.emailAddress}
+                    </div>
+                  </div>
+                  <Link
+                    href={dashHref}
+                    onClick={() => setMobileOpen(false)}
+                    className={[
+                      "inline-flex items-center justify-center gap-2 rounded-lg px-4 py-3 text-[14px] font-[700] text-white transition",
+                      isTeacher ? "bg-brand-cyan" : "bg-brand-navy",
+                    ].join(" ")}
+                  >
+                    {dashLabel}
+                  </Link>
+                  {!isTeacher && !isAdmin && (
+                    <Link
+                      href="/booking/trial"
+                      onClick={() => setMobileOpen(false)}
+                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-line-default px-4 py-3 text-[14px] font-[600] text-content-primary transition hover:bg-neutral-50"
+                    >
+                      Book a Trial
+                    </Link>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleSignOut}
+                    className="mt-1 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-3 text-[14px] font-[600] text-danger transition hover:bg-red-50"
+                  >
+                    Sign out
+                  </button>
+                </>
+              )}
+
+              {isLoaded && !isLoggedIn && (
+                <>
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileOpen(false)}
+                    className="inline-flex items-center justify-center rounded-lg border-[1.5px] border-neutral-200 bg-neutral-100 px-4 py-3 text-[14px] font-[700] text-brand-navy transition"
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    href="/booking/trial"
+                    onClick={() => setMobileOpen(false)}
+                    className="inline-flex items-center justify-center rounded-lg bg-brand-amber px-4 py-3 text-[14px] font-[700] text-brand-navy transition"
+                  >
+                    Book Free Trial
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

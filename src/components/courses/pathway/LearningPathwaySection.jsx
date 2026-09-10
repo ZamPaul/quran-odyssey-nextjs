@@ -31,7 +31,7 @@ export default function LearningPathwaySection() {
           </div>
         </div>
 
-        <div className="pathway-track reveal mt-10 grid grid-cols-1 gap-4 md:grid-cols-4">
+        <div className="pathway-track reveal mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
           <Node n="1" tone="cyan" badge="Start here" title="Noorani Qaida" sub="Arabic alphabet & basic reading" primary />
           <Node n="2" tone="navy" badge="Core stage" title="Salah (Namaz)" sub="Fluency · Juz progression" />
           <Node n="3" tone="cyan2" badge="Refinement" title="Quran Recitation (with Tajweed)" sub="Precision & beautiful recitation" />
