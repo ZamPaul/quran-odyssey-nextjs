@@ -511,12 +511,11 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0" onClick={() => setMobileOpen(false)}>
             <Image
-              src="/logo2.png"
+              src="/logo2-trimmed.png"
               alt="Quran Odyssey"
-              width={130}
-              height={36}
-              className="h-8 w-auto sm:h-9"
-              style={{ objectFit: "contain" }}
+              width={1110}
+              height={539}
+              className="h-9 w-auto sm:h-10"
               priority
             />
           </Link>

@@ -38,7 +38,7 @@ const CartoonCard = ({ c, idx }) => {
         <div className="flex items-center justify-center">{c.svg}</div>
       </div>
 
-      <div className="text-[1.2vw] font-[plus-eb] tracking-[-0.02em] text-content-primary">
+      <div className="text-[16px] lg:text-[18px] font-[plus-eb] tracking-[-0.02em] text-content-primary">
         {c.topic}
       </div>
       {/* <p className="mt-2 font-[plus-r] text-[13px] leading-[1.7] text-content-muted">

@@ -51,11 +51,11 @@ export default function AuthLayout({ children }) {
           {/* Logo */}
           <Link href="/" className="inline-block">
             <Image
-              src="/logo2.png"
-              width={160}
-              height={40}
+              src="/logo2-trimmed.png"
+              width={1110}
+              height={539}
               alt="Quran Odyssey"
-              className="object-contain"
+              className="h-10 w-auto"
             />
           </Link>
         </div>
@@ -130,12 +130,16 @@ export default function AuthLayout({ children }) {
 
       <div className="min-h-screen w-full md:w-[55%] bg-surface-white flex flex-col">
         {/* Mobile-only brand header (the left panel is hidden on phones) */}
-        <div className="md:hidden flex items-center justify-center gap-2 pt-8">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-cyan text-white text-lg">📖</span>
-          <span className="text-[19px] font-[900] tracking-[-0.02em]">
-            <span className="text-brand-cyan">Quran</span>{" "}
-            <span className="text-brand-amber">Odyssey</span>
-          </span>
+        <div className="md:hidden flex items-center justify-center pt-8">
+          <Link href="/" className="inline-flex">
+            <Image
+              src="/logo2-trimmed.png"
+              width={1110}
+              height={539}
+              alt="Quran Odyssey"
+              className="h-10 w-auto"
+            />
+          </Link>
         </div>
 
         {/* Centered content */}

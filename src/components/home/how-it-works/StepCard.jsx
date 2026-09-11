@@ -20,7 +20,7 @@ const StepCard = ({ s, idx }) => {
         {s.icon}
       </div>
 
-      <div className="text-[1.5vw] font-[plus-eb] tracking-[-0.02em] text-content-primary">
+      <div className="text-[19px] lg:text-[22px] font-[plus-eb] tracking-[-0.02em] text-content-primary">
         {s.title}
       </div>
       <p className="mt-2 text-[14px] leading-[1.75] text-content-muted">

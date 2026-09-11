@@ -231,16 +231,16 @@ export default function AboutHeroSection() {
                 }
               />
 
-              <div className="mt-6 flex gap-3">
+              <div className="mt-6 flex flex-col sm:flex-row gap-3">
                 <Link
                   href="/booking/trial"
-                  className="inline-flex items-center justify-center rounded-[var(--radius)] bg-brand-amber px-6 py-[12px] text-[14px] font-[800] text-brand-navy transition hover:-translate-y-[1px] hover:bg-brand-amber-dark"
+                  className="inline-flex w-full sm:w-auto items-center justify-center whitespace-nowrap rounded-[var(--radius)] bg-brand-amber px-6 py-[12px] text-[14px] font-[800] text-brand-navy transition hover:-translate-y-[1px] hover:bg-brand-amber-dark"
                 >
                   Book Free Trial
                 </Link>
                 <Link
                   href="/courses"
-                  className="inline-flex items-center justify-center rounded-[var(--radius)] border-2 border-line-default bg-transparent px-6 py-[12px] text-[14px] font-[700] text-content-primary transition hover:bg-surface-light"
+                  className="inline-flex w-full sm:w-auto items-center justify-center whitespace-nowrap rounded-[var(--radius)] border-2 border-line-default bg-transparent px-6 py-[12px] text-[14px] font-[700] text-content-primary transition hover:bg-surface-light"
                 >
                   View Courses
                 </Link>

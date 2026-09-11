@@ -126,7 +126,7 @@ export default function HeroCountriesMap() {
           </span>
         </div>
 
-        <div className="relative scale-[1.2] aspect-[16/9]">
+        <div className="relative scale-100 md:scale-[1.2] aspect-[16/9]">
           {/* <div className="pointer-events-none absolute inset-0 opacity-[0]">
             <Image
               src="/Frame.png"

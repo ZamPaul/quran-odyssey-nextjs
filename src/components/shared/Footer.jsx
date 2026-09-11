@@ -18,12 +18,11 @@ export default function Footer() {
           <div className="flex flex-col items-center gap-3 md:items-start">
             <Link href="/" className="inline-flex">
               <Image
-                src="/logo2.png"
-                width={150}
-                height={40}
+                src="/logo2-trimmed.png"
+                width={1110}
+                height={539}
                 alt="Quran Odyssey"
-                className="h-9 w-auto select-none"
-                style={{ objectFit: "contain" }}
+                className="h-11 w-auto select-none"
               />
             </Link>
             <p className="max-w-[320px] text-[13px] leading-[1.6] text-white/40">

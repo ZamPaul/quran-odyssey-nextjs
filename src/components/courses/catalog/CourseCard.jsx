@@ -36,7 +36,7 @@ const CourseCard = ({ idx, c }) => {
       </div>
 
       <div className="p-6 pt-5">
-        <div className="text-[1.7vw] font-[plus-eb] tracking-[-0.02em]">
+        <div className="text-[20px] lg:text-[24px] font-[plus-eb] tracking-[-0.02em] text-content-primary">
           {c.title}
         </div>
         <p className="mt-2 text-[14px] leading-[1.75] text-content-muted">
@@ -79,10 +79,10 @@ const CourseCard = ({ idx, c }) => {
           ))}
         </div>
 
-        <div className="mt-6 w-full flex gap-3 items-center justify-start">
+        <div className="mt-6 w-full flex flex-col sm:flex-row gap-3 items-stretch">
           <Link
             href={`/enroll?course=${c.value}`}
-            className="w-[38%] inline-flex items-center gap-2 rounded-[var(--radius)] bg-brand-amber px-5 py-[11px] text-[14px] font-[plus-b] text-brand-navy transition hover:-translate-y-[1px] hover:bg-brand-amber-dark"
+            className="w-full sm:flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius)] bg-brand-amber px-5 py-[11px] text-[14px] font-[plus-b] text-brand-navy transition hover:-translate-y-[1px] hover:bg-brand-amber-dark"
           >
             Enroll Now
             <svg
@@ -103,7 +103,7 @@ const CourseCard = ({ idx, c }) => {
           </Link>
           <Link
             href="/booking/trial"
-            className="w-[33%] inline-flex items-center gap-2 rounded-[var(--radius)] bg-brand-navy-dark px-5 py-[11px] text-[14px] font-[plus-b] text-white transition hover:-translate-y-[1px] hover:bg-brand-navy"
+            className="w-full sm:flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius)] bg-brand-navy-dark px-5 py-[11px] text-[14px] font-[plus-b] text-white transition hover:-translate-y-[1px] hover:bg-brand-navy"
           >
             Book free trial
             <svg
