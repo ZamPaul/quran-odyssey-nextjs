@@ -104,6 +104,25 @@ export function getFileCategory(mimeType) {
   return 'document';
 }
  
+// ── Multi-file resolvers ──────────────────────────────────
+// Return the file array for a record, falling back to the legacy
+// single-file columns so older rows still render.
+export function assignmentAttachments(a) {
+  if (Array.isArray(a?.attachments) && a.attachments.length) return a.attachments;
+  if (a?.attachmentUrl) {
+    return [{ url: a.attachmentUrl, name: a.attachmentName, type: a.attachmentType, path: a.attachmentPath }];
+  }
+  return [];
+}
+
+export function submissionFiles(s) {
+  if (Array.isArray(s?.files) && s.files.length) return s.files;
+  if (s?.fileUrl) {
+    return [{ url: s.fileUrl, name: s.fileName, type: s.fileType, path: s.filePath }];
+  }
+  return [];
+}
+
 export function formatFileSize(bytes) {
   if (!bytes) return '';
   if (bytes < 1024)        return `${bytes} B`;

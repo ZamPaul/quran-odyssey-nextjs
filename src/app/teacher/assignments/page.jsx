@@ -3,10 +3,8 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import useTeacherFetch from "../../hooks/useTeacherFetch.js";
-import FileUpload, {
-  FileCard,
-  FilePreview,
-} from "../../../components/FileUpload";
+import MultiFileUpload, { FileList } from "../../../components/MultiFileUpload";
+import { assignmentAttachments, submissionFiles } from "../../../lib/uploadFile";
 import { useAuth } from "@clerk/nextjs";
 
 // ─── Constants ────────────────────────────────────────────
@@ -152,11 +150,8 @@ function CreateForm({
     description: "",
     dueDate: defaultDueDate(),
     courseType: "",
-    // File attachment fields
-    attachmentUrl: "",
-    attachmentName: "",
-    attachmentType: "",
-    attachmentPath: "",
+    // Multiple file attachments: array of { url, name, type, path, size }
+    attachments: [],
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -175,24 +170,8 @@ function CreateForm({
     if (match) set("courseType", match.enrollment.courseType);
   }, [form.studentId]);
 
-  const handleUploadComplete = ({ url, fileName, fileType, path }) => {
-    setForm((p) => ({
-      ...p,
-      attachmentUrl: url,
-      attachmentName: fileName,
-      attachmentType: fileType,
-      attachmentPath: path || "",
-    }));
-  };
-
-  const handleFileClear = () => {
-    setForm((p) => ({
-      ...p,
-      attachmentUrl: "",
-      attachmentName: "",
-      attachmentType: "",
-      attachmentPath: "",
-    }));
+  const handleAttachmentsChange = (files) => {
+    setForm((p) => ({ ...p, attachments: files }));
   };
 
   // Catch the obvious problems instantly, without a round trip.
@@ -232,10 +211,7 @@ function CreateForm({
         // the student sees it in theirs.
         dueDate: new Date(form.dueDate).toISOString(),
         description: form.description.trim() || undefined,
-        attachmentUrl: form.attachmentUrl || undefined,
-        attachmentName: form.attachmentName || undefined,
-        attachmentType: form.attachmentType || undefined,
-        attachmentPath: form.attachmentPath || undefined,
+        attachments: form.attachments,
       };
       const data = await apiFetch("/api/teacher/assignments", {
         method: "POST",
@@ -359,24 +335,16 @@ function CreateForm({
           )}
         </div>
 
-        {/* File attachment */}
+        {/* File attachments */}
         <div style={{ gridColumn: "1/-1" }}>
-          <label style={labelStyle}>Attachment (optional)</label>
-          <FileUpload
+          <label style={labelStyle}>Attachments (optional)</label>
+          <MultiFileUpload
             role="teacher"
             userId={teacherClerkId}
-            label="Attach worksheet, audio, or PDF"
-            onUploadComplete={handleUploadComplete}
-            onClear={handleFileClear}
-            existingFile={
-              form.attachmentUrl
-                ? {
-                    url: form.attachmentUrl,
-                    fileName: form.attachmentName,
-                    fileType: form.attachmentType,
-                  }
-                : null
-            }
+            label="Attach worksheets, audio, or PDFs"
+            max={10}
+            files={form.attachments}
+            onChange={handleAttachmentsChange}
           />
         </div>
       </div>
@@ -644,7 +612,7 @@ function AssignmentCard({
               {local.status}
             </span>
             {/* Attachment indicator */}
-            {local.attachmentUrl && (
+            {assignmentAttachments(local).length > 0 && (
               <span
                 style={{
                   fontSize: 11,
@@ -655,7 +623,8 @@ function AssignmentCard({
                   padding: "2px 7px",
                 }}
               >
-                📎 Attachment
+                📎 {assignmentAttachments(local).length} file
+                {assignmentAttachments(local).length === 1 ? "" : "s"}
               </span>
             )}
           </div>
@@ -716,13 +685,11 @@ function AssignmentCard({
             </div>
           )}
 
-          {/* Teacher's attachment — always visible */}
-          {local.attachmentUrl && (
-            <FilePreview
-              url={local.attachmentUrl}
-              fileName={local.attachmentName}
-              fileType={local.attachmentType}
-              label="Your attachment"
+          {/* Teacher's attachments — always visible */}
+          {assignmentAttachments(local).length > 0 && (
+            <FileList
+              files={assignmentAttachments(local)}
+              label="Your attachments"
             />
           )}
 
@@ -757,13 +724,11 @@ function AssignmentCard({
                   {sub.content}
                 </div>
               )}
-              {/* Student's uploaded file */}
-              {sub.fileUrl && (
-                <FilePreview
-                  url={sub.fileUrl}
-                  fileName={sub.fileName}
-                  fileType={sub.fileType}
-                  label="Student's file"
+              {/* Student's uploaded files */}
+              {submissionFiles(sub).length > 0 && (
+                <FileList
+                  files={submissionFiles(sub)}
+                  label="Student's files"
                 />
               )}
               {/* Grade display or form */}
@@ -1169,17 +1134,9 @@ function EditAssignmentModal({
   const [dueDate, setDueDate] = useState(
     assignment.dueDate ? toLocalInput(new Date(assignment.dueDate)) : "",
   );
-  const [attachment, setAttachment] = useState(
-    assignment.attachmentUrl
-      ? {
-          url: assignment.attachmentUrl,
-          fileName: assignment.attachmentName,
-          fileType: assignment.attachmentType,
-          path: assignment.attachmentPath,
-        }
-      : null,
+  const [attachments, setAttachments] = useState(
+    assignmentAttachments(assignment),
   );
-  const [removeAttachment, setRemoveAttachment] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
@@ -1216,14 +1173,9 @@ function EditAssignmentModal({
       };
       if (dueDate) body.dueDate = new Date(dueDate).toISOString();
 
-      if (attachment?.url && attachment.url !== assignment.attachmentUrl) {
-        body.attachmentUrl = attachment.url;
-        body.attachmentName = attachment.fileName;
-        body.attachmentType = attachment.fileType;
-        body.attachmentPath = attachment.path;
-      } else if (removeAttachment && !attachment) {
-        body.removeAttachment = true;
-      }
+      // Always send the full desired attachment set; the server diffs it
+      // against the stored set and deletes any files that were removed.
+      body.attachments = attachments;
 
       const data = await apiFetch(
         `/api/teacher/assignments/${assignment.id}`,
@@ -1348,48 +1300,16 @@ function EditAssignmentModal({
             )}
           </div>
           <div>
-            <label style={labelStyle}>Attachment (optional)</label>
-            {attachment ? (
-              <div>
-                <FilePreview
-                  url={attachment.url}
-                  fileName={attachment.fileName}
-                  fileType={attachment.fileType}
-                  label="Current attachment"
-                />
-                <button
-                  onClick={() => {
-                    setAttachment(null);
-                    setRemoveAttachment(true);
-                  }}
-                  style={{
-                    marginTop: 8,
-                    padding: "6px 12px",
-                    borderRadius: 7,
-                    border: "1px solid #fecaca",
-                    background: "white",
-                    color: "#dc2626",
-                    fontSize: 12,
-                    fontWeight: 700,
-                    cursor: "pointer",
-                  }}
-                >
-                  Remove attachment
-                </button>
-              </div>
-            ) : (
-              <FileUpload
-                role="teacher"
-                userId={userId}
-                label="Replace / add attachment"
-                compact
-                onUploadComplete={(r) => {
-                  setAttachment(r);
-                  setRemoveAttachment(false);
-                }}
-                onClear={() => setAttachment(null)}
-              />
-            )}
+            <label style={labelStyle}>Attachments (optional)</label>
+            <MultiFileUpload
+              role="teacher"
+              userId={userId}
+              label="Add attachment"
+              compact
+              max={10}
+              files={attachments}
+              onChange={setAttachments}
+            />
           </div>
         </div>
 
