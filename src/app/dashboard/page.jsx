@@ -783,7 +783,7 @@ function SubmitForm({ assignmentId, studentId, onSuccess, onCancel, mode = 'crea
   const isEdit = mode === 'edit';
 
   const handleSubmit = async () => {
-    if (!content.trim() && files.length === 0) { setError('Add an answer or upload a file before submitting.'); return; }
+    // Text and file are both optional — allow submitting with nothing attached.
     setSubmitting(true); setError('');
     try {
       const token = await getToken();
@@ -823,7 +823,9 @@ function SubmitForm({ assignmentId, studentId, onSuccess, onCancel, mode = 'crea
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div>
-        <label style={{ fontSize: 12, fontWeight: 700, color: '#64748b', display: 'block', marginBottom: 6 }}>Answer</label>
+        <label style={{ fontSize: 12, fontWeight: 700, color: '#64748b', display: 'block', marginBottom: 6 }}>
+          Answer <span style={{ fontWeight: 400, color: '#94a3b8' }}>(optional)</span>
+        </label>
         <textarea value={content} onChange={e => setContent(e.target.value)} placeholder="Write the answer here…" maxLength={3000} rows={4}
           style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 13, fontFamily: 'inherit', outline: 'none', resize: 'vertical', boxSizing: 'border-box', color: '#0f172a' }} />
         <div style={{ fontSize: 11, color: '#94a3b8', textAlign: 'right', marginTop: 2 }}>{content.length}/3000</div>
