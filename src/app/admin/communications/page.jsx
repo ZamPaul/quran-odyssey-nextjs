@@ -160,14 +160,14 @@ function CommModal({ id, onClose, onDone }) {
   return (
     <div onClick={onClose} style={overlay}>
       <div onClick={e => e.stopPropagation()} style={{ ...modalCard, maxWidth: 680, maxHeight: '88vh', overflowY: 'auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
           <div style={{ fontSize: 17, fontWeight: 800, color: '#0f172a' }}>Communication</div>
           <button onClick={onClose} style={{ border: 'none', background: 'none', fontSize: 18, color: '#94a3b8', cursor: 'pointer' }}>✕</button>
         </div>
         {error && <div style={errBox}>⚠️ {error}</div>}
         {!row ? <div style={empty}>Loading…</div> : (
           <>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10, marginBottom: 14 }}>
               <Field label="To" value={editing ? undefined : row.toAddress} />
               <Field label="Status" value={editing ? undefined : (row.status === 'SENT' ? 'Sent' : (row.resolvedAt ? 'Failed (resolved)' : 'Failed'))} />
             </div>

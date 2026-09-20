@@ -348,7 +348,7 @@ function CreateSessionModal({ teachers, onClose, onCreated }) {
           )}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
           <div style={{ gridColumn: '1 / -1' }}><label style={lbl}>Teacher *</label>
             <select value={form.teacherId} onChange={e => set('teacherId', e.target.value)} style={{ ...inp, cursor: 'pointer' }}>
               <option value="">Select…</option>{teachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
@@ -440,7 +440,7 @@ function SessionPanel({ session, teachers, onClose, onChanged }) {
   return (
     <div onClick={onClose} style={modalOverlay}>
       <div onClick={e => e.stopPropagation()} style={{ ...modalCard, maxWidth: 500, maxHeight: '90vh', overflowY: 'auto' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10, justifyContent: 'space-between', marginBottom: 14 }}>
           <div style={{ fontSize: 18, fontWeight: 800, color: '#0f172a' }}>{session.student?.name}</div>
           <span style={pill(session.status)}>{session.status}</span>
         </div>

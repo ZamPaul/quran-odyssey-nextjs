@@ -76,8 +76,8 @@ export default function TeachersPage() {
 
       {error && <div style={errBox}>⚠️ {error}</div>}
 
-      <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 14, overflow: 'hidden' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 2fr 1.6fr 0.8fr 0.8fr 0.4fr', gap: 0, padding: '12px 18px', borderBottom: '1px solid #e2e8f0', background: '#f7f9fb' }}>
+      <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 14, overflowX: 'auto' }}>
+        <div style={{ display: 'grid', minWidth: 760, gridTemplateColumns: '1.6fr 2fr 1.6fr 0.8fr 0.8fr 0.4fr', gap: 0, padding: '12px 18px', borderBottom: '1px solid #e2e8f0', background: '#f7f9fb' }}>
           {['Teacher', 'Email', 'Specialties', 'Students', 'Status', ''].map((h, i) => <div key={i} style={thStyle}>{h}</div>)}
         </div>
 
@@ -85,7 +85,7 @@ export default function TeachersPage() {
           : teachers.length === 0 ? <div style={emptyStyle}>No teachers found.</div>
           : teachers.map(t => (
             <div key={t.id} onClick={() => router.push(`/admin/teachers/${t.id}`)}
-              style={{ display: 'grid', gridTemplateColumns: '1.6fr 2fr 1.6fr 0.8fr 0.8fr 0.4fr', gap: 0, padding: '14px 18px', borderBottom: '1px solid #f4f8fb', cursor: 'pointer', alignItems: 'center' }}
+              style={{ display: 'grid', minWidth: 760, gridTemplateColumns: '1.6fr 2fr 1.6fr 0.8fr 0.8fr 0.4fr', gap: 0, padding: '14px 18px', borderBottom: '1px solid #f4f8fb', cursor: 'pointer', alignItems: 'center' }}
               onMouseEnter={e => e.currentTarget.style.background = '#fafbfc'}
               onMouseLeave={e => e.currentTarget.style.background = 'white'}
             >
@@ -148,7 +148,7 @@ function OnboardModal({ onClose, onDone }) {
           <>
             <div style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', marginBottom: 4 }}>Onboard teacher</div>
             <div style={{ fontSize: 13, color: '#94a3b8', marginBottom: 20 }}>Creates their sign-in account, sets the teacher role, and links their calendar.</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
               <div style={{ gridColumn: '1 / -1' }}><label style={lbl}>Full name *</label><input value={form.name} onChange={e => set('name', e.target.value)} style={inp} /></div>
               <div style={{ gridColumn: '1 / -1' }}><label style={lbl}>Email *</label><input type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="teacher@example.com" style={inp} /></div>
               <div><label style={lbl}>Gender *</label><select value={form.gender} onChange={e => set('gender', e.target.value)} style={{ ...inp, cursor: 'pointer' }}><option value="">Select…</option><option value="MALE">Male</option><option value="FEMALE">Female</option></select></div>

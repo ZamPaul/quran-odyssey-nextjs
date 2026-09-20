@@ -146,7 +146,7 @@ export default function TeacherProfilePage() {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 22 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16, marginBottom: 22 }}>
         <div style={card}>
           <div style={cardTitle}>Profile</div>
           <InfoRow k="Email" v={teacher.email} />
@@ -161,7 +161,7 @@ export default function TeacherProfilePage() {
 
         <div style={card}>
           <div style={cardTitle}>Workload</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10 }}>
             {[['Active students', teacher.enrollments.length], ['Total sessions', teacher._count.classSessions], ['Reports', teacher._count.progressReports]].map(([l, v]) => (
               <div key={l} style={{ textAlign: 'center', padding: '14px 8px', background: '#f7f9fb', borderRadius: 10 }}>
                 <div style={{ fontSize: 22, fontWeight: 800, color: '#0f172a' }}>{v}</div>
@@ -173,7 +173,7 @@ export default function TeacherProfilePage() {
           {/* Active vs history — what can be handed over, and what never moves */}
           {workload && (
             <div style={{ marginTop: 16, borderTop: '1px solid #f1f5f9', paddingTop: 14 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
                 <div>
                   <div style={{ fontSize: 11.5, fontWeight: 800, color: '#0e6e8a', marginBottom: 6 }}>Active: can be handed over</div>
                   {Object.entries(workload.active).map(([k, v]) => (
@@ -293,7 +293,7 @@ function EditModal({ teacher, onClose, onSaved }) {
 
   return (
     <Modal title="Edit teacher" onClose={onClose}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
         <div style={{ gridColumn: '1 / -1' }}><label style={lbl}>Name</label><input value={form.name} onChange={e => set('name', e.target.value)} style={inp} /></div>
         <div><label style={lbl}>Gender</label><select value={form.gender} onChange={e => set('gender', e.target.value)} style={{ ...inp, cursor: 'pointer' }}><option value="MALE">Male</option><option value="FEMALE">Female</option></select></div>
         <div style={{ gridColumn: '1 / -1' }}>

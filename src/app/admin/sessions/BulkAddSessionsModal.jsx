@@ -179,7 +179,7 @@ export default function BulkAddSessionsModal({ onClose, onDone }) {
           <div>
             <label style={lbl}>Student</label>
             {student ? (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 12px', borderRadius: 8, border: '1px solid #28b7d9', background: 'rgba(40,183,217,0.06)', marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10, justifyContent: 'space-between', padding: '9px 12px', borderRadius: 8, border: '1px solid #28b7d9', background: 'rgba(40,183,217,0.06)', marginBottom: 16 }}>
                 <span style={{ fontSize: 13, fontWeight: 600, color: '#0f172a' }}>{student.name} <span style={{ color: '#94a3b8' }}>· {student.account?.email}</span></span>
                 <button onClick={() => { setStudent(null); setEnrollments([]); setEnrollmentId(''); }} style={{ fontSize: 12, color: '#64748b', background: 'none', border: 'none', cursor: 'pointer' }}>change</button>
               </div>
@@ -270,7 +270,7 @@ export default function BulkAddSessionsModal({ onClose, onDone }) {
         {/* STEP 3 — date range + blackouts */}
         {step === 3 && (
           <div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginBottom: 16 }}>
               <div><label style={lbl}>Start date</label><input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={inp} /></div>
               <div><label style={lbl}>End date</label><input type="date" value={endDate} min={startDate} onChange={e => setEndDate(e.target.value)} style={inp} /></div>
             </div>

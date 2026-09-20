@@ -132,7 +132,7 @@ function TrialPanel({ trial, onClose, onChanged }) {
   return (
     <div onClick={onClose} style={modalOverlay}>
       <div onClick={e => e.stopPropagation()} style={{ ...modalCard, maxWidth: 520, maxHeight: '90vh', overflowY: 'auto' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10, justifyContent: 'space-between', marginBottom: 14 }}>
           <div style={{ fontSize: 18, fontWeight: 800, color: '#0f172a' }}>{trial.student.name}</div>
           <span style={pill(trial.status)}>{trial.status}</span>
         </div>
@@ -208,10 +208,10 @@ function TrialConvert({ trial, onBack, onConverted, onClose }) {
   };
   return (
     <div onClick={onClose} style={modalOverlay}>
-      <div onClick={e => e.stopPropagation()} style={{ ...modalCard, maxWidth: 500 }}>
+      <div onClick={e => e.stopPropagation()} style={{ ...modalCard, maxWidth: 500, maxHeight: '90vh', overflowY: 'auto' }}>
         <div style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', marginBottom: 4 }}>Convert trial to enrolment</div>
         <div style={{ fontSize: 13, color: '#94a3b8', marginBottom: 18 }}>For {trial.student.name} with {trial.teacher?.name}. Emails the family.</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
           <div><label style={lbl}>Sessions / week</label><input type="number" min="1" max="7" value={form.sessionsPerWeek} onChange={e => set('sessionsPerWeek', e.target.value)} style={inp} /></div>
           <div><label style={lbl}>Start date</label><input type="date" value={form.startDate} onChange={e => set('startDate', e.target.value)} style={inp} /></div>
         </div>

@@ -148,8 +148,8 @@ function LeadModal({ id, onClose, onDone }) {
 
   return (
     <div onClick={onClose} style={overlay}>
-      <div onClick={e => e.stopPropagation()} style={{ ...modalCard, maxWidth: 520 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+      <div onClick={e => e.stopPropagation()} style={{ ...modalCard, maxWidth: 520, maxHeight: '90vh', overflowY: 'auto' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
           <div style={{ fontSize: 17, fontWeight: 800, color: '#0f172a' }}>Lead detail</div>
           <button onClick={onClose} style={{ border: 'none', background: 'none', fontSize: 18, color: '#94a3b8', cursor: 'pointer' }}>✕</button>
         </div>

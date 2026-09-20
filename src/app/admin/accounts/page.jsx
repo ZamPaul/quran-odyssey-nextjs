@@ -97,8 +97,8 @@ export default function AccountsPage() {
       {error && <div style={errBox}>⚠️ {error}</div>}
 
       {/* Table */}
-      <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 14, overflow: 'hidden' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 0.8fr 1fr 0.6fr', gap: 0, padding: '12px 18px', borderBottom: '1px solid #e2e8f0', background: '#f7f9fb' }}>
+      <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 14, overflowX: 'auto' }}>
+        <div style={{ display: 'grid', minWidth: 780, gridTemplateColumns: '2fr 2fr 1fr 0.8fr 1fr 0.6fr', gap: 0, padding: '12px 18px', borderBottom: '1px solid #e2e8f0', background: '#f7f9fb' }}>
           {['Name', 'Email', 'Phone', 'Learners', 'Status', ''].map((h, i) => (
             <div key={i} style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#94a3b8' }}>{h}</div>
           ))}
@@ -114,7 +114,7 @@ export default function AccountsPage() {
             return (
               <div key={a.id}
                 onClick={() => router.push(`/admin/accounts/${a.id}`)}
-                style={{ display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 0.8fr 1fr 0.6fr', gap: 0, padding: '14px 18px', borderBottom: '1px solid #f4f8fb', cursor: 'pointer', alignItems: 'center' }}
+                style={{ display: 'grid', minWidth: 780, gridTemplateColumns: '2fr 2fr 1fr 0.8fr 1fr 0.6fr', gap: 0, padding: '14px 18px', borderBottom: '1px solid #f4f8fb', cursor: 'pointer', alignItems: 'center' }}
                 onMouseEnter={e => e.currentTarget.style.background = '#fafbfc'}
                 onMouseLeave={e => e.currentTarget.style.background = 'white'}
               >

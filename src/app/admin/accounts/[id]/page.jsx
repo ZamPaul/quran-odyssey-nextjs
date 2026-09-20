@@ -132,7 +132,7 @@ export default function AccountDetailPage() {
       )}
 
       {/* Info + rollup */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 16, marginBottom: 22 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16, marginBottom: 22 }}>
         <div style={card}>
           <div style={cardTitle}>Account</div>
           <InfoRow k="Name" v={account.name || '—'} />
@@ -144,7 +144,7 @@ export default function AccountDetailPage() {
 
         <div style={card}>
           <div style={cardTitle}>Activity roll-up (across all learners)</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(92px, 1fr))', gap: 10 }}>
             {[
               ['Enrolments', rollup.enrollments],
               ['Sessions', rollup.sessions],

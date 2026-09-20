@@ -91,8 +91,8 @@ export default function StudentsPage() {
 
       {error && <div style={errBox}>⚠️ {error}</div>}
 
-      <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 14, overflow: 'hidden' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 2fr 0.6fr 1fr 1.4fr 0.8fr 0.4fr', gap: 0, padding: '12px 18px', borderBottom: '1px solid #e2e8f0', background: '#f7f9fb' }}>
+      <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 14, overflowX: 'auto' }}>
+        <div style={{ display: 'grid', minWidth: 820, gridTemplateColumns: '1.6fr 2fr 0.6fr 1fr 1.4fr 0.8fr 0.4fr', gap: 0, padding: '12px 18px', borderBottom: '1px solid #e2e8f0', background: '#f7f9fb' }}>
           {['Learner', 'Account', 'Age', 'Country', 'Course', 'Activity', ''].map((h, i) => (
             <div key={i} style={thStyle}>{h}</div>
           ))}
@@ -105,7 +105,7 @@ export default function StudentsPage() {
         ) : (
           students.map(s => (
             <div key={s.id} onClick={() => router.push(`/admin/students/${s.id}`)}
-              style={{ display: 'grid', gridTemplateColumns: '1.6fr 2fr 0.6fr 1fr 1.4fr 0.8fr 0.4fr', gap: 0, padding: '14px 18px', borderBottom: '1px solid #f4f8fb', cursor: 'pointer', alignItems: 'center' }}
+              style={{ display: 'grid', minWidth: 820, gridTemplateColumns: '1.6fr 2fr 0.6fr 1fr 1.4fr 0.8fr 0.4fr', gap: 0, padding: '14px 18px', borderBottom: '1px solid #f4f8fb', cursor: 'pointer', alignItems: 'center' }}
               onMouseEnter={e => e.currentTarget.style.background = '#fafbfc'}
               onMouseLeave={e => e.currentTarget.style.background = 'white'}
             >
@@ -217,7 +217,7 @@ function CreateStudentModal({ onClose, onCreated }) {
           )}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
           <div style={{ gridColumn: '1 / -1' }}><label style={lbl}>Name *</label><input value={form.name} onChange={e => set('name', e.target.value)} style={inp} /></div>
           <div><label style={lbl}>Age *</label><input type="number" value={form.age} onChange={e => set('age', e.target.value)} style={inp} /></div>
           <div><label style={lbl}>Gender</label>

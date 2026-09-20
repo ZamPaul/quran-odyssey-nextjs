@@ -99,7 +99,7 @@ export default function StudentProfilePage() {
       {msg && <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, fontSize: 13, fontWeight: 600, background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', color: '#15803d' }}>✓ {msg}</div>}
 
       {/* Info + attendance */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 22 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16, marginBottom: 22 }}>
         <div style={card}>
           <div style={cardTitle}>Learner & Account</div>
           <InfoRow k="Account" v={<Link href={`/admin/accounts/${student.account.id}`} style={{ color: '#0e6e8a', fontWeight: 700, textDecoration: 'none' }}>{student.account.name || student.account.email}</Link>} />
@@ -120,7 +120,7 @@ export default function StudentProfilePage() {
               </svg>
               <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', fontSize: 18, fontWeight: 800, color: '#0f172a' }}>{attendance.percentage}%</div>
             </div>
-            <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 8 }}>
               {[['Present', attendance.present, '#22c55e'], ['Late', attendance.late, '#f97316'], ['Absent', attendance.absent, '#ef4444'], ['Excused', attendance.excused, '#8b5cf6']].map(([l, v, c]) => (
                 <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ width: 8, height: 8, borderRadius: 2, background: c }} />
@@ -281,7 +281,7 @@ function EditModal({ student, onClose, onSaved }) {
   };
   return (
     <Modal title="Edit student" onClose={onClose}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
         <div style={{ gridColumn: '1 / -1' }}><label style={lbl}>Name</label><input value={form.name} onChange={e => set('name', e.target.value)} style={inp} /></div>
         <div><label style={lbl}>Date of birth</label><input type="date" value={form.dateOfBirth} max={new Date().toISOString().slice(0,10)} onChange={e => set('dateOfBirth', e.target.value)} style={inp} /></div>
         <div><label style={lbl}>Age {form.dateOfBirth && <span style={{ textTransform: 'none', color: '#cbd5e1' }}>(from DOB)</span>}</label><input type="number" value={form.dateOfBirth ? (ageFromDob(form.dateOfBirth) ?? '') : form.age} disabled={!!form.dateOfBirth} onChange={e => set('age', e.target.value)} style={{ ...inp, background: form.dateOfBirth ? '#f7f9fb' : 'white' }} /></div>
@@ -384,7 +384,7 @@ function EnrollModal({ student, onClose, onEnrolled }) {
       <div style={{ fontSize: 12, color: '#92400e', background: '#fff7e0', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 8, padding: '8px 12px', marginBottom: 16 }}>
         This creates an active enrolment and emails the family a confirmation. (Recurring class sessions are scheduled separately under Sessions.)
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
         <div style={{ gridColumn: '1 / -1' }}><label style={lbl}>Teacher *</label>
           <select value={form.teacherId} onChange={e => set('teacherId', e.target.value)} style={{ ...inp, cursor: 'pointer' }}>
             <option value="">Select a teacher…</option>

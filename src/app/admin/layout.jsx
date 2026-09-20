@@ -91,6 +91,12 @@ export default function AdminLayout({ children }) {
   const [admin, setAdmin] = useState(null);
 
   const [failedCount, setFailedCount] = useState(0);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Close the mobile drawer whenever the route changes.
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
 
   // ── Admin guard ──────────────────────────────────────────
   useEffect(() => {
@@ -279,10 +285,42 @@ export default function AdminLayout({ children }) {
         background: "#f7f9fb",
       }}
     >
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .admin-burger { display: none; }
+        .admin-overlay { display: none; }
+        @media (max-width: 1023px) {
+          .admin-aside {
+            transform: translateX(-100%);
+            transition: transform 250ms ease;
+          }
+          .admin-aside.open { transform: translateX(0); }
+          .admin-main { margin-left: 0 !important; }
+          .admin-burger { display: inline-flex !important; }
+          .admin-overlay { display: block !important; }
+          .admin-header { padding: 0 14px !important; }
+          .admin-content { padding: 16px !important; }
+        }
+      `}</style>
+
+      {/* Mobile overlay */}
+      <div
+        className="admin-overlay"
+        onClick={() => setSidebarOpen(false)}
+        style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(0,0,0,0.5)",
+          zIndex: 150,
+          opacity: sidebarOpen ? 1 : 0,
+          pointerEvents: sidebarOpen ? "auto" : "none",
+          transition: "opacity 250ms ease",
+        }}
+      />
 
       {/* Sidebar */}
       <aside
+        className={`admin-aside${sidebarOpen ? " open" : ""}`}
         style={{
           width: 252,
           background: "#0a2035",
@@ -292,7 +330,9 @@ export default function AdminLayout({ children }) {
           top: 0,
           left: 0,
           bottom: 0,
-          zIndex: 50,
+          // Inline z-index kept in sync with (and above) the overlay (150),
+          // so the open drawer is always clickable on mobile.
+          zIndex: 200,
           borderRight: "1px solid rgba(255,255,255,0.06)",
         }}
       >
@@ -384,6 +424,7 @@ export default function AdminLayout({ children }) {
                   <Link
                     key={item.href}
                     href={item.href}
+                    onClick={() => setSidebarOpen(false)}
                     style={{
                       display: "flex",
                       alignItems: "center",
@@ -479,15 +520,18 @@ export default function AdminLayout({ children }) {
 
       {/* Main */}
       <div
+        className="admin-main"
         style={{
           marginLeft: 252,
           flex: 1,
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
+          minWidth: 0,
         }}
       >
         <header
+          className="admin-header"
           style={{
             background: "white",
             borderBottom: "1px solid #e2e8f0",
@@ -496,15 +540,41 @@ export default function AdminLayout({ children }) {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
+            gap: 10,
             position: "sticky",
             top: 0,
             zIndex: 40,
           }}
         >
-          <div style={{ fontSize: 13, color: "#64748b" }}>
-            <span style={{ fontWeight: 700, color: "#0f172a" }}>Admin</span>
-            <span style={{ margin: "0 8px", color: "#cbd5e1" }}>/</span>
-            <span>{pathTitle(pathname)}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+            {/* Hamburger — mobile/tablet only */}
+            <button
+              type="button"
+              className="admin-burger"
+              onClick={() => setSidebarOpen((p) => !p)}
+              aria-label="Toggle menu"
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+                width: 36,
+                height: 36,
+                borderRadius: 8,
+                border: "1px solid #e2e8f0",
+                background: "white",
+                color: "#0f172a",
+                cursor: "pointer",
+                flexShrink: 0,
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+            </button>
+            <div style={{ fontSize: 13, color: "#64748b", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              <span style={{ fontWeight: 700, color: "#0f172a" }}>Admin</span>
+              <span style={{ margin: "0 8px", color: "#cbd5e1" }}>/</span>
+              <span>{pathTitle(pathname)}</span>
+            </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <Link
@@ -539,7 +609,7 @@ export default function AdminLayout({ children }) {
           </div>
         </header>
 
-        <main style={{ padding: 28, flex: 1 }}>{children}</main>
+        <main className="admin-content" style={{ padding: 28, flex: 1, minWidth: 0 }}>{children}</main>
       </div>
     </div>
   );
