@@ -421,7 +421,9 @@ function OverviewTab({ account, student }) {
           <div style={{ marginTop: 20, borderRadius: 24, border: `1px dashed ${QO.line}`, padding: 24, textAlign: 'center', color: QO.muted }}>
             <div style={{ fontSize: 34 }}>📅</div>
             <p style={{ margin: '10px 0 14px', fontSize: 14 }}>No upcoming lessons scheduled.</p>
-            <Link href={`/booking/trial?studentId=${student?.id}`} style={{ display: 'inline-flex', background: QO.blue, color: '#fff', padding: '10px 18px', borderRadius: 14, fontSize: 13, fontWeight: 800, textDecoration: 'none' }}>Book a class</Link>
+            {!student?.hasEnrollment && (
+              <Link href={`/booking/trial?studentId=${student?.id}`} style={{ display: 'inline-flex', background: QO.blue, color: '#fff', padding: '10px 18px', borderRadius: 14, fontSize: 13, fontWeight: 800, textDecoration: 'none' }}>Book a class</Link>
+            )}
           </div>
         )}
         {journey.nextMilestone && (
@@ -596,6 +598,8 @@ function OverviewOnboarding({ account, student, childName, courseLabel }) {
           <div style={{ fontSize: 13, color: QO.muted }}>Loading…</div>
         ) : activeApplication ? (
           <div><div style={{ fontSize: 15, fontWeight: 800, color: QO.ink }}>{activeApplication.courseLabel || activeApplication.courseType}</div><div style={{ fontSize: 13, color: QO.muted, marginTop: 2 }}>Application status: {activeApplication.status}</div></div>
+        ) : student?.hasEnrollment ? (
+          <div style={{ fontSize: 13, color: QO.muted }}>{childName} is already enrolled — your admin manages course enrollment.</div>
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
             <div style={{ fontSize: 13, color: QO.muted }}>No active enrollment application for {childName}.</div>
@@ -604,7 +608,7 @@ function OverviewOnboarding({ account, student, childName, courseLabel }) {
         )}
       </article>
 
-      {!latestTrial && (
+      {!latestTrial && !student?.hasEnrollment && (
         <EmptyState icon="📅" title={`Book a free trial for ${childName}`} sub="A 30-minute trial class to get started." action={{ href: `/booking/trial?studentId=${student?.id}`, label: 'Book Free Trial' }} />
       )}
     </div>
@@ -651,7 +655,7 @@ function ClassesTab({ student }) {
       <div style={{ marginBottom: 32 }}>
         <div style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#94a3b8', marginBottom: 12 }}>Upcoming</div>
         {upcoming.length === 0 ? (
-          <EmptyState icon="📅" title="No upcoming classes" sub="Scheduled sessions will appear here." action={{ href: `/booking/trial?studentId=${student?.id}`, label: 'Book Free Trial' }} />
+          <EmptyState icon="📅" title="No upcoming classes" sub={student?.hasEnrollment ? 'Your teacher will schedule sessions here.' : 'Scheduled sessions will appear here.'} action={student?.hasEnrollment ? undefined : { href: `/booking/trial?studentId=${student?.id}`, label: 'Book Free Trial' }} />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {upcoming.map(s => <SessionCard key={s.id} session={s} tz={tz} showJoin />)}
