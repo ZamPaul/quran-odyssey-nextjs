@@ -5,6 +5,9 @@
    classes are wrapped in :global because the map markup is injected.
    ───────────────────────────────────────────────────────── */
 
+   @import "tailwindcss";
+   @import "../../app/theme.css";
+
 .world {
   position: fixed;
   inset: 0;
