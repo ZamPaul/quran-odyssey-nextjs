@@ -1257,7 +1257,7 @@ function ProfileTab({ account, student, onStudentUpdated, onAccountUpdated, onAd
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {/* Learner details */}
-          <div style={{ background: 'white', borderRadius: 12, border: '1px solid #e2e8f0', padding: 24 }}>
+          <div style={{ width: "86vw", background: 'white', borderRadius: 12, border: '1px solid #e2e8f0', padding: 24 }}>
             <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', marginBottom: 20 }}>Learner Details</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
               <div>
