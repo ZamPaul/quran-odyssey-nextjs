@@ -1248,7 +1248,7 @@ function ProfileTab({ account, student, onStudentUpdated, onAccountUpdated, onAd
 
       <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: 16 }}>
         {/* Learner card */}
-        <div style={{ background: 'white', borderRadius: 12, border: '1px solid #e2e8f0', padding: 24, textAlign: 'center', alignSelf: 'start' }}>
+        <div className={`max-w-[576px]:hidden`} style={{ background: 'white', borderRadius: 12, border: '1px solid #e2e8f0', padding: 24, textAlign: 'center', alignSelf: 'start' }}>
           <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg, #faa71a, #e8920a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 800, color: '#0d2840', margin: '0 auto 12px' }}>{initials}</div>
           <div style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', marginBottom: 4 }}>{student?.name || 'Learner'}</div>
           <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 16 }}>{account?.email}</div>
@@ -1313,7 +1313,7 @@ function ProfileTab({ account, student, onStudentUpdated, onAccountUpdated, onAd
           </div>
 
           {/* Account holder details */}
-          <div style={{ background: 'white', borderRadius: 12, border: '1px solid #e2e8f0', padding: 24 }}>
+          <div className={`max-w-[576px]:w-[85vw]`} style={{ background: 'white', borderRadius: 12, border: '1px solid #e2e8f0', padding: 24 }}>
             <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', marginBottom: 20 }}>Account Holder</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
               <div>
