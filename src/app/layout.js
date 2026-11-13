@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Quran Odyssey — Online Quran Classes for Children",
+  title: "Quran Odyssey Online Quran Classes for Children",
   description:
     "Live Quran classes with verified teachers. Structured learning for children aged 5–18 across the UK, USA, and Canada. Book a free 30-minute trial class today.",
   // icons
